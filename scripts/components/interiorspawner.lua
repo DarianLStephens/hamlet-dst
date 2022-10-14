@@ -277,7 +277,8 @@ function InteriorSpawner:getSpawnStorage(interiorID, forcedOffset)
 			-- if interiorIndex then -- For when more than one interior is loaded, get the position of this one's origin
 				-- interiorIndex = interiorIndex - 1
 				print("Interior Index before math:", combinedValue)
-				combinedValue = math.max(combinedValue - 1, 0)
+				-- combinedValue = math.max(combinedValue - 1, 0)
+				combinedValue = math.max(combinedValue, 0)
 				print("Interior Index AFTER max math stuff:", combinedValue)
 				local zOffset = (combinedValue * 100) % 1000 -- To give 100 'units' of space between interior origins, and only let them go out to 1000
 				print("zOffset:",zOffset)
@@ -388,8 +389,13 @@ function InteriorSpawner:MovePropToInteriorStorage(prop,interior,ignoredisplacem
 	if prop:IsValid() then
 		local pt1 = self:getSpawnOrigin()		
 		print("DS - MovePropToInteriorStorage - Attempting to add the index offset")
-		local index = self:GetLoadedInteriorIndex(interior.unique_name)
-		local pt2 = self:getSpawnStorage(index)	
+		-- local index = self:GetLoadedInteriorIndex(interior.unique_name)
+		local index = interior.storage_offset
+		
+		print("Changed it out for the stored storage offset, which is ", index)
+		
+		-- local pt2 = self:getSpawnStorage(index)	
+		local pt2 = self:getSpawnStorage(nil, index)	
 
 		if pt2 and not prop.parent and not ignoredisplacement then			
 			local diffx = pt2.x - pt1.x 
@@ -1729,7 +1735,8 @@ function InteriorSpawner:SpawnInterior(interior)
 	local loadingInterior = self:GetLoadedInteriorIndex(interior.unique_name)
 
 	-- local pt = self:getSpawnStorage(loadingInterior, 1)
-	local pt = self:getSpawnStorage(loadingInterior)
+	-- local pt = self:getSpawnStorage(loadingInterior)
+	local pt = self:getSpawnStorage(nil, interior.storage_space)
 	
 
 	for k, prefab in ipairs(interior.prefabs) do
@@ -1882,6 +1889,23 @@ function InteriorSpawner:LoadInterior(doer, interior)
 	print("Loading Interior "..interior.unique_name.. " with no handle, because that engine stuff doesn't exist")--With Handle "..interior.handle)
 	--TheWorld.Map:SetInterior( interior.handle )
 
+	-- Can't use the length, need to actually find unused storage offsets.
+	
+	print("About to try and find a free storage space")
+	local storageOffset = 0
+	for k, v in ipairs(self.loaded_interiors) do
+		if v.storage_offset == storageOffset then
+			print("Found occupied storage space at ", storageOffset)
+			storageOffset = storageOffset + 1
+		else
+			print("Located free space inside loop as ", storageOffset)
+			break
+		end
+	end
+	print("Found? Got ", storageOffset)
+	
+	interior.storage_offset = (storageOffset)
+	
 	local loadedInteriorCount = #self.loaded_interiors -- SHOULD be the length, I think?
 	print("Interior count gotten directly with LUA's hash symbol:", loadedInteriorCount)
 	-- print("Loaded interior count according to hash: 
@@ -1912,7 +1936,8 @@ function InteriorSpawner:LoadInterior(doer, interior)
 		-- local loadingInterior = self:GetLoadedInteriorIndex(interior.unique_name)
 
 		-- local pt1 = self:getSpawnStorage(loadingInterior, 1)
-		local pt1 = self:getSpawnStorage(nil, (loadedInteriorCount + 1))
+		-- local pt1 = self:getSpawnStorage(nil, (loadedInteriorCount + 1))
+		local pt1 = self:getSpawnStorage(nil, (storageOffset))
 		-- local pt1 = self:getSpawnStorage(loadingInterior)
 		local pt2 = self:getSpawnOrigin()
 
@@ -1966,7 +1991,6 @@ function InteriorSpawner:LoadInterior(doer, interior)
 
 	interior.enigma = false
 	self.current_interior = interior
-	interior.storage_offset = (loadedInteriorCount + 1)
 	table.insert(self.loaded_interiors, interior)
 	self:ConsiderPlayerInside(self.current_interior.unique_name)
 
