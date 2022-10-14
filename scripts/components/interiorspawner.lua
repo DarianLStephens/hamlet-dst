@@ -1228,7 +1228,9 @@ function InteriorSpawner:UpdatePlayerInterior(player, interiorID)
 	local k = self:GetInteriorPlayerIndex(player)
 	if k then
 		print("Updated player interior ID, now ", interiorID)
-		self.interior_players.interiorID = interiorID
+		self.interior_players[k].interiorID = interiorID
+		print("Dumping to be sure the change stuck:")
+		dumptable(self.interior_players, 1, 1, nil, 0)
 	end
 end
 
@@ -1246,7 +1248,8 @@ function InteriorSpawner:IsInteriorPlayerLoaded(interiorID)
 			end
 		end
 	end
-	print("Never found interior, presumably unloaded already")
+	-- print("Never found interior, presumably unloaded already") -- Darn misleading/old prints
+	print("DS - IsInteriorPlayerLoaded - Didn't detect interior ID in player list, so it isn't player-loaded")
 	return false
 end
 
@@ -2245,8 +2248,10 @@ function InteriorSpawner:OnSave()
 		next_interior_ID = self.next_interior_ID, 	
 		current_interior = self.current_interior and self.current_interior.unique_name or nil,
 		player_homes = self.player_homes,
-		loaded_interiors = self.loaded_interiors,
-		interior_players  = self.interior_players
+		--loaded_interiors = deepcopy(self.loaded_interiors),
+		loaded_interiors = {},
+		interior_players  = self.interior_players,
+		-- interior_players = {},
 	}	
 
 	local refs = {}
@@ -2315,6 +2320,60 @@ function InteriorSpawner:OnSave()
 		table.insert(data.doors, door_data)
 	end
 	
+	for k, int in ipairs(self.loaded_interiors) do
+		
+		local prefabs = nil
+		if int.prefabs then
+			prefabs = {}
+			for k, prefab in ipairs(int.prefabs) do
+				local prefab_data = prefab
+				table.insert(prefabs, prefab_data)
+			end
+		end
+
+		print("About to save object data for loaded interiors...")
+		local object_list = {}
+		for k, object in ipairs(int.object_list) do
+			local save_data = object.GUID
+			table.insert(object_list, save_data)
+			table.insert(refs, object.GUID)
+		end
+		print("Got object data, dump...")
+		dumptable(object_list, 1, 1, nil, 0)
+
+		local interior_data =
+		{
+			unique_name = k, 
+			z = int.z, 
+			x = int.x, 
+			dungeon_name = int.dungeon_name,
+			width = int.width, 
+			height = int.height, 
+			depth = int.depth, 
+			object_list = object_list, 
+			prefabs = prefabs,
+			walltexture = int.walltexture,
+			floortexture = int.floortexture,
+			minimaptexture = int.minimaptexture,
+			cityID = int.cityID,
+			cc = int.cc,
+			visited = int.visited,
+			batted = int.batted,
+			playerroom = int.playerroom,
+			enigma = int.enigma,
+			reverb = int.reverb,
+			ambsnd = int.ambsnd,
+			groundsound = int.groundsound,
+			zoom = int.zoom,
+			cameraoffset = int.cameraoffset,
+			forceInteriorMinimap = int.forceInteriorMinimap,
+			storage_offset = int.storage_offset,
+		}
+
+		table.insert(data.loaded_interiors, interior_data)		
+		
+	end
+	
 	--Store camera details 
 	if TheCamera.interior_distance then
 		data.interior_x = TheCamera.interior_currentpos.x
@@ -2335,6 +2394,7 @@ function InteriorSpawner:OnLoad(data)
 	self.interiors = {}
 	for k, int_data in ipairs(data.interiors) do		
 		-- Create placeholder definitions with saved locations
+		
 		self.interiors[int_data.unique_name] =
 		{ 
 			unique_name = int_data.unique_name,
@@ -2397,13 +2457,81 @@ function InteriorSpawner:OnLoad(data)
 	if data.player_homes then
 		self.player_homes = data.player_homes
 	end
-	if data.loaded_interiors then
-		print ("OnLoad - Detected loaded interiors in data storage, retrive...")
-		self.loaded_interiors = data.loaded_interiors
+	-- if data.loaded_interiors then
+		-- print ("OnLoad - Detected loaded interiors in data storage, retrieve...")
+		-- self.loaded_interiors = data.loaded_interiors
+		-- print("Interiors loaded, dumping...")
+		-- dumptable(self.loaded_interior, 1, 1, nil, 0)
+	-- else
+		-- print("Didn't detect loaded interiors in save data, do nothing")
+	-- end
+	
+	print("About to load the 'loaded interiors' list")
+	self.loaded_interiors = {}
+	for k, int_data in ipairs(data.loaded_interiors) do		
+		print("Loading 'loaded interiors' list, iteration ", k)
+		print("Dump data, for safety:")
+		dumptable(int_data, 1, 1, nil, 0)
+		-- Create placeholder definitions with saved locations
+		-- self.loaded_interiors[int_data.unique_name] =
+		
+		print("About to try loading object list?")
+		local object_list = {}
+		for k, object in ipairs(int_data.object_list) do
+			print("Iteration ",k,", object ",object)
+			local load_data = object.GUID
+			print("GUID stuff about to be inserted: ", load_data)
+			table.insert(object_list, load_data)
+			-- table.insert(refs, object.GUID)
+		end
+		
+		local interiordata =
+		{ 
+			unique_name = int_data.unique_name,
+			z = int_data.z, 
+			x = int_data.x, 
+			dungeon_name = int_data.dungeon_name,
+			width = int_data.width, 
+			height = int_data.height,
+			depth = int_data.depth,			
+			-- object_list = {}, 
+			object_list = object_list, 
+			prefabs = int_data.prefabs, 			
+			walltexture = int_data.walltexture,
+			floortexture = int_data.floortexture,
+			minimaptexture = int_data.minimaptexture,
+			cityID = int_data.cityID,
+			cc = int_data.cc,
+			visited = int_data.visited,
+			batted = int_data.batted,
+			playerroom = int_data.playerroom,
+			enigma = int_data.enigma,
+			reverb = int_data.reverb,
+			ambsnd = int_data.ambsnd,
+			groundsound = int_data.groundsound,
+			zoom = int_data.zoom,
+			cameraoffset = int_data.cameraoffset,
+			forceInteriorMinimap = int_data.forceInteriorMinimap,
+			storage_offset = int_data.storage_offset,
+		}
+		print("Dump Loaded Interior data about to be inserted in to the real list:")
+		dumptable(interiordata, 1, 1, nil, 0)
+		print("Dump object list of interior data:")
+		dumptable(interiordata.object_list, 1, 1, nil, 0)
+		
+		table.insert(self.loaded_interiors, interiordata)
 	end
+	print("All loaded interiors should have been fully loaded, dump it...")
+	dumptable(self.loaded_interiors, 1, 1, nil, 0)
+	
+	
 	if data.interior_players then
-		print ("OnLoad - Detected interior players in data storage, retrive...")
+		print ("OnLoad - Detected interior players in data storage, retrieve...")
 		self.interior_players = data.interior_players
+		print("Player list loaded, dumping...")
+		dumptable(self.interior_players, 1, 1, nil, 0)
+	else
+		print("Didn't detect loaded players in save data, do nothing")
 	end
 	
 	--self.inst:DoTaskInTime(2, function() self:LoadPostPass(interior_definition) end)
