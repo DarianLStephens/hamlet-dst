@@ -358,6 +358,7 @@ function InteriorSpawner:RefreshDoorsNotInLimbo()
 end
 
 function InteriorSpawner:SetPropToInteriorLimbo(prop,interior,ignoredisplacement)
+	print("Removing prop from scene and adding to interior list...")
 	if not prop.persists then
 		prop:Remove()
 	else
@@ -707,6 +708,8 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 		direction = "out"		
 		-- if going outside, blank the interior color cube setting.
 		--TheWorld.components.colourcubemanager:SetInteriorColourCube(nil)
+		-- player.interiorplayer:RemoveColorCube()
+		player.components.playervision:SetCustomCCTable(nil)
 	end
 	if not wasinterior and camerainterior then
 		-- If the user is the player, then the perspective of things will move inside
@@ -764,6 +767,8 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 			
 		else
 			print("Previous interior wasn't loaded, and was ", previousInterior, "don't try to unload anything")
+			print("I believe this is where the saving problem lies. Dumping loaded interior list...")
+			dumptable(self.loaded_interiors,1, 1, nil, 0)
 		end
 	end
 
@@ -777,6 +782,8 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 
 		-- set the interior color cube
 		--TheWorld.components.colourcubemanager:SetInteriorColourCube( destination.cc )
+		-- player.interiorplayer:ApplyColorCube(destination.cc)
+		player.components.playervision:SetCustomCCTable(destination.cc)
 		
 		if not self:IsInteriorLoaded(destination.unique_name) then
 			print("Interior isn't loaded already, load it")
@@ -877,27 +884,27 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	end
 
 	if self.from_inst and self.from_inst:HasTag("ruins_entrance") and not self.to_interior then
-		GetPlayer():PushEvent("exitedruins")
+		player:PushEvent("exitedruins")
 	end
 
 	if to_target.prefab then
 
 		if to_target:HasTag("ruins_entrance") then
-			GetPlayer():PushEvent("enteredruins")
+			player:PushEvent("enteredruins")
 			-- unlock all doors
 			self:UnlockAllDoors(to_target)
 		end
 
 		if to_target:HasTag("shop_entrance") then
-			GetPlayer():PushEvent("enteredshop")
+			player:PushEvent("enteredshop")
 		end	
 
 		if to_target:HasTag("anthill_inside") then
-			GetPlayer():PushEvent("entered_anthill")
+			player:PushEvent("entered_anthill")
 		end
 
 		if to_target:HasTag("anthill_outside") then
-			GetPlayer():PushEvent("exited_anthill")
+			player:PushEvent("exited_anthill")
 		end
 	end
 
@@ -948,6 +955,11 @@ function InteriorSpawner:CheckIsFollower(inst, doer)
 	local isfollower = false
 	-- CURRENT ASSUMPTION IS THAT ONLY THE PLAYER USES DOORS!!!!
 	local player = doer--GetPlayer()
+	
+	if not player then
+		print("DS - WARNING: CheckIsFollower didn't have a player! Returning false to prevent a crash, at least temporarily")
+		return false
+	end
 
 	local eyebone = nil
 
@@ -1017,6 +1029,15 @@ function InteriorSpawner:CheckIsFollower(inst, doer)
 	if inst.components.spell and inst.components.spell.target == player then --GetPlayer() then
 		isfollower = true
 	end
+	
+	-- DS - To deal with lights and stuff. Whatever method they used before doesn't seem to work.
+	if inst.entity:GetParent() then
+		if inst.entity:GetParent():HasTag("player") then
+			print("FOUND A CHILD",inst.prefab)
+			isfollower = true
+		end
+	end
+	-- Oh dang, that's it below, isn't it? To get stuff attached to the player?
 
 	-- DS - No idea what 'GetGrandParent' is. It's in entityscript.lua, and I have no idea how to put stuff in to that.
 	-- if inst and not isfollower and inst:GetGrandParent() == GetPlayer() then
@@ -1330,6 +1351,96 @@ end
 
 
 --function InteriorSpawner:GetInteriorSpawnOrigin
+
+function InteriorSpawner:GatherAllRooms(from_room, allrooms)
+	if allrooms[from_room] then 
+		-- already did this room
+		return
+	end
+	allrooms[from_room] = true
+	local interior = self:GetInteriorByName(from_room) 
+	if interior then		
+		--print("interior = ",interior)		
+		--print("prefabs:",interior.prefabs)
+		if interior.prefabs then
+			-- room was never spawned
+			--assert(false)
+			for k, prefab in ipairs(interior.prefabs) do
+				if prefab.name == "prop_door" then
+					if  prefab.door_closed then
+						prefab.door_closed["door"] = nil
+					end
+					local target_interior = prefab.target_interior	
+					print("target_interior:",target_interior)
+					if target_interior then
+						self:GatherAllRooms(target_interior, allrooms)
+					end
+				end
+			end
+		else
+			-- go through the object list and see what entities are doors
+			if interior.object_list and #interior.object_list > 0 then
+				--print("Room has been spawned but was unspawned")
+				-- room was spawned but is unspawned
+				for i,v in pairs(interior.object_list) do
+					--print(i,v)
+					if v.prefab == "prop_door" then
+						if v.components.door then
+							--v.components.door:checkDisableDoor(nil, "door")
+							v:PushEvent("open", {instant=true})
+							local target_interior = v.components.door.target_interior	
+							--print("target_interior:",target_interior)
+							if target_interior then
+								self:GatherAllRooms(target_interior, allrooms)
+							end
+						end
+					end
+				end
+			else
+				-- we're in the room
+				print("Inside the room")
+				local ents = self:GetCurrentInteriorEntities()
+				for i,v in pairs(ents) do
+					if v.prefab == "prop_door" then
+						--print(v)
+						if v.components.door then
+							--v.components.door:checkDisableDoor(nil, "door")
+							v:PushEvent("open", {instant=true})
+							local target_interior = v.components.door.target_interior	
+							--print("target_interior:",target_interior)
+							if target_interior then
+								self:GatherAllRooms(target_interior, allrooms)
+							end
+						end
+					end
+				end
+			end
+		end
+	else
+		assert(false)
+	end
+
+end
+
+function InteriorSpawner:UnlockAllDoors(from_door)
+	-- gather all rooms that can be reached from this room
+	local allrooms = {}
+	local target_interior
+	if from_door then
+		target_interior = from_door.components.door and from_door.components.door.interior_name
+	else
+		target_interior = self.current_interior and self.current_interior.unique_name
+	end
+	if target_interior then
+		print("Unlocking all doors coming from", target_interior)
+		self:GatherAllRooms(target_interior, allrooms)
+    else
+		print("Nothing to unlock")
+	end
+	--for i,v in pairs(allrooms) do
+	--	print(i,v)
+	--end
+end
 
 function InteriorSpawner:PlayTransition(doer, inst, interiorID, to_target, dont_fadeout, dont_fadein)	
 	-- the usual use of this function is with doer and inst.. where inst has the door component.
@@ -1660,6 +1771,7 @@ function InteriorSpawner:CheckIfPlayerIsInside()
 	--local player = ThePlayer
 	--ThePlayer:UpdateIsInInterior()
 	if self.current_interior then --and not ThePlayer:CheckIsInInterior() then
+		print("DS WARNING - Hamlet code trying to do some interior fix thing, but the code is disabled!")
 		-- Play an instant transition out of this interior (no fades)
 		--self:PlayTransition(GetPlayer(), nil, nil, GetPlayer():GetPosition(), true, true)
 	end
@@ -1758,7 +1870,9 @@ function InteriorSpawner:SpawnInterior(interior)
 			if prefab.flip then
 				local rx, ry, rz = object.Transform:GetScale()
 				object.flipped = true
-				object.Transform:SetScale(rx, ry, -rz)
+				-- object.Transform:SetScale(rx, ry, -rz)
+				object.Transform:SetScale(-rx, ry, rz)
+				object.AnimState:SetScale(-1,1,1)
 			end
 
 			-- sets the initial roation of an object, NOTE: must be manually saved by the item to survive a save
@@ -2340,10 +2454,12 @@ function InteriorSpawner:OnSave()
 		end
 		print("Got object data, dump...")
 		dumptable(object_list, 1, 1, nil, 0)
+		print("For comparison, dumping real list:")
+		dumptable(int.object_list, 1, 1, nil, 0)
 
 		local interior_data =
 		{
-			unique_name = k, 
+			unique_name = int.unique_name, 
 			z = int.z, 
 			x = int.x, 
 			dungeon_name = int.dungeon_name,
@@ -2438,6 +2554,9 @@ function InteriorSpawner:OnLoad(data)
 	end	
 
 	--TheWorld.components.colourcubemanager:SetInteriorColourCube(nil)
+	
+	-- player.replica.interiorplayer:RemoveColorCube()
+	-- player.components.playervision:SetCustomCCTable(nil)
 
 	if data.current_interior then
 		self.current_interior = self:GetInteriorByName(data.current_interior)
@@ -2537,8 +2656,29 @@ function InteriorSpawner:OnLoad(data)
 	--self.inst:DoTaskInTime(2, function() self:LoadPostPass(interior_definition) end)
 end
 
+function InteriorSpawner:CleanUpMessAroundOrigin()
+	local function removeStray(ent)
+		print("Removing stray "..ent.prefab)
+		ent:Remove()
+	end
+	for i,v in pairs(Ents) do
+		if v.Transform then
+			local pos = v:GetPosition()
+			if v.prefab == "window_round_light" and pos == Vector3(0,0,0) then
+				removeStray(v)
+			end
+			if v.prefab == "window_round_light_backwall" and pos == Vector3(0,0,0) then
+				removeStray(v)
+			end
+			if v.prefab == "home_prototyper" and v ~= self.homeprototyper then
+				removeStray(v)
+			end
+		end
+	end
+end
+
 function InteriorSpawner:LoadPostPass(ents, data)
-	--self:CleanUpMessAroundOrigin()
+	self:CleanUpMessAroundOrigin()
 
 	self:RefreshDoorsNotInLimbo()
 
