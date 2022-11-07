@@ -1,7 +1,3 @@
-Assets = {
-	Asset("IMAGE", "images/inventoryimages.tex"),
-    Asset("ATLAS", "images/inventoryimages.xml"),
-	
-	Asset("IMAGE", "images/inventoryimages_2.tex"),
-    Asset("ATLAS", "images/inventoryimages_2.xml"),
-}
+-- Turns out this was just for Mods in Menu, and had nothing to do with the base game. Who knew?
+
+-- I tried to put client-side stuff, like the assets, here.

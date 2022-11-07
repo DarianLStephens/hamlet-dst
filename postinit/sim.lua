@@ -12,6 +12,16 @@ HAMENV.AddSimPostInit(function()
 		-- end
 	-- end
 	
+	local _GetTileCoordsAtPoint = Map.GetTileCoordsAtPoint
+	function Map:GetTileCoordsAtPoint(x,y,z, ...)
+		if x > 990 then
+			x = 0
+			y = 0
+			z = 0
+		end
+		return _GetTileCoordsAtPoint(self, x,y,z, ...)
+	end
+	
 	-- I have to override this, otherwise there are crashes with things like poop, the digamajig, or other farming-related stuff, because Klei doesn't null check it.
 	local _GetTileCenterPoint = Map.GetTileCenterPoint
 	function Map:GetTileCenterPoint(x,y,z, ...)
@@ -20,6 +30,7 @@ HAMENV.AddSimPostInit(function()
 			--local newpos = Vector3(0,0,0)
 			--return _GetTileCenterPoint(self, newpos, ...)
 			--return (Vector3(0,0,0))
+			-- Half suggested I make it return the original coordinates, but I'm not sure how well that will work.
 			x = 0
 			y = 0
 			z = 0
