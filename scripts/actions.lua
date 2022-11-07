@@ -8,7 +8,7 @@ HAMENV.AddAction(ENTERDOOR)
 
 local BUILD_ROOM = Action({priority = 1, distance = 1})
 BUILD_ROOM.id = "BUILD_ROOM"
-BUILD_ROOM.str = "Build"
+BUILD_ROOM.str = "Build Room"
 HAMENV.AddAction(BUILD_ROOM)
 
 local DEMOLISH_ROOM = Action({priority = 1, distance = 1})
@@ -16,7 +16,119 @@ DEMOLISH_ROOM.id = "DEMOLISH_ROOM"
 DEMOLISH_ROOM.str = "Demolish"
 HAMENV.AddAction(DEMOLISH_ROOM)
 
+local WEIGHDOWN = Action({priority = 1, distance = 1})
+WEIGHDOWN.id = "WEIGHDOWN"
+WEIGHDOWN.str = "Weigh Down"
+HAMENV.AddAction(WEIGHDOWN)
 
+local DISLODGE = Action({priority = 1, distance = 1})
+DISLODGE.id = "DISLODGE"
+DISLODGE.str = "Dislodge"
+HAMENV.AddAction(DISLODGE)
+
+local STOCK = Action({priority = 1, distance = 1})
+STOCK.id = "STOCK"
+STOCK.str = "Stock I guess"
+HAMENV.AddAction(STOCK)
+
+local SHOP = Action({priority = 1, distance = 1})
+SHOP.id = "SHOP"
+SHOP.str = "Buy"
+HAMENV.AddAction(SHOP)
+
+local FIX = Action({priority = 1, distance = 1})
+FIX.id = "FIX"
+FIX.str = "FIX I guess"
+HAMENV.AddAction(FIX)
+
+local SPECIAL_ACTION = Action({priority = 1, distance = 1})
+SPECIAL_ACTION.id = "SPECIAL_ACTION"
+SPECIAL_ACTION.str = "SPECIAL_ACTION I guess"
+HAMENV.AddAction(SPECIAL_ACTION)
+
+local SPECIAL_ACTION2 = Action({priority = 1, distance = 1})
+SPECIAL_ACTION2.id = "SPECIAL_ACTION2"
+SPECIAL_ACTION2.str = "SPECIAL_ACTION2 I guess"
+HAMENV.AddAction(SPECIAL_ACTION2)
+
+local HAMARTIFACTIVATE = Action({priority = 1, distance = 1})
+HAMARTIFACTIVATE.id = "HAMARTIFACTIVATE"
+HAMARTIFACTIVATE.str = "Activate"
+HAMENV.AddAction(HAMARTIFACTIVATE)
+
+local CHARGE_UP = Action({priority = ACTIONS.HIGH_ACTION_PRIORITY, rmb=true, distance = 10})
+CHARGE_UP.id = "CHARGE_UP"
+CHARGE_UP.str = "Charge"
+HAMENV.AddAction(CHARGE_UP)
+
+
+HAMARTIFACTIVATE.fn = function(act)
+
+	if act.target.components.hamlivingartifact then
+		act.target.components.hamlivingartifact:Activate(act.doer)
+		return true
+	else
+		return false
+	end
+end
+
+CHARGE_UP.fn = function(act)
+ 	act.doer:PushEvent("beginchargeup")
+end
+
+
+ACTIONS.SPECIAL_ACTION.fn = function(act)
+	if act.doer.special_action then
+		act.doer.special_action(act)
+		return true
+	end
+end
+ACTIONS.SPECIAL_ACTION2.fn = function(act)
+	if act.doer.special_action2 then
+		act.doer.special_action2(act)
+		return true
+	end
+end
+
+ACTIONS.FIX.fn = function(act)
+	if act.target then
+		local target = act.target
+		local numworks = 1
+		target.components.workable:WorkedBy(act.doer, numworks)
+	--	return target:fix(act.doer)		
+	end
+end
+
+ACTIONS.STOCK.fn = function(act)
+	if act.target then		
+		act.target.restock(act.target,true)
+		act.doer.changestock = nil
+		return true
+	end
+end
+
+ACTIONS.WEIGHDOWN.fn = function(act)
+	local pos = Vector3(act.target.Transform:GetWorldPosition())
+	-- if act.doer.components.inventory then	
+	return act.doer.components.inventory ~= nil
+		and act.doer.components.inventory:DropItem(act.invobject, false, false, pos) 
+		-- return true
+	-- end
+end
+
+ACTIONS.DISLODGE.fn = function(act)
+	if act.target.components.dislodgeable then
+		act.target.components.dislodgeable:Dislodge(act.doer)
+		-- action with inventory object already explicitly calls OnUsedAsItem
+		if not act.invobject and act.doer and act.doer.components.inventory and act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) then
+			local invobject = act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+			if invobject.components.finiteuses then
+				invobject.components.finiteuses:OnUsedAsItem(ACTIONS.DISLODGE)
+			end
+		end
+		return true
+	end
+end
 
 
 ENTERDOOR.fn = function(act)
@@ -24,12 +136,12 @@ ENTERDOOR.fn = function(act)
 		return false
 	end
 
-	--if act.target.components.door and not act.target.components.door.disabled then
-	if act.target:HasTag("door") and not act.target:HasTag("door_disabled") then
+	if act.target.components.door and not act.target.components.door.disabled then
+	-- if act.target:HasTag("door") and not act.target:HasTag("door_disabled") then
 		act.target.components.door:Activate(act.doer)
 		return true
-	--elseif act.target.components.door and act.target.components.door.disabled then
-	elseif act.target:HasTag("door") and act.target:HasTag("door_disabled") then
+	elseif act.target.components.door and act.target.components.door.disabled then
+	-- elseif act.target:HasTag("door") and act.target:HasTag("door_disabled") then
 		return false, "LOCKED"
 	end
 end
@@ -273,6 +385,142 @@ DEMOLISH_ROOM.fn = function(act)
 	end
 end
 
+ACTIONS.SHOP.stroverridefn = function(act)
+	if not act.target or not act.target.costprefab or not act.target.components.shopdispenser:GetItem() then
+		return nil
+	else
+
+		local blueprint = false
+
+		local item = act.target.components.shopdispenser:GetItem()
+		local blueprintstart= string.find(item,"_blueprint")
+		if blueprintstart then
+			item = string.sub(item,1,blueprintstart-1)
+			blueprint = true
+		end
+
+		local wantitem = STRINGS.NAMES[string.upper(item)]
+		if blueprint then
+			wantitem = string.format(STRINGS.BLUEPRINT_ITEM,wantitem)
+		end
+		if not wantitem then
+			local temp = SpawnPrefab(item)
+			if temp.displaynamefn then
+				wantitem = temp.displaynamefn(temp)
+			else
+				wantitem = item
+			end
+			temp:Remove()
+		end
+		local payitem = STRINGS.NAMES[string.upper(act.target.costprefab)]
+		local qty = ""
+		if act.target.costprefab == "oinc" then		
+			qty = act.target.cost		
+			if act.target.cost > 1 then
+				payitem = STRINGS.NAMES.OINC_PL
+			end
+		end
+
+		if act.doer.components.shopper:IsWatching(act.target) then		
+			return subfmt(STRINGS.ACTIONS.SHOP_LONG, { wantitem = wantitem, qty=qty, payitem = payitem })
+		else
+			return subfmt(STRINGS.ACTIONS.SHOP_TAKE, { wantitem = wantitem })
+		end
+	end
+end 
+
+ACTIONS.SHOP.fn = function(act)
+	if act.doer.components.inventory then
+		print("SHOP - Doer has inventory")
+		if act.doer:HasTag("player") and act.doer.components.shopper then 
+			print("SHOP - Doer is a shoppable player")
+			if act.doer.components.shopper:IsWatching(act.target) then 
+				print("SHOP - Doer is... watching something? I dunno")
+				local sell = true
+				local reason = nil
+
+				if act.target:HasTag("shopclosed") or TheWorld.state.isnight then
+					reason = "closed"
+					sell = false
+				elseif not act.doer.components.shopper:CanPayFor(act.target) then 
+					local prefab_wanted = act.target.costprefab
+					if prefab_wanted == "oinc" then
+						reason = "money"
+					else
+						reason = "goods"
+					end
+					sell = false
+				end
+				
+				if sell then
+					act.doer.components.shopper:PayFor(act.target)
+
+					if act.target and act.target.shopkeeper_speech then
+						act.target.shopkeeper_speech(act.target,STRINGS.CITY_PIG_SHOPKEEPER_SALE[math.random(1,#STRINGS.CITY_PIG_SHOPKEEPER_SALE)])
+					end
+
+					return true 
+				else 
+					if reason == "money" then
+						if act.target and act.target.shopkeeper_speech then
+							act.target.shopkeeper_speech(act.target,STRINGS.CITY_PIG_SHOPKEEPER_NOT_ENOUGH[math.random(1,#STRINGS.CITY_PIG_SHOPKEEPER_NOT_ENOUGH)])
+						end
+					elseif reason == "goods" then
+						if act.target and act.target.shopkeeper_speech then
+							act.target.shopkeeper_speech(act.target,STRINGS.CITY_PIG_SHOPKEEPER_DONT_HAVE[math.random(1,#STRINGS.CITY_PIG_SHOPKEEPER_DONT_HAVE)])
+						end						
+					elseif reason == "closed" then
+						if act.target and act.target.shopkeeper_speech then
+							act.target.shopkeeper_speech(act.target,STRINGS.CITY_PIG_SHOPKEEPER_CLOSING[math.random(1,#STRINGS.CITY_PIG_SHOPKEEPER_CLOSING)])
+						end						
+					end
+					return true
+				end		
+			else
+				act.doer.components.shopper:Take(act.target)
+				-- THIS IS WHAT HAPPENS IF ISWATCHING IS FALSE
+				return true 
+			end 
+		end
+	end
+end
+
+HAMENV.AddComponentAction("SCENE", "shopdispenser", function(inst, doer, actions, right)
+    if inst:HasTag("shop_pedestal") then
+	--if inst.components.door then
+        if not right then
+			-- print("Door tag detected, you should be able to attempt entering it")
+            table.insert(actions, ACTIONS.SHOP)
+        end
+    end
+end)
+
+
+HAMENV.AddComponentAction("USEITEM", "inventoryitem", function(inst, doer, target, actions, right)
+    if target:HasTag("weighdownable") then
+        if not right then
+            table.insert(actions, ACTIONS.WEIGHDOWN)
+        end
+    end
+end)
+
+-- HAMENV.AddComponentAction("SCENE", "dislodgable", function(inst, doer, actions, right)
+    -- -- if target.components.dislodgeable then
+        -- if not right then
+            -- table.insert(actions, ACTIONS.DISLODGE)
+        -- end
+    -- -- end
+-- end)
+
+HAMENV.AddComponentAction("EQUIPPED", "dislodger", function(inst, doer, target, actions, right)
+    -- if target.components.dislodgeable then
+    if target:HasTag("dislodgeable") then
+        if not right then
+            table.insert(actions, ACTIONS.DISLODGE)
+        end
+    end
+end)
+
 HAMENV.AddComponentAction("SCENE", "door", function(inst, doer, actions, right)
     if inst:HasTag("door") then
 	--if inst.components.door then
@@ -295,8 +543,26 @@ HAMENV.AddComponentAction("USEITEM", "roombuilder", function(inst, doer, target,
 	-- if doer.invobject.components.roombuilder then
 	
 		if target:HasTag("predoor") then
-			print("Room builder detected for component action?")
+			-- print("Room builder detected for component action?")
 			table.insert(actions, ACTIONS.BUILD_ROOM)
 		end
+    -- end
+end)
+
+HAMENV.AddComponentAction("SCENE", "hamlivingartifact", function(inst, doer, actions, right)
+	--if inst.components.door then
+        if right then
+			-- print("Door tag detected, you should be able to attempt entering it")
+            table.insert(actions, ACTIONS.HAMARTIFACTIVATE)
+        end
+    -- end
+end)
+
+HAMENV.AddComponentAction("INVENTORY", "hamlivingartifact", function(inst, doer, actions, right)
+	--if inst.components.door then
+        if right then
+			-- print("Door tag detected, you should be able to attempt entering it")
+            table.insert(actions, ACTIONS.HAMARTIFACTIVATE)
+        end
     -- end
 end)

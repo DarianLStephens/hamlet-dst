@@ -10,13 +10,13 @@ local AddRecipe2 = AddRecipe2
 _GLOBAL.setfenv(1, _GLOBAL)
 
 
-
+-- If this doesn't pan out, maybe I can make a unique one for each door with the name pre-filled, and generic-ize the main test thing to get passed the needed data? How can I make the anim stuff work, though...
 local function place_door_test_fn(pt,rot)
     -- self.Transform:SetRotation(-90)
 
-	-- if not TheWorld.ismastersim then
-		-- return false
-	-- end
+	if not TheWorld.ismastersim then
+		return true
+	end
 
     -- local interior_spawner = TheWorld.components.interiorspawner
     -- if interior_spawner.current_interior then
@@ -80,13 +80,13 @@ local function place_door_test_fn(pt,rot)
         -- end
 
         local ents = TheSim:FindEntities(newpt.x, newpt.y, newpt.z, 3, {}, {}, {"wallsection", "interior_door", "predoor"})
-        if #ents >= 1 then
-        	for _, ent in pairs(ents) do
-        		if (ent:HasTag("predoor") or ent:HasTag("interior_door")) and ent.prefab ~= name and ent.prefab ~= "prop_door" then
-        			return true
-        		end
-        	end
-        end
+        -- if #ents >= 1 then
+        	-- for _, ent in pairs(ents) do
+        		-- if (ent:HasTag("predoor") or ent:HasTag("interior_door")) and ent.prefab ~= name and ent.prefab ~= "prop_door" then
+        			-- return true
+        		-- end
+        	-- end
+        -- end
 
         if #ents < 1 and canbuild then
             return true
@@ -117,6 +117,7 @@ TECH.SCIENCE_TWO,
  {Ingredient("oinc", 15)},
  TECH.HOME_TWO,
  {placer="common/inventory/iron_door_placer",
+ image="iron_door.tex",
  testfn=place_door_test_fn,
  nounlock=true})
  
