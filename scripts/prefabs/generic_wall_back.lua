@@ -4,7 +4,7 @@ local function setUp(inst,width,rotation,coords,depth)
 	if width then
 		inst.wall_width = width
 		inst.wall_depth = depth
-		--MakeInteriorPhysics(inst, width, nil, depth)
+		MakeInteriorPhysics(inst, width, nil, depth)
 	end
 	if rotation then
 		inst.wall_rotation = rotation

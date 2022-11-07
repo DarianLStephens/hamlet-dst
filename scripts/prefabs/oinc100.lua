@@ -11,14 +11,14 @@ local prefabs =
 local function shine(inst)
     inst.task = nil
     -- hacky, need to force a floatable anim change
-    inst.components.floatable:UpdateAnimations("idle_water", "idle")
-    inst.components.floatable:UpdateAnimations("sparkle_water", "sparkle")
+    -- inst.components.floatable:UpdateAnimations("idle_water", "idle")
+    -- inst.components.floatable:UpdateAnimations("sparkle_water", "sparkle")
 
-    if inst.components.floatable.onwater then
-        inst.AnimState:PushAnimation("idle_water")
-    else
-        inst.AnimState:PushAnimation("idle")
-    end
+    -- if inst.components.floatable.onwater then
+        -- inst.AnimState:PushAnimation("idle_water")
+    -- else
+        -- inst.AnimState:PushAnimation("idle")
+    -- end
     
     if inst.entity:IsAwake() then
         inst:DoTaskInTime(4+math.random()*5, function() shine(inst) end)
@@ -69,8 +69,8 @@ local function fn(Sim)
     inst:AddComponent("stackable")
     inst.components.stackable.maxsize = TUNING.STACK_SIZE_SMALLITEM
 
-    inst:AddComponent("appeasement")
-    inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_TINY
+    -- inst:AddComponent("appeasement")
+    -- inst.components.appeasement.appeasementvalue = TUNING.APPEASEMENT_TINY
 
     inst:AddComponent("waterproofer")
     inst.components.waterproofer.effectiveness = 0

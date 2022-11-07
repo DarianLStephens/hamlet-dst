@@ -302,9 +302,9 @@ local function onsave(inst, data)
         data.childrenspawned = inst.childrenspawned 
     end
 
-    if inst.flipped then
-        data.flipped = inst.flipped
-    end    
+    -- if inst.flipped then
+        -- data.flipped = inst.flipped
+    -- end    
     if inst.setbackground then
         data.setbackground = inst.setbackground
     end
@@ -370,9 +370,9 @@ local function onload(inst, data)
     if data.childrenspawned then
         inst.childrenspawned = data.childrenspawned
     end
-    if data.flipped then
-        inst.flipped = data.flipped        
-    end       
+    -- if data.flipped then
+        -- inst.flipped = data.flipped        
+    -- end       
     if data.dartthrower then
        inst:AddTag("dartthrower")
     end
@@ -441,7 +441,11 @@ local function loadpostpass(inst,ents, data)
                     table.insert(inst.decochildrenToRemove, childent.entity)
                 end
             end
-        end              
+        end    
+		-- -- DS - Trying something
+		-- if data.scalex  then
+			-- inst.Transform:SetScale( data.scalex, data.scaley, data.scalez)
+		-- end      
     end
     if inst.updateworkableart then        
         updateartworkable(inst,true)      
@@ -594,21 +598,27 @@ function decofn(build, bank, animframe, data, name)
 		inst.entity:AddNetwork()
 		
         inst.Transform:SetRotation(-90)
-
-        if scale then
-			if flipped then
-				-- anim:SetScale(-1, 1)
-				scale.x = scale.x *-1
-			-- else
-			end
-			anim:SetScale(scale.x, scale.y, scale.z)
-        end
+		-- inst:AddComponent("savedscale")-- DS - Testing a way to save the scale easier
 		
 		inst.entity:SetPristine()
+
+        -- if scale then
+			-- if flipped then
+				-- -- anim:SetScale(-1, 1)
+				-- scale.x = scale.x * -1
+			-- -- else
+			-- end
+			-- anim:SetScale(scale.x, scale.y, scale.z)
+		-- else
+			-- if flipped then
+				-- anim:SetScale(-1, 1, 1)
+			-- end
+        -- end
 
 		if not TheWorld.ismastersim then
 			return inst
 		end
+		
 
         for i, tag in ipairs(tags) do
             inst:AddTag(tag)
@@ -678,7 +688,7 @@ function decofn(build, bank, animframe, data, name)
                 inst.Physics:ClearCollisionMask()
                 inst.Physics:CollidesWith(COLLISION.ITEMS)
                 inst.Physics:CollidesWith(COLLISION.CHARACTERS)
-                inst.Physics:CollidesWith(COLLISION.INTWALL)
+                -- inst.Physics:CollidesWith(COLLISION.INTWALL)
             elseif physics == "pond_physics" then
                 inst:AddTag("blocker")
                 inst.entity:AddPhysics()
@@ -688,7 +698,7 @@ function decofn(build, bank, animframe, data, name)
                 inst.Physics:ClearCollisionMask()
                 inst.Physics:CollidesWith(COLLISION.ITEMS)
                 inst.Physics:CollidesWith(COLLISION.CHARACTERS)
-                inst.Physics:CollidesWith(COLLISION.INTWALL)
+                -- inst.Physics:CollidesWith(COLLISION.INTWALL)
             elseif physics == "big_post_physics" then
                 MakeObstaclePhysics(inst, 0.75)
             elseif physics == "post_physics" then

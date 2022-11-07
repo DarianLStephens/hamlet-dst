@@ -11,14 +11,15 @@ local prefabs =
 local function shine(inst)
     inst.task = nil
     -- hacky, need to force a floatable anim change
-    inst.components.floatable:UpdateAnimations("idle_water", "idle")
-    inst.components.floatable:UpdateAnimations("sparkle_water", "sparkle")
+	-- DS - I think the DST version of the component is better
+    -- inst.components.floatable:UpdateAnimations("idle_water", "idle")
+    -- inst.components.floatable:UpdateAnimations("sparkle_water", "sparkle")
 
-    if inst.components.floatable.onwater then
-        inst.AnimState:PushAnimation("idle_water")
-    else
-        inst.AnimState:PushAnimation("idle")
-    end
+    -- if inst.components.floatable.onwater then
+        -- inst.AnimState:PushAnimation("idle_water")
+    -- else
+        -- inst.AnimState:PushAnimation("idle")
+    -- end
     
     if inst.entity:IsAwake() then
         inst:DoTaskInTime(4+math.random()*5, function() shine(inst) end)

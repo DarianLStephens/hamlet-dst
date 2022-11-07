@@ -50,7 +50,7 @@ end
 
 local function smash(inst)
     if inst.components.lootdropper then
-        local interiorSpawner = GetWorld().components.interiorspawner 
+        local interiorSpawner = TheWorld.components.interiorspawner 
         if interiorSpawner.current_interior then
             local originpt = interiorSpawner:getSpawnOrigin()
             local x, y, z = inst.Transform:GetWorldPosition()
@@ -357,12 +357,12 @@ local function testcontrollermodefn(inst)
 end
 
 local function OnRemove(inst)
-	inst:RemoveEventCallback("controllermode_changed", inst.testcontrollermodefn, GetWorld())
+	inst:RemoveEventCallback("controllermode_changed", inst.testcontrollermodefn, TheWorld)
 end
 
 local function OnReturn(inst)
 	testcontrollermodefn(inst)
-	inst:ListenForEvent("controllermode_changed", inst.testcontrollermodefn, GetWorld())
+	inst:ListenForEvent("controllermode_changed", inst.testcontrollermodefn, TheWorld)
 end
 
 function handlelock(inst)
@@ -392,7 +392,7 @@ end
 
 local function makeobstacle(inst)
 	-- print('makeobstacle walls.lua')
-    local ground = GetWorld()
+    local ground = TheWorld
     if ground then
     	local pt = Point(inst.Transform:GetWorldPosition())
 		--print("    at: ", pt)
@@ -404,7 +404,7 @@ end
 
 local function clearobstacle(inst)
 
-    local ground = GetWorld()
+    local ground = TheWorld
     if ground then
     	local pt = Point(inst.Transform:GetWorldPosition())
     	ground.Pathfinder:RemoveWall(pt.x, pt.y, pt.z-1)

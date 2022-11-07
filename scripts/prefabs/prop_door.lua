@@ -60,7 +60,7 @@ local phasefunctions =
     end,
 
     night = function(inst) 
-        if TheWorld.components.clock:GetMoonPhase() == "full" then
+        if TheWorld.state.isfullmoon then
             inst.components.lighttweener:StartTween(nil, lights.full.rad, lights.full.intensity, lights.full.falloff, {lights.full.color[1],lights.full.color[2],lights.full.color[3]}, 4)
         else
             inst.components.lighttweener:StartTween(nil, 0, 0, 1, {0,0,0}, 6, turnoff)
@@ -456,7 +456,7 @@ end
 
 local function closedoor(inst, instant)
 	-- once the player has used a door, the doors should freeze open
-	if not TheDoor.doorfreeze  then
+	if not TheWorld.doorfreeze  then -- lol I accidentally put 'TheDoor'
 		if inst.baseanimname and (not inst.components.door.disabledcauses or not inst.components.door.disabledcauses["door"])  then
 			--print("CLOSING")
 			if not instant then
@@ -491,6 +491,7 @@ local function fn()
 	inst.entity:AddTransform()
 	inst.entity:AddAnimState()
 	inst.entity:AddSoundEmitter()
+	inst.entity:AddNetwork()
 
     inst.AnimState:SetBank("acorn")
     inst.AnimState:SetBuild("acorn")
@@ -503,8 +504,6 @@ local function fn()
 
    	inst:AddTag("interior_door")
    	inst:AddTag("NOBLOCK")
-
-	inst.entity:AddNetwork()
 	
 	inst.entity:SetPristine()
 
@@ -514,7 +513,7 @@ local function fn()
 
     inst:AddComponent("door")
 
-    --inst:AddComponent("vineable")    
+    inst:AddComponent("vineable")    
 	inst.initInteriorPrefab = InitInteriorPrefab
 	inst.saveInteriorData = SaveInteriorData
 	inst.initFromInteriorSave = InitFromInteriorSave
@@ -560,6 +559,7 @@ local function shadowfn()
 	local inst = CreateEntity()
 	inst.entity:AddTransform()
 	inst.entity:AddAnimState()
+	inst.entity:AddNetwork()
 
     inst.AnimState:SetBank("doorway_ruins")
     inst.AnimState:SetBuild("pig_ruins_door")

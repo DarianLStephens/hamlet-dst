@@ -314,12 +314,17 @@ local function common_on_built( inst )
 	--local interior_spawner = TheWorld.components.interiorspawner
 	local current_interior = interior_spawner:GetCurrentInterior()
 
+	print("DS - House Door - Common on built running")
+
 	local baseanimname = GetBaseAnimName(inst)
 	inst.baseanimname = baseanimname
     CheckForShadow(inst)
+	print("Checked for shadow")
 
 	local wasExistingDoor = false
 	local doors = interior_spawner:GetInteriorDoors(current_interior.unique_name)
+	print("Found doors of interior ID ", current_interior.unique_name, ", dumping...")
+	dumptable(doors, 1, 1, nil, 0)
     for index, door in ipairs(doors) do
     	if door.inst and door.inst.baseanimname then
 
@@ -327,6 +332,10 @@ local function common_on_built( inst )
     		if door.inst.baseanimname == baseanimname then
     			ActivateSelf(inst, door.inst.components.door.target_interior, current_interior)
 				door.inst:Remove() -- Deletes an old door
+				print("Found the door already exists, don't initialize")
+				print("This is the data used to determine it exists already:")
+				print("Loop door baseanimname: ", door.inst.baseanimname)
+				print("My baseanimname: ", baseanimname)
 				wasExistingDoor = true
 				break
     		end
@@ -334,12 +343,16 @@ local function common_on_built( inst )
     end
 
 	if not wasExistingDoor then
+		print("Door didn't already exist, check its stuff for proper init")
 		local connecting_room = interior_spawner:GetPlayerRoomInDirection(current_interior.dungeon_name, current_interior.unique_name, baseanimname)
 		if connecting_room then
 			local found_interior = interior_spawner:GetInteriorByName(connecting_room)
+			print("DS - House door - Found interior, dumping...")
+			dumptable(found_interior, 1, 1, nil, 0)
 			ActivateSelf(inst, found_interior.unique_name, current_interior)
 
 			local opposing_exit = player_interior_exit_dir_data[baseanimname].op_dir
+			print("DS - Adding door data")
 			local door_data = 
 			{ 
 				name = inst.prefab, 
@@ -426,6 +439,7 @@ local function common_house_door_fn()
 	inst.entity:AddAnimState()
 	inst.entity:AddSoundEmitter()
 	inst.entity:AddNetwork()
+	
 
 	inst.AnimState:SetBank("doorway_ruins")
 	inst.AnimState:SetBuild("pig_ruins_door")
@@ -650,7 +664,8 @@ local function modify_house_door(inst)
 
     local canbuild = true
 	local dir = GetBaseAnimName(inst)
-	data.anim = "close_"..player_interior_exit_dir_data[dir].anim
+	-- data.anim = "close_"..player_interior_exit_dir_data[dir].anim
+	inst.animdata.anim = "close_"..player_interior_exit_dir_data[dir].anim
 
     return data
 end
@@ -662,11 +677,37 @@ local function MakeHouseDoor(name, build, bank)
 		inst.AnimState:SetBank("player_house_doors")
 		inst.AnimState:SetBuild("player_house_doors")
 
+	--"iron_door",    "player_house_doors", "player_house_doors"
+
+	-- Temporary hardcoding to see if this can work at all
+	inst.animdata = {}
+	inst.animdata.bank = "player_house_doors"--bank
+	inst.animdata.build = "player_house_doors"--build
+	-- inst.animdata.anim = "iron_door" .. "_open_north" --"_placer"--anim
+	inst.animdata.anim = "close_north" --"_placer"--anim
+		
+		if not TheWorld.ismastersim then
+			return inst
+		end
+		
+		-- This stuff didn't exist in DST, it was prefabutil stuff
+
 		inst.OnBuilt = function()
 			common_on_built(inst)
 
-			if not inst.initialized and not TheWorld.ismastersim then
+			-- if not inst.initialized and not TheWorld.ismastersim then
+			-- if not inst.initialized and TheWorld.ismastersim then
+			if not inst.initialized then
+				print("DS - House Door - This is where the crash happens, and where it's missing data. Print everything we can, with the problem data being the last thing")
+				print("Inst: ", inst)
+				print("Printing inst.prefab: ", inst.prefab)
+				print("About to print problem stuff, inst.animdata")
+				print("Animdata: ", inst.animdata)
+				print("Animdata anim: ", inst.animdata.anim)
+				print("Manually calling the house modification function, to try and update the anim before playing it")
+				modify_house_door(inst)
 				inst.animdata.anim = inst.prefab .. "_" .. inst.animdata.anim
+				print("New anim: ", inst.animdata.anim)
 				inst.AnimState:PlayAnimation(inst.animdata.anim)
 
 				local background = player_interior_exit_dir_data[inst.baseanimname].background
@@ -680,7 +721,6 @@ local function MakeHouseDoor(name, build, bank)
 
 		return inst
 	end
-
 	return Prefab("common/inventory/" .. name, house_fn, assets, prefabs )
 end
 
@@ -688,7 +728,7 @@ local function MakeHouseDoorPlacer(name, build, bank)
 	-- return MakePlacer( "common/inventory/" .. name .. "_placer", bank, build, name .. "_open_north", nil, nil, nil, nil, nil, nil, nil, nil, nil, place_door_test_fn, modify_house_door, nil)
 	-- Gotta do something about the place test function.
 	-- Turns out it's done in the recipe itself, now!
-	return MakePlacer( "common/inventory/" .. name .. "_placer", bank, build, name .. "_open_north", nil, nil, 2, nil, nil, nil, InitHouseDoorInteriorPrefab)
+	return MakePlacer( "common/inventory/" .. name .. "_placer", bank, build, name .. "_open_north", nil, nil, 2, nil, nil, nil, nil, modify_house_door) --, InitHouseDoorInteriorPrefab)
 end
 
 local function InitInteriorPrefab_shadow(inst, doer, prefab_definition, interior_definition)
