@@ -210,35 +210,6 @@ function InteriorSpawner:GetOppositeFromDirection(direction)
 	end
 end
 
-function InteriorSpawner:GetInteriorsByDungeonName(dungeonname)
-	if dungeonname == nil then
-		return nil
-	else
-		local tempinteriors = {}
-		for i,interior in pairs(self.interiors)do
-			if interior.dungeon_name == dungeonname then
-				table.insert(tempinteriors,interior)
-			end
-		end
-		return tempinteriors
-	end
-end
-
-function InteriorSpawner:GetInteriorsByDungeonNameStart(dungeonnameStart)
-	if dungeonnameStart == nil then
-		return nil
-	else
-		local tempinteriors = {}
-		local len = #dungeonnameStart
-		for i,interior in pairs(self.interiors)do
-			if string.sub(interior.dungeon_name, 1, len) == dungeonnameStart then
-				table.insert(tempinteriors,interior)
-			end
-		end
-		return tempinteriors
-	end
-end
-
 function InteriorSpawner:GetInteriorByName(name)
 	if name == nil then
 		return nil
@@ -440,7 +411,6 @@ function InteriorSpawner:MovePropToInteriorStorage(prop,interior,ignoredisplacem
 		-- local index = self:GetLoadedInteriorIndex(interior.unique_name)
 		local index = interior.storage_offset
 		
-		-- Never mind about the 'changed it' thing, apparently this is what was in Hamlet. I probably changed it at some point and then changed it back without realizing that's what I did.
 		print("Changed it out for the stored storage offset, which is ", index)
 		
 		-- local pt2 = self:getSpawnStorage(index)	
@@ -499,7 +469,7 @@ function InteriorSpawner:UnloadInterior(doer, interiorID)
 	print("UnloadInterior - User ID is :", doerID)
 	print("UnloadInterior - interiorID is:", interiorID)
 	for k, v in ipairs(self.interior_players) do
-		if v.playerID == doerID then
+		if v == doerID then
 			print("UnloadInterior - detected playerID in list")
 		end
 	end
@@ -510,8 +480,7 @@ function InteriorSpawner:UnloadInterior(doer, interiorID)
 	print("Interior index of supposedly-loaded interior ", interiorID, " is ", loadedInteriorIndex)
 	if loadedInteriorIndex then
 		-- print("Dumping loaded interior index...")
-		local interior = self.loaded_interiors[loadedInteriorIndex].interior_ref
-		local interiorOffset = self.loaded_interiors[loadedInteriorIndex].storage_offset
+		local interior = self.loaded_interiors[loadedInteriorIndex]
 		-- print("Unload interior "..self.current_interior.unique_name.."("..self.current_interior.dungeon_name..")")
 		print("Unload interior "..interior.unique_name.."("..interior.dungeon_name..")")
 		-- THIS UNLOADS THE CURRENT INTERIOR IN THE WORLD
@@ -522,7 +491,7 @@ function InteriorSpawner:UnloadInterior(doer, interiorID)
 		print("Compared to self.current_interior:")
 		dumptable(self.current_interior, 1, 1, nil, 0)
 
-		local ents = self:GetCurrentInteriorEntities(doer, interiorOffset) -- Doer added to propogate the interacting player through
+		local ents = self:GetCurrentInteriorEntities(doer, interior.storage_offset) -- Doer added to propogate the interacting player through
 
 		-- whipe the rooms object list, then fill it with all the stuff found at this place, 
 		-- then remove them from the scene
@@ -713,15 +682,10 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 	
 	if player.player_classified then
 		print("DS - NETWORK - Detected classified, set netvars")
-		-- player.player_classified.net_roomx:set(camX)
-		-- player.player_classified.net_roomz:set(camZ)
-		-- player.player_classified.net_roomzoom:set(zoom)
-		-- player.player_classified.net_intcamera:set(true)
-		player.components.interiorplayer._camX = camX
-		player.components.interiorplayer._camZ = camZ
-		player.components.interiorplayer._camZoom = zoom
-		player.components.interiorplayer._interiorMode = true
-		player.components.interiorplayer:UpdateCamera() -- So it gets sent to the client, I hope
+		player.player_classified.net_roomx:set(camX)
+		player.player_classified.net_roomz:set(camZ)
+		player.player_classified.net_roomzoom:set(zoom)
+		player.player_classified.net_intcamera:set(true)
 	else
 		print("DS - NETWORK - Player classified component missing?")
 	end
@@ -769,9 +733,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 		-- self:RemovePlayerFromInteriorList(player)
 		if player.player_classified then
 			print("DS - NETWORK - Detected classified, set netvars")
-			-- player.player_classified.net_intcamera:set(false)
-		player.components.interiorplayer._interiorMode = false
-		player.components.interiorplayer:UpdateCamera()
+			player.player_classified.net_intcamera:set(false)
 		end
 		player.TheCamera = self.exteriorCamera
 	end
@@ -1358,7 +1320,6 @@ function InteriorSpawner:LoadInteriorByPlayer(player, interior)
 end
 
 -- Just returns how many interiors are already loaded. Useful for things like creating a new interior space offset
--- Although, I've since discovered that #table works, also.
 function InteriorSpawner:GetLoadedInteriorCount()
 	local count = 0
 	if self.loaded_interiors then
@@ -1376,7 +1337,7 @@ function InteriorSpawner:IsInteriorLoaded(interiorID)
 	print("DS - IsInteriorLoaded - Attempting to figure out if interior ID ", interiorID, " is loaded")
 	if self.loaded_interiors then
 		for k, v in ipairs(self.loaded_interiors) do
-			if v.interior_ref.unique_name == interiorID then
+			if v.unique_name == interiorID then
 				print("Determined ID was already loaded!")
 				return true
 			end
@@ -1395,7 +1356,7 @@ function InteriorSpawner:GetLoadedInteriorIndex(interiorID) -- Doubles as an 'is
 		for k, v in ipairs(self.loaded_interiors) do
 			print("Inside loop ", k, ", dump V:")
 			dumptable(v, 1, 1, nil, 0)
-			if v.interior_ref.unique_name == interiorID then
+			if v.unique_name == interiorID then
 				print("Found interior ID at index ",k," of loaded_interiors!")
 				return k
 			else
@@ -1724,12 +1685,12 @@ function InteriorSpawner:AddInterior(interior_definition)
 	-- The last force-load attempt was just this line
 	--self.inst:DoTaskInTime(2, function() self:LoadInterior(interior_definition) end)
 
-	-- if batcave, register with the batted component.
-	if spawner_definition.batted then
-		if TheWorld.components.batted then
-			TheWorld.components.batted:registerInterior(spawner_definition.unique_name)
-		end
-	end
+	-- -- if batcave, register with the batted component.
+	-- if spawner_definition.batted then
+		-- if TheWorld.components.batted then
+			-- TheWorld.components.batted:registerInterior(spawner_definition.unique_name)
+		-- end
+	-- end
 end
 
 function InteriorSpawner:CreatePlayerHome(house_id, interior_id)
@@ -2101,7 +2062,7 @@ function InteriorSpawner:LoadInterior(doer, interior)
 	end
 	print("Found? Got ", storageOffset)
 	
-	-- interior.storage_offset = (storageOffset)
+	interior.storage_offset = (storageOffset)
 	
 	local loadedInteriorCount = #self.loaded_interiors -- SHOULD be the length, I think?
 	print("Interior count gotten directly with LUA's hash symbol:", loadedInteriorCount)
@@ -2188,13 +2149,7 @@ function InteriorSpawner:LoadInterior(doer, interior)
 
 	interior.enigma = false
 	self.current_interior = interior
-	-- table.insert(self.loaded_interiors.interior_ref, interior)
-	local interiorData = {
-		interior_ref = interior,
-		storage_offset = storageOffset,
-	}
-	table.insert(self.loaded_interiors, interiorData)
-	-- interior.storage_offset = (storageOffset)
+	table.insert(self.loaded_interiors, interior)
 	self:ConsiderPlayerInside(self.current_interior.unique_name)
 
 	if not hasdoors then
@@ -2206,62 +2161,6 @@ function InteriorSpawner:LoadInterior(doer, interior)
 	self:ConfigureWalls(interior)
 
 	self:SanityCheck("Post LoadInterior")
-end
-
-function InteriorSpawner:insertprefab(interior, prefab, offset, prefabdata)
-	if interior == self.current_interior then
-		print("CURRENT")
-		local pt = self:getSpawnOrigin()
-		local object = SpawnPrefab(prefab)	
-		object.Transform:SetPosition(pt.x + offset.x_offset, 0, pt.z + offset.z_offset)
-		if prefabdata and prefabdata.startstate then
-			object.sg:GoToState(prefabdata.startstate)
-			if prefabdata.startstate == "forcesleep" then
-				object.components.sleeper.hibernate = true
-				object.components.sleeper:GoToSleep()
-			end
-		end		
-	elseif interior.visited then
-		print("VISITED")
-		local pt = self:getSpawnOrigin()
-		local object = SpawnPrefab(prefab)	
-		object.Transform:SetPosition(pt.x + offset.x_offset, 0, pt.z + offset.z_offset)			
-		if prefabdata and prefabdata.startstate then
-			object.sg:GoToState(prefabdata.startstate)
-			if prefabdata.startstate == "forcesleep" then
-				object.components.sleeper.hibernate = true
-				object.components.sleeper:GoToSleep()
-			end
-		end
-		self:PutPropIntoInteriorLimbo(object,interior)
-	else
-		local data = {name = prefab, x_offset = offset.x_offset, z_offset = offset.z_offset }
-		if prefabdata then
-			for arg, param in pairs(prefabdata) do
-				data[arg] = param
-			end
-		end
-		table.insert(interior.prefabs, data)
-	end
-end
-
-function InteriorSpawner:InsertHouseDoor(interior, door_data)
-
-	if interior.visited then
-		local pt = self:getSpawnOrigin()
-
-		local object = SpawnPrefab(door_data.name)
-		object.Transform:SetPosition(pt.x + door_data.x_offset, 0, pt.z + door_data.z_offset)
-		object.Transform:SetRotation(door_data.rotation)
-		object.initInteriorPrefab(object, nil, door_data, interior) -- DS - The 'nil' was GetPlayer(), but I don't want to pass it down all the way, and it doesn't seem to be used regardless
-
-		self:AddDoor(object, door_data)
-		self:PutPropIntoInteriorLimbo(object, interior)
-
-	else
-		local data = door_data
-		table.insert(interior.prefabs, data)
-	end
 end
 
 -- find the world entry points into dungeons. For multipe entries into one dungeon this is non-deterministic
@@ -2599,42 +2498,35 @@ function InteriorSpawner:OnSave()
 		-- print("For comparison, dumping real list:")
 		-- dumptable(int.object_list, 1, 1, nil, 0)
 
-		-- local interior_data =
-		-- {
-			-- unique_name = int.unique_name, 
-			-- z = int.z, 
-			-- x = int.x, 
-			-- dungeon_name = int.dungeon_name,
-			-- width = int.width, 
-			-- height = int.height, 
-			-- depth = int.depth, 
-			-- object_list = {}, 
-			-- -- object_list = object_list, 
-			-- prefabs = prefabs,
-			-- walltexture = int.walltexture,
-			-- floortexture = int.floortexture,
-			-- minimaptexture = int.minimaptexture,
-			-- cityID = int.cityID,
-			-- cc = int.cc,
-			-- visited = int.visited,
-			-- batted = int.batted,
-			-- playerroom = int.playerroom,
-			-- enigma = int.enigma,
-			-- reverb = int.reverb,
-			-- ambsnd = int.ambsnd,
-			-- groundsound = int.groundsound,
-			-- zoom = int.zoom,
-			-- cameraoffset = int.cameraoffset,
-			-- forceInteriorMinimap = int.forceInteriorMinimap,
-			-- storage_offset = int.storage_offset,
-		-- }
-		
 		local interior_data =
 		{
-			unique_name = int.interior_ref.unique_name,
+			unique_name = int.unique_name, 
+			z = int.z, 
+			x = int.x, 
+			dungeon_name = int.dungeon_name,
+			width = int.width, 
+			height = int.height, 
+			depth = int.depth, 
+			object_list = {}, 
+			-- object_list = object_list, 
+			prefabs = prefabs,
+			walltexture = int.walltexture,
+			floortexture = int.floortexture,
+			minimaptexture = int.minimaptexture,
+			cityID = int.cityID,
+			cc = int.cc,
+			visited = int.visited,
+			batted = int.batted,
+			playerroom = int.playerroom,
+			enigma = int.enigma,
+			reverb = int.reverb,
+			ambsnd = int.ambsnd,
+			groundsound = int.groundsound,
+			zoom = int.zoom,
+			cameraoffset = int.cameraoffset,
+			forceInteriorMinimap = int.forceInteriorMinimap,
 			storage_offset = int.storage_offset,
 		}
-		print("DS - OnSave interior name gotten as:", interior_data.unique_name)
 
 		table.insert(data.loaded_interiors, interior_data)		
 		
@@ -2714,21 +2606,6 @@ function InteriorSpawner:OnLoad(data)
 		--TheWorld.components.colourcubemanager:SetInteriorColourCube( self.current_interior.cc )		
 	end
 
-	if data.loaded_interiors then
-		for k, interior in pairs(data.loaded_interiors) do
-			-- local interiorData = self:GetInteriorByName(interior.unique_name)
-			-- self.current_interior = self:GetInteriorByName(data.loaded_interiors)
-			-- self:ConsiderPlayerInside(self.current_interior.unique_name)
-			--TheWorld.components.colourcubemanager:SetInteriorColourCube( self.current_interior.cc )	
-			local data = {
-				-- interior_ref = interiorData
-				interior_ref = self:GetInteriorByName(interior.unique_name),
-				storage_offset = interior.storage_offset,
-			}
-			table.insert(self.loaded_interiors, data)
-		end
-	end
-
 	if data.prev_player_pos then
 		self.prev_player_pos_x, self.prev_player_pos_y, self.prev_player_pos_z = data.prev_player_pos.x, data.prev_player_pos.y, data.prev_player_pos.z
 	end
@@ -2741,7 +2618,6 @@ function InteriorSpawner:OnLoad(data)
 	if data.player_homes then
 		self.player_homes = data.player_homes
 	end
-	
 	-- if data.loaded_interiors then
 		-- print ("OnLoad - Detected loaded interiors in data storage, retrieve...")
 		-- self.loaded_interiors = data.loaded_interiors
@@ -2751,61 +2627,61 @@ function InteriorSpawner:OnLoad(data)
 		-- print("Didn't detect loaded interiors in save data, do nothing")
 	-- end
 	
-	-- print("About to load the 'loaded interiors' list")
-	-- self.loaded_interiors = {}
-	-- for k, int_data in ipairs(data.loaded_interiors) do		
-		-- print("Loading 'loaded interiors' list, iteration ", k)
-		-- print("Dump data, for safety:")
-		-- dumptable(int_data, 1, 1, nil, 0)
-		-- -- Create placeholder definitions with saved locations
-		-- -- self.loaded_interiors[int_data.unique_name] =
+	print("About to load the 'loaded interiors' list")
+	self.loaded_interiors = {}
+	for k, int_data in ipairs(data.loaded_interiors) do		
+		print("Loading 'loaded interiors' list, iteration ", k)
+		print("Dump data, for safety:")
+		dumptable(int_data, 1, 1, nil, 0)
+		-- Create placeholder definitions with saved locations
+		-- self.loaded_interiors[int_data.unique_name] =
 		
-		-- -- print("About to try loading object list?")
-		-- -- local object_list = {}
-		-- -- for k, object in ipairs(int_data.object_list) do
-			-- -- print("Iteration ",k,", object ",object)
-			-- -- local load_data = object.GUID
-			-- -- print("GUID stuff about to be inserted: ", load_data)
-			-- -- table.insert(object_list, load_data)
-			-- -- -- table.insert(refs, object.GUID)
-		-- -- end
+		-- print("About to try loading object list?")
+		-- local object_list = {}
+		-- for k, object in ipairs(int_data.object_list) do
+			-- print("Iteration ",k,", object ",object)
+			-- local load_data = object.GUID
+			-- print("GUID stuff about to be inserted: ", load_data)
+			-- table.insert(object_list, load_data)
+			-- -- table.insert(refs, object.GUID)
+		-- end
 		
-		-- local interiordata =
-		-- { 
-			-- unique_name = int_data.unique_name,
-			-- z = int_data.z, 
-			-- x = int_data.x, 
-			-- dungeon_name = int_data.dungeon_name,
-			-- width = int_data.width, 
-			-- height = int_data.height,
-			-- depth = int_data.depth,			
-			-- object_list = {}, 
-			-- -- object_list = object_list, 
-			-- prefabs = int_data.prefabs, 			
-			-- walltexture = int_data.walltexture,
-			-- floortexture = int_data.floortexture,
-			-- minimaptexture = int_data.minimaptexture,
-			-- cityID = int_data.cityID,
-			-- cc = int_data.cc,
-			-- visited = int_data.visited,
-			-- batted = int_data.batted,
-			-- playerroom = int_data.playerroom,
-			-- enigma = int_data.enigma,
-			-- reverb = int_data.reverb,
-			-- ambsnd = int_data.ambsnd,
-			-- groundsound = int_data.groundsound,
-			-- zoom = int_data.zoom,
-			-- cameraoffset = int_data.cameraoffset,
-			-- forceInteriorMinimap = int_data.forceInteriorMinimap,
-			-- storage_offset = int_data.storage_offset,
-		-- }
-		-- print("Dump Loaded Interior data about to be inserted in to the real list:")
-		-- dumptable(interiordata, 1, 1, nil, 0)
-		-- -- print("Dump object list of interior data:")
-		-- -- dumptable(interiordata.object_list, 1, 1, nil, 0)
+		local interiordata =
+		{ 
+			unique_name = int_data.unique_name,
+			z = int_data.z, 
+			x = int_data.x, 
+			dungeon_name = int_data.dungeon_name,
+			width = int_data.width, 
+			height = int_data.height,
+			depth = int_data.depth,			
+			object_list = {}, 
+			-- object_list = object_list, 
+			prefabs = int_data.prefabs, 			
+			walltexture = int_data.walltexture,
+			floortexture = int_data.floortexture,
+			minimaptexture = int_data.minimaptexture,
+			cityID = int_data.cityID,
+			cc = int_data.cc,
+			visited = int_data.visited,
+			batted = int_data.batted,
+			playerroom = int_data.playerroom,
+			enigma = int_data.enigma,
+			reverb = int_data.reverb,
+			ambsnd = int_data.ambsnd,
+			groundsound = int_data.groundsound,
+			zoom = int_data.zoom,
+			cameraoffset = int_data.cameraoffset,
+			forceInteriorMinimap = int_data.forceInteriorMinimap,
+			storage_offset = int_data.storage_offset,
+		}
+		print("Dump Loaded Interior data about to be inserted in to the real list:")
+		dumptable(interiordata, 1, 1, nil, 0)
+		-- print("Dump object list of interior data:")
+		-- dumptable(interiordata.object_list, 1, 1, nil, 0)
 		
-		-- table.insert(self.loaded_interiors, interiordata)
-	-- end
+		table.insert(self.loaded_interiors, interiordata)
+	end
 	print("All loaded interiors should have been fully loaded, dump it...")
 	dumptable(self.loaded_interiors, 1, 1, nil, 0)
 	
@@ -2893,28 +2769,28 @@ function InteriorSpawner:LoadPostPass(ents, data)
 			-- print("*** Warning *** InteriorSpawner:LoadPostPass Could not fetch interior "..room.unique_name)			
 		-- end
 	-- end
-	-- for k, loadedroom in pairs(self.loaded_interiors) do
-		-- local interior = self:GetInteriorByName(loadedroom.unique_name)
-		-- if interior then 
-			-- self.loaded_interiors[k].object_list = interior.object_list
-			-- print("DS - Tried to insert object list to loaded interior, dumping...")
-			-- dumptable(self.loaded_interiors[k].object_list, 1, 1, nil, 0)
-			-- print("DS - Dumping the interior...")
-			-- dumptable(self.loaded_interiors[k], 1, 1, nil, 0)
-			-- print("DS - Dumping the object list we tried to add:")
-			-- dumptable(interior.object_list, 1, 1, nil, 0)
-				-- -- if object and ents[object] then										
-					-- -- local object_inst = ents[object].entity
-					-- -- table.insert(loadedroom.object_list, object_inst)	
-					-- -- object_inst.interior = loadedroom.unique_name
-				-- -- else
-					-- -- print("*** Warning *** InteriorSpawner:LoadPostPass object "..tostring(object).." not found for interior "..interior.unique_name)
-				-- -- end
-			-- -- end
-		-- else
-			-- print("*** Warning *** InteriorSpawner:LoadPostPass Could not fetch interior "..room.unique_name)			
-		-- end
-	-- end
+	for k, loadedroom in pairs(self.loaded_interiors) do
+		local interior = self:GetInteriorByName(loadedroom.unique_name)
+		if interior then 
+			self.loaded_interiors[k].object_list = interior.object_list
+			print("DS - Tried to insert object list to loaded interior, dumping...")
+			dumptable(self.loaded_interiors[k].object_list, 1, 1, nil, 0)
+			print("DS - Dumping the interior...")
+			dumptable(self.loaded_interiors[k], 1, 1, nil, 0)
+			print("DS - Dumping the object list we tried to add:")
+			dumptable(interior.object_list, 1, 1, nil, 0)
+				-- if object and ents[object] then										
+					-- local object_inst = ents[object].entity
+					-- table.insert(loadedroom.object_list, object_inst)	
+					-- object_inst.interior = loadedroom.unique_name
+				-- else
+					-- print("*** Warning *** InteriorSpawner:LoadPostPass object "..tostring(object).." not found for interior "..interior.unique_name)
+				-- end
+			-- end
+		else
+			print("*** Warning *** InteriorSpawner:LoadPostPass Could not fetch interior "..room.unique_name)			
+		end
+	end
 
 	-- camera load stuff
 	if self.exteriorCamera == nil then
