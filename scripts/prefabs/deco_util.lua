@@ -500,26 +500,46 @@ local phasefunctions =
     end,
 }
 
-local function timechange(inst)    
-    if TheWorld.state.isday then
+local timechange = 
+{
+    day = function(inst)
         inst.AnimState:PlayAnimation("to_day")
         inst.AnimState:PushAnimation("day_loop", true)
---        if inst.Light then
- --           phasefunctions["day"](inst)
-  --      end
-    elseif TheWorld.state.isnight then
-       inst.AnimState:PlayAnimation("to_night")
-        inst.AnimState:PushAnimation("night_loop", true)
---        if inst.Light then
---            phasefunctions["night"](inst)
---        end
-    elseif TheWorld.state.isdusk then
+	end,
+	
+    dusk = function(inst) 
         inst.AnimState:PlayAnimation("to_dusk")
         inst.AnimState:PushAnimation("dusk_loop", true)
---        if inst.Light then
- --           phasefunctions["dusk"](inst)
- --       end
-    end
+	end,
+	
+    night = function(inst) 
+		inst.AnimState:PlayAnimation("to_night")
+		inst.AnimState:PushAnimation("night_loop", true)
+	end,
+-- --        if inst.Light then
+ -- --           phasefunctions["day"](inst)
+  -- --      end
+    -- elseif TheWorld.state.isnight then
+       -- inst.AnimState:PlayAnimation("to_night")
+        -- inst.AnimState:PushAnimation("night_loop", true)
+-- --        if inst.Light then
+-- --            phasefunctions["night"](inst)
+-- --        end
+    -- elseif TheWorld.state.isdusk then
+        -- inst.AnimState:PlayAnimation("to_dusk")
+        -- inst.AnimState:PushAnimation("dusk_loop", true)
+-- --        if inst.Light then
+ -- --           phasefunctions["dusk"](inst)
+ -- --       end
+    -- end
+-- end
+}
+
+local function UpdateTime(inst, instant)    
+	local phase = TheWorld.state.phase
+	-- phasefunctions[phase](inst, instant)
+	-- phasefunctions[phase](inst, false)
+	timechange[phase](inst)
 end
 
 local function mirror_blink_idle(inst)
@@ -732,10 +752,12 @@ function decofn(build, bank, animframe, data, name)
         end
 
         if data.dayevents then
-            inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
-            inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
-            inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)  
-            timechange(inst)
+            -- inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
+            -- inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
+            -- inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)  
+            -- timechange(inst)
+			inst:WatchWorldState("phase", UpdateTime)
+			UpdateTime(inst, false)
         end
 
         if light then

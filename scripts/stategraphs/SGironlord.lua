@@ -723,7 +723,8 @@ local states=
 
         
         onexit = function(inst)
-            inst.livingartifact.BecomeIronLord_post(inst.livingartifact)
+            -- inst.livingartifact.BecomeIronLord_post(inst.livingartifact)
+            inst.BecomeIronLord_post(inst)
         end,
 
         events=
@@ -1048,12 +1049,14 @@ local states=
             TimeEvent(52*FRAMES, function(inst) 
                 local explosion = SpawnPrefab("living_suit_explode_fx")
                 explosion.Transform:SetPosition(inst.Transform:GetWorldPosition())  
-                inst.livingartifact.DoDamage(inst.livingartifact, 5)
+                -- inst.livingartifact.DoDamage(inst.livingartifact, 5)
+                inst.DoDamage(inst, 5)
             end),
         }, 
         
         onexit = function(inst)
-             inst.livingartifact.Revert(inst.livingartifact)
+             -- inst.livingartifact.Revert(inst.livingartifact)
+             inst.Revert(inst)
         end,
 
         events=

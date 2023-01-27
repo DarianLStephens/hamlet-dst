@@ -61,20 +61,27 @@ local phasefunctions =
     end,
 }
 
-local function timechange(inst, instant)
-    local c = GetClock()
-    local p = c:GetPhase()
-    if not inst:HasTag("INTERIOR_LIMBO") then
-        -- phasefunctions[p](inst, instant)        
+-- local function timechange(inst, instant)
+    -- local c = GetClock()
+    -- local p = c:GetPhase()
+    -- if not inst:HasTag("INTERIOR_LIMBO") then
+        -- -- phasefunctions[p](inst, instant)        
 		
-		if TheWorld.state.isday then
-			phasefunctions["day"](inst, instant)
-		elseif TheWorld.state.isnight then
-			phasefunctions["night"](inst, instant)
-		elseif TheWorld.state.isdusk then
-			phasefunctions["dusk"](inst, instant)
-		end
+		-- if TheWorld.state.isday then
+			-- phasefunctions["day"](inst, instant)
+		-- elseif TheWorld.state.isnight then
+			-- phasefunctions["night"](inst, instant)
+		-- elseif TheWorld.state.isdusk then
+			-- phasefunctions["dusk"](inst, instant)
+		-- end
 		
+    -- end
+-- end
+
+local function UpdateTime(inst, instant)    
+	local phase = TheWorld.state.phase
+    if inst.Light then
+        phasefunctions[phase](inst, instant)
     end
 end
 
@@ -98,7 +105,8 @@ local function filterspawn(inst)
 end
 
 local function UpdateIsInInterior(inst)
-     timechange(inst,true)
+     -- timechange(inst,true)
+     UpdateTime(inst,true)
 end  
 
 local function distancefadeextra(inst, dt)    
@@ -172,9 +180,12 @@ local function makefn(fadeout)
 
         inst:AddTag("NOCLICK")
 
-        inst:ListenForEvent("daytime", function() timechange(inst) end, GetWorld())
-        inst:ListenForEvent("dusktime", function() timechange(inst) end, GetWorld())
-        inst:ListenForEvent("nighttime", function() timechange(inst) end, GetWorld())
+        -- inst:ListenForEvent("daytime", function() timechange(inst) end, GetWorld())
+        -- inst:ListenForEvent("dusktime", function() timechange(inst) end, GetWorld())
+        -- inst:ListenForEvent("nighttime", function() timechange(inst) end, GetWorld())
+		
+		inst:WatchWorldState("phase", UpdateTime)
+		UpdateTime(inst, TheWorld.state.phase)
 
         inst:AddComponent("distancefade")
         inst.components.distancefade:Setup(15,15)

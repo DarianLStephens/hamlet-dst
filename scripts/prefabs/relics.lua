@@ -45,12 +45,6 @@ local function MakeRelic(num)
         inst.entity:AddTransform()
         inst.entity:AddAnimState()
 		inst.entity:AddNetwork()
-	
-		inst.entity:SetPristine()
-
-		if not TheWorld.ismastersim then
-			return inst
-		end
 
         inst.OnEntityWake = onwake        
         
@@ -63,8 +57,14 @@ local function MakeRelic(num)
         
         inst:AddComponent("tradable")
         
-        -- inst:AddComponent("inspectable")
+        inst:AddComponent("inspectable")
         -- inst.components.inspectable.getstatus = getstatus
+	
+		inst.entity:SetPristine()
+
+		if not TheWorld.ismastersim then
+			return inst
+		end
 
         inst:AddComponent("inventoryitem")
 

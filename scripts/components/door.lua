@@ -24,6 +24,9 @@ local Door = Class(function(self, inst)
 	self.destination = {target_x = 0, target_y = 0, target_z = 0, target_offset_x = 0, target_offset_y = 0, target_offset_z = 0}
 	self.getverb = function() return STRINGS.ACTIONS.JUMPIN.ENTER end
 	self.inst:AddTag("door")
+	-- self.inst:AddComponent("hauntable")
+	-- self.inst.onhaunt = Activate -- So ghosts can go through doors like normal. Don't want people getting trapped in or out of interiors
+	MakeHauntableWork(self.inst)
 end)
 
 function Door:SetUnloadTransition()

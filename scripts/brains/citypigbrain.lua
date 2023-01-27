@@ -113,7 +113,8 @@ local function KeepTraderFn(inst, target)
 end
 
 local function GreetAction(inst)
-    if GetClosestInstWithTag("player", inst, START_FACE_DIST) then
+	local target = GetClosestInstWithTag("player", inst, START_FACE_DIST)
+    if target then
         inst.sg:GoToState("greet")
         return true
     end
@@ -254,7 +255,8 @@ end
 
 local function PayTax(inst)
     inst.taxing = true
-    return BufferedAction(inst, GetPlayer(), ACTIONS.SPECIAL_ACTION)
+    -- return BufferedAction(inst, GetPlayer(), ACTIONS.SPECIAL_ACTION)
+    return BufferedAction(inst, GetClosestInstWithTag("mayor", inst, 80), ACTIONS.SPECIAL_ACTION)
 end
 
 
@@ -306,6 +308,13 @@ local function shouldpanicwithspeech(inst)
         end
         return true
     end
+end
+
+local function SafeLightDist(inst, target)
+    return (target:HasTag("player") or target:HasTag("playerlight")
+            or (target.inventoryitem and target.inventoryitem:GetGrandOwner() and target.inventoryitem:GetGrandOwner():HasTag("player")))
+        and 4
+        or target.Light:GetCalculatedRadius() / 3
 end
 
 local function needlight(inst)
@@ -496,11 +505,12 @@ function CityPigBrain:OnStart()
             
             WhileNode(function() return needlight(self.inst) end, "NeedLight",
                 ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_FIND_LIGHT),
-                    FindLight(self.inst))),
+                    -- FindLight(self.inst))),
+                    FindLight(self.inst, SEE_LIGHT_DIST, SafeLightDist))),
             
             IfNode(function() return not self.inst:HasTag("guard") and not (TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive()) end, "panic",
-                ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_PANIC),                                
-                Panic(self.inst))),
+                ChattyNode(self.inst, getSpeechType(self.inst, STRINGS.CITY_PIG_TALK_PANIC)),                                
+                Panic(self.inst)),
         },1)
 
     local root = 

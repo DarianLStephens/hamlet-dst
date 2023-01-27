@@ -1,4 +1,8 @@
+local HAMENV = env
+GLOBAL.setfenv(1, GLOBAL)
 
+----------------------------------------------------------------------------------------
+local InventoryItem = require("components/inventoryitem")
 
 function InventoryItem:TakeOffShelf()
 
@@ -16,6 +20,7 @@ function InventoryItem:TakeOffShelf()
 end
 
 function InventoryItem:PutOnShelf(shelf, slot)
+	print("DS - InventoryItem PutOnShelf stuff")
    self.inst:AddTag("bookshelfed")
    self.inst.bookshelfslot = slot
    self.inst.bookshelf = shelf 
@@ -82,14 +87,14 @@ function InventoryItem:LoadPostPass(newents, data)
 end
 
 
-function InventoryItem:OnHitCloud()
-    self.inst:RemoveTag("falling")
-    if self.inst:HasTag("irreplaceable") then
-        self.inst.Transform:SetPosition(GetPlayer().Transform:GetWorldPosition())
-    else
-        local x, y, z = self.inst.Transform:GetWorldPosition()
-        local fx = SpawnPrefab("splash_clouds_drop")
-        fx.Transform:SetPosition(x, y, z)
-        self.inst:Remove()
-    end
-end
+-- function InventoryItem:OnHitCloud()
+    -- self.inst:RemoveTag("falling")
+    -- if self.inst:HasTag("irreplaceable") then
+        -- self.inst.Transform:SetPosition(GetPlayer().Transform:GetWorldPosition())
+    -- else
+        -- local x, y, z = self.inst.Transform:GetWorldPosition()
+        -- local fx = SpawnPrefab("splash_clouds_drop")
+        -- fx.Transform:SetPosition(x, y, z)
+        -- self.inst:Remove()
+    -- end
+-- end

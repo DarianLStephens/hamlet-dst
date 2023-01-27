@@ -148,10 +148,10 @@ local function spawnshelfslots(inst)
         local object = SpawnPrefab("shelf_slot")   
 		object.components.shelfer.slotindex = i
         if inst.swp_img_list then
-            --object.components.inventoryitem:PutOnShelf(inst, inst.swp_img_list[i])
+            object.components.inventoryitem:PutOnShelf(inst, inst.swp_img_list[i])
             object.components.shelfer:SetShelf(inst, inst.swp_img_list[i])            
         else                     
-            -- object.components.inventoryitem:PutOnShelf(inst,"SWAP_img"..i)
+            object.components.inventoryitem:PutOnShelf(inst,"SWAP_img"..i)
             object.components.shelfer:SetShelf(inst, "SWAP_img"..i)            
         end
         table.insert(inst.shelves, object)
@@ -426,7 +426,7 @@ local function common(setsize,swp_img_list, locked, physics_round)
     if physics_round then
         MakeObstaclePhysics(inst, .5)
     else
-        --MakeInteriorPhysics(inst, 1.6, 1, 0.2)
+        MakeInteriorPhysics(inst, 1.6, 1, 0.2)
 		inst:DoTaskInTime(0, makeobstacle)
 	    inst.returntointeriorscene = makeobstacle
     	inst.removefrominteriorscene = clearobstacle

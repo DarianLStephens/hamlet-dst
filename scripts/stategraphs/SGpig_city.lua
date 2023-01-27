@@ -493,7 +493,8 @@ local states=
                 function(inst)
                     inst:RemoveTag("paytax")
                     inst.taxing = false
-                    GetPlayer().components.inventory:GiveItem(
+                    -- GetPlayer().components.inventory:GiveItem(
+                    FindClosestPlayer.components.inventory:GiveItem(
                         SpawnPrefab("oinc"), nil, Vector3(TheSim:GetScreenPos(inst.Transform:GetWorldPosition())))
                 end ),
         },

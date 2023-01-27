@@ -143,25 +143,35 @@ local phasefunctions =
     end,
 }
 
-local function timechange(inst, instant)
-    -- local c = GetClock()
-    -- local p = c:GetPhase()
-    if not inst:HasTag("INTERIOR_LIMBO") then
-        -- phasefunctions[p](inst, instant)        
+-- local function timechange(inst, instant)
+    -- -- local c = GetClock()
+    -- -- local p = c:GetPhase()
+    -- if not inst:HasTag("INTERIOR_LIMBO") then
+        -- -- phasefunctions[p](inst, instant)        
 		
-		if TheWorld.state.isday then
-			phasefunctions["day"](inst, instant)
-		elseif TheWorld.state.isnight then
-			phasefunctions["night"](inst, instant)
-		elseif TheWorld.state.isdusk then
-			phasefunctions["dusk"](inst, instant)
+		-- if TheWorld.state.isday then
+			-- phasefunctions["day"](inst, instant)
+		-- elseif TheWorld.state.isnight then
+			-- phasefunctions["night"](inst, instant)
+		-- elseif TheWorld.state.isdusk then
+			-- phasefunctions["dusk"](inst, instant)
+		-- end
+    -- end
+-- end
+
+local function UpdateTime(inst, instant)    
+	local phase = TheWorld.state.phase
+	if not inst:HasTag("INTERIOR_LIMBO") then
+		if inst.Light then
+			phasefunctions[phase](inst, instant)
 		end
-    end
+	end
 end
 
 
 local function UpdateIsInInterior(inst)
-     timechange(inst,true)
+     -- timechange(inst,true)
+     UpdateTime(inst,true)
 end  
 
 local function fn(Sim)
@@ -196,9 +206,12 @@ local function fn(Sim)
     
     --------------------
 
-    inst:ListenForEvent("daytime", function() timechange(inst) end, GetWorld())
-    inst:ListenForEvent("dusktime", function() timechange(inst) end, GetWorld())
-    inst:ListenForEvent("nighttime", function() timechange(inst) end, GetWorld())
+    -- inst:ListenForEvent("daytime", function() timechange(inst) end, GetWorld())
+    -- inst:ListenForEvent("dusktime", function() timechange(inst) end, GetWorld())
+    -- inst:ListenForEvent("nighttime", function() timechange(inst) end, GetWorld())
+	-- inst:WatchWorldState("phase", timechange)
+	inst:WatchWorldState("phase", UpdateTime)
+    UpdateTime(inst, TheWorld.state.phase)
 
     --------------------
 
@@ -214,6 +227,7 @@ end
 
 local function ruinsfn(Sim)
     local inst = fn(Sim)
+	inst.entity:AddNetwork()
     inst:AddTag("ruins_light")
     inst:AddComponent("lighttweener")
     inst.components.lighttweener:StartTween(inst.entity:AddLight(), 1, .6, .7, {180/255, 195/255, 150/255}, 0)
@@ -223,6 +237,7 @@ end
 
 local function cavefn(Sim)
     local inst = fn(Sim)
+	inst.entity:AddNetwork()
     inst:AddTag("cave_light")
     inst:AddComponent("lighttweener") -- 0.6
     inst.components.lighttweener:StartTween(inst.entity:AddLight(), 1*3, .8, .7, {180/255, 195/255, 150/255}, 0)

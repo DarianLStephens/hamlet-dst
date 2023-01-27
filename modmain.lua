@@ -49,6 +49,8 @@ modimport("scripts/ham_fx.lua")
 modimport("postinit/player.lua")
 modimport("postinit/prefabs/player_classified.lua")
 
+modimport("postinit/components/inventoryitem.lua")
+
 modimport("strings/names") -- So things have their display names
 modimport("main/strings.lua")
 

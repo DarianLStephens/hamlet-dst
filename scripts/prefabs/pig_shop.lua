@@ -1293,9 +1293,11 @@ local function makefn(name,build, bank, data)
 
         local minimap = inst.entity:AddMiniMapEntity()
         if name == "pig_shop_cityhall_player" then 
-             minimap:SetIcon( "pig_shop_cityhall.png" )
+             -- minimap:SetIcon( "pig_shop_cityhall.png" )
+             inst.MiniMapEntity:SetIcon( "pig_shop_cityhall.png" )
         else
-            minimap:SetIcon( name .. ".png" )
+            -- minimap:SetIcon( name .. ".png" )
+            inst.MiniMapEntity:SetIcon( name .. ".png" )
         end
 
         light:SetFalloff(1)

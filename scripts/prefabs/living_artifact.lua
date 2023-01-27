@@ -303,7 +303,7 @@ local function BecomeIronLord(inst,instant,player)
 
     player.components.combat:SetDefaultDamage(TUNING.IRON_LORD_DAMAGE)
 
-    player.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED*1.3
+    -- player.components.locomotor.runspeed = TUNING.WILSON_RUN_SPEED*1.3
     player.components.inventory:DropEverything()
     
     player.components.playercontroller.actionbuttonoverride = ArtifactActionButton

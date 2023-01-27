@@ -1085,7 +1085,14 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
         local inst = make_common()
 
 	
+        inst.AnimState:AddOverrideBuild("townspig_shop_wip")
+        inst:AddTag("shopkeep")
+		
 		inst.entity:SetPristine()
+
+        inst.special_action = function (act)
+            inst.sg:GoToState("desk_pre")
+        end
 
 		if not TheWorld.ismastersim then
 			return inst
@@ -1093,17 +1100,11 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
 		
         inst.components.sleeper.onlysleepsfromitems= true
         
-        inst.AnimState:AddOverrideBuild("townspig_shop_wip")
-        inst:AddTag("shopkeep")
         inst.separatedesk = separatedesk
         inst.shopkeeper_speech = shopkeeper_speech  
         
         TheWorld:ListenForEvent("enterroom", function(data) shopkeeper_speech(inst, getSpeechType(inst,STRINGS.CITY_PIG_SHOPKEEPER_GREETING) ) end ) --  getSpeechType(inst,speech) -- [math.random(1,#STRINGS.CITY_PIG_SHOPKEEPER_GREETING)]
         inst:ListenForEvent("nighttime", function() closeshop(inst) end, TheWorld)
-
-        inst.special_action = function (act)
-            inst.sg:GoToState("desk_pre")
-        end
 
 
         inst:ListenForEvent("death", 

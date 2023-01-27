@@ -57,19 +57,27 @@ local phasefunctions =
     end,
 }
 
-local function timechange(inst, instant)    
-    if TheWorld.state.isday then
-        if inst.Light then
-            phasefunctions["day"](inst, instant)
-        end
-    elseif TheWorld.state.isnight then
-        if inst.Light then
-            phasefunctions["night"](inst, instant)
-        end
-    elseif TheWorld.state.isdusk then
-        if inst.Light then
-            phasefunctions["dusk"](inst, instant)
-        end
+-- local function timechange(inst, instant)    
+    -- if TheWorld.state.isday then
+        -- if inst.Light then
+            -- phasefunctions["day"](inst, instant)
+        -- end
+    -- elseif TheWorld.state.isnight then
+        -- if inst.Light then
+            -- phasefunctions["night"](inst, instant)
+        -- end
+    -- elseif TheWorld.state.isdusk then
+        -- if inst.Light then
+            -- phasefunctions["dusk"](inst, instant)
+        -- end
+    -- end
+-- end
+
+local function UpdateTime(inst, instant)    
+	local phase = TheWorld.state.phase
+    if inst.Light then
+        -- phasefunctions[phase](inst, instant)
+        phasefunctions[phase](inst, false)
     end
 end
 
@@ -80,11 +88,16 @@ local function setListenEvents(inst)
     inst.components.lighttweener:StartTween(inst.Light, lights.day.rad, lights.day.intensity, lights.day.falloff, {lights.day.color[1],lights.day.color[2],lights.day.color[3]}, 0)
     inst.Light:Enable(true)
 
-    inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
-    inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
-    inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)   
+    -- inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
+    -- inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
+    -- inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)   
+	-- inst:WatchWorldState("phase", timechange)
     
-    timechange(inst)
+    -- timechange(inst)
+	
+	inst:WatchWorldState("phase", UpdateTime)
+    -- UpdateTime(inst, TheWorld.state.phase)
+    UpdateTime(inst, false)
 
     inst.daytimeevents = true
 end

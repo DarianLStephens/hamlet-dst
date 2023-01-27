@@ -98,7 +98,8 @@ function Shelfer:SetArt()
 
     if item then
         self.shelf.SetImage(self.shelf, item, self.slot)
-        self.inst:SetPrefabNameOverride(item.components.inspectable.nameoverride or item.prefab)
+		-- DS - Inspectable component doesn't exist yet
+        -- self.inst:SetPrefabNameOverride(item.components.inspectable.nameoverride or item.prefab)
 	else
 	    self.inst.components.inventoryitem.canbepickedup = false
     end

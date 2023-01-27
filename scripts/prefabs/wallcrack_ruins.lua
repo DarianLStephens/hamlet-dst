@@ -115,7 +115,8 @@ local function fn()
 
             inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
 
-            GetPlayer().SoundEmitter:PlaySound( "dontstarve_DLC003/music/secret_found")
+            -- GetPlayer().SoundEmitter:PlaySound( "dontstarve_DLC003/music/secret_found")
+            inst.SoundEmitter:PlaySound( "dontstarve_DLC003/music/secret_found")
 
             -- The rest of the function unlocks the equivalent door within the secret room
             local interior_spawner = TheWorld.components.interiorspawner
@@ -158,7 +159,9 @@ local function fn()
 
     inst:ListenForEvent("death", function(_) reveal() end)
     inst:ListenForEvent("endquake", function() 
+		print("Door crack got endquake, check limbo")
 		if not inst:IsInLimbo() then
+			print("Not in limbo, reveal the door")
         	reveal()
 		end
     end, TheWorld)

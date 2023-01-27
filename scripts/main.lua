@@ -64,7 +64,15 @@ PrefabFiles = {
 "living_artifact",
 "waterbot",
 "waterbot_none",
-"ancient_hulk"
+"ancient_hulk",
+"interior_wall_fx",
+"deed",
+"demolition_permit",
+"securitycontract",
+"interior_collision",
+"chitin",
+"city_lamp",
+"pighouse_city"
 }
 
 print("Hello world! Interior mod here! Coming at you from main.lua!")

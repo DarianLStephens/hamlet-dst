@@ -107,9 +107,11 @@ local function settimechange(inst)
 	inst.components.lighttweener:StartTween(inst.entity:AddLight(), lights.day.rad, lights.day.intensity, lights.day.falloff, {lights.day.color[1],lights.day.color[2],lights.day.color[3]}, 0)
 	inst.Light:Enable(true)
 
-	inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
-	inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
-	inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)   
+	-- inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
+	-- inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
+	-- inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)   
+	inst:WatchWorldState("phase", timechange)
+    -- UpdateTime(inst, TheWorld.state.phase)
 
 	inst.timechanger = true
 	timechange(inst)	
