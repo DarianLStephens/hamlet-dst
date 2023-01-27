@@ -1,5 +1,5 @@
-name = "Interior System Tests"
-description = "Trying to make Hamlet-style interiors."
+name = "Live Interior System Tests"
+description = "Trying to make Hamlet-style interiors, synced with Github"
 author = "Darian Stephens"
 version = "0.1"
 

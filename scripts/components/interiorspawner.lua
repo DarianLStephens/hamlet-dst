@@ -756,7 +756,7 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 	local diffx = pt2.x - pt.x
 	print("diffx = ",diffx)
 	-- local diffz = pt2.z - (pt.z *-1)
-	local diffz = pt2.z - pt.z
+	local diffz = pt2.z - ((math.abs (pt.z)) * -1) -- Trying some stinky hacks to make the camera reliable
 	print("diffz = ",diffz)
 	
 	-- local camX = pt.x+cameraoffset

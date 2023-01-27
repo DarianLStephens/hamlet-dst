@@ -39,3 +39,21 @@ luac.out
 *.x86_64
 *.hex
 
+sound/dontstarve_DLC003_sfx.bank
+sound/dontstarve_DLC003_music_stream_Hamlet.bank
+sound/dontstarve_DLC003_music_stream.bank
+sound/dontstarve_DLC003_dontstarve_hamlet_SFX.bank
+sound/dontstarve_DLC003_amb_stream_hamlet.bank
+sound/dontstarve_DLC003_amb_stream.bank
+sound/dontstarve_DLC003.txt
+sound/dontstarve_DLC003.h
+sound/dontstarve_DLC003.fev
+sound/dontstarve_DLC002.fev
+sound/dontstarve_DLC001.txt
+sound/dontstarve_DLC001.fev
+sound/DLC003_sfx.lst
+sound/DLC003_sfx.fsb
+sound/DLC003_music_stream.lst
+sound/DLC003_music_stream.fsb
+sound/DLC003_AMB_stream.lst
+sound/DLC003_AMB_stream.fsb
