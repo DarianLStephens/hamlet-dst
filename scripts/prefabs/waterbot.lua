@@ -19,6 +19,62 @@ end
 prefabs = FlattenTree({ prefabs, start_inv }, true)
 
 
+local function shoot(inst, fullcharge)
+	print("DS - Inside prefab's Shooting function")
+	
+	local player = inst
+	local rotation = player.Transform:GetRotation()
+    local pt = Vector3(player.Transform:GetWorldPosition())
+	local angle = rotation * DEGREES
+	
+    if fullcharge then
+		print("Full charge, do big ball?")
+        -- local player = GetPlayer()
+        local beam = SpawnPrefab("ancient_hulk_orb")
+        beam.components.complexprojectile.yOffset = 1
+        -- local pt = Vector3(player.Transform:GetWorldPosition())
+        local radius = 2.5
+        local offset = Vector3(radius * math.cos( angle ), 0, -radius * math.sin( angle ))
+        local newpt = pt+offset
+
+        beam.Transform:SetPosition(newpt.x,newpt.y,newpt.z)
+        beam.host = player
+        beam.AnimState:PlayAnimation("spin_loop",true)
+
+        local targetpos = TheInput:GetWorldPosition()
+        local controller_mode = TheInput:ControllerAttached()
+        if controller_mode then
+            targetpos = Vector3(player.livingartifact.components.reticule.reticule.Transform:GetWorldPosition())     
+        end  
+    
+        local speed =  60 --  easing.linear(rangesq, 15, 3, maxrange * maxrange)
+        beam.components.complexprojectile:SetHorizontalSpeed(speed)
+        beam.components.complexprojectile:SetGravity(-1)
+        beam.components.complexprojectile:Launch(targetpos, player)
+        beam.components.combat.proxy = inst
+        beam.owner = inst    
+    else
+		print("Not full charge, small ball it is!")
+        -- local player = GetPlayer()
+		-- local player = inst
+		-- local rotation = player.Transform:GetRotation()
+		-- local pt = Vector3(player.Transform:GetWorldPosition())
+        local beam = SpawnPrefab("ancient_hulk_orb_small")
+        -- local angle = rotation * DEGREES
+        local radius = 2.5
+        local offset = Vector3(radius * math.cos( angle ), 0, -radius * math.sin( angle ))
+        local newpt = pt+offset
+
+        beam.Transform:SetPosition(newpt.x,1,newpt.z)
+        beam.host = player
+        beam.Transform:SetRotation(rotation)
+        beam.AnimState:PlayAnimation("spin_loop",true) 
+        beam.components.combat.proxy = inst
+    end
+	print("Either ball should have fired by now")
+end
+
+
 
 local function setfires(x,y,z, rad)
     for i, v in ipairs(TheSim:FindEntities(x, 0, z, rad, nil, { "laser", "DECOR", "INLIMBO" })) do 
@@ -234,6 +290,10 @@ local function BecomeIronLord_post(inst, player)
         inst.components.reticule:CreateReticule()
         inst.components.reticule.reticule:Show()
     end
+	
+	if not TheWorld.ismastersim then
+		TheWorld:PushEvent("enabledynamicmusic", false) -- Trying to turn the special music off only for the players who are waterbots
+	end
 
 end
 
@@ -329,6 +389,8 @@ local function master_postinit(inst)
     inst.components.worker:SetAction(ACTIONS.MINE, 3)
     inst.components.worker:SetAction(ACTIONS.HAMMER, 3)
     -- inst.components.worker:SetAction(ACTIONS.HACK, 2)   
+	
+	inst.music = inst.SoundEmitter:PlaySound("dontstarve_DLC003/music/iron_lord_suit", "ironlord_music")
 
     -- inst:AddTag("umbrella")
 	-- inst:AddTag("waterproofer")
@@ -377,6 +439,8 @@ local function master_postinit(inst)
 	inst.DoDamage = DoDamage
 	inst.Revert = Revert
 	
+	inst.Shoot = shoot
+	
 	
 
     if not inst.useloaddata then
@@ -389,6 +453,10 @@ local function master_postinit(inst)
     inst.timelimit = inst:DoPeriodicTask(dt,function() 
         testtimeleft(dt,inst)
     end)
+	
+	if not TheWorld.ismastersim then
+		TheWorld:PushEvent("enabledynamicmusic", false) -- Trying to turn the special music off only for the players who are waterbots
+	end
 	
 end
 

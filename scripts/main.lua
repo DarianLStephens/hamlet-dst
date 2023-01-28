@@ -94,6 +94,8 @@ GLOBAL.setfenv(1, GLOBAL)
 
 HAMENV.AddModCharacter("waterbot", "ROBOT")
 
+table.insert(SEAMLESSSWAP_CHARACTERLIST, "waterbot") -- I still don't fully understand LUA global stuff like this
+
 
 -- function GLOBAL.TheCamera:InteriorCamera()
 -- end

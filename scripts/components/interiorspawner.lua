@@ -852,7 +852,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 		direction = "out"		
 		-- if going outside, blank the interior color cube setting.
 		--TheWorld.components.colourcubemanager:SetInteriorColourCube(nil)
-		player.interiorplayer:RemoveColorCube()
+		player.interiorplayer:RemoveColorCube() -- This line might crash the game, but I think it can't be called because of the above 'local camerainterior' thing? Maybe? No idea, because this function doesn't seem to exist in the interiorplayer component. Or, is this even for the component?
 		-- player.components.playervision:SetCustomCCTable(nil)
 	end
 	if not wasinterior and camerainterior then

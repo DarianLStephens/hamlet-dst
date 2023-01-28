@@ -163,12 +163,8 @@ local function makefn(fadeout)
         -- anim:SetBuild("ham_lightrays")
         anim:SetBank("lightrays")
         anim:SetBuild("lightrays")
-	
-		inst.entity:SetPristine()
-
-		if not TheWorld.ismastersim then
-			return inst
-		end
+		
+		-- inst.Light = inst.entity:AddLight()
 		
         anim:PlayAnimation("idle_loop", true)
         inst:AddTag("lightrays")
@@ -187,16 +183,23 @@ local function makefn(fadeout)
 		inst:WatchWorldState("phase", UpdateTime)
 		UpdateTime(inst, TheWorld.state.phase)
 
-        inst:AddComponent("distancefade")
-        inst.components.distancefade:Setup(15,15)
-        inst.components.distancefade:SetExtraFn(distancefadeextra)
-
         inst:AddComponent("lighttweener")
         inst.components.lighttweener:StartTween(inst.entity:AddLight(), 4, .8, .7, {180/255, 195/255, 150/255}, 0)
+        -- inst.components.lighttweener:StartTween(inst.Light, 4, .8, .7, {180/255, 195/255, 150/255}, 0)
 
         inst.color= {255/255,177/255,32/255}
 
         inst.AnimState:SetMultColour(255/255,177/255,32/255,0)
+	
+		inst.entity:SetPristine()
+
+		if not TheWorld.ismastersim then
+			return inst
+		end
+
+        inst:AddComponent("distancefade")
+        inst.components.distancefade:Setup(15,15)
+        inst.components.distancefade:SetExtraFn(distancefadeextra)
 
         --inst:DoTaskInTime(0,function()  filterspawn(inst)  end)
 
@@ -215,7 +218,8 @@ local function makefn(fadeout)
         if fadeout then
             inst:ListenForEvent( "onchangecanopyzone", function()
                 updatevis(inst)
-            end, GetWorld())
+            -- end, GetWorld())
+            end, TheWorld)
             inst.extradistancefade_current = 0            
         else
             inst:AddTag("no_fade_by_zone")

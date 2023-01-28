@@ -564,8 +564,9 @@ local function StopActionMeter(inst, flash)
 end
 
 local function shoot(inst)
+	print("DS - Inside Shooting function")
     if inst.fullcharge then
-
+		print("Full charge, do big ball?")
         -- local player = GetPlayer()
         local player = inst
         local rotation = player.Transform:GetRotation()
@@ -594,6 +595,7 @@ local function shoot(inst)
         beam.components.combat.proxy = inst
         beam.owner = inst    
     else
+		print("Not full charge, small ball it is!")
         -- local player = GetPlayer()
         local player = inst
         local rotation = player.Transform:GetRotation()
@@ -610,6 +612,7 @@ local function shoot(inst)
         beam.AnimState:PlayAnimation("spin_loop",true) 
         beam.components.combat.proxy = inst
     end
+	print("Either ball should have fired by now")
 end
 
 local events=
@@ -710,6 +713,20 @@ local states=
             end),
             TimeEvent(105*FRAMES, function(inst) 
                 -- inst.components.playercontroller:ShakeCamera(inst, "FULL", 0.7, 0.02, .5, 40)
+				
+				-- I don't understand all this math. It seems to be attenuating the intensity of the shake based on distance.
+				-- Copied from lightning.lua
+				for i, v in ipairs(AllPlayers) do
+					local distSq = v:GetDistanceSqToInst(inst)
+					local k = math.max(0, math.min(1, distSq / LIGHTNING_MAX_DIST_SQ))
+					local intensity = -(k-1)*(k-1)*(k-1)				--k * 0.8 * (k - 2) + 0.8
+
+					--print("StartFX", k, intensity)
+					if intensity > 0 then
+						-- v:ScreenFlash(intensity <= 0.05 and 0.05 or intensity)
+						v:ShakeCamera(CAMERASHAKE.FULL, .7, .02, intensity / 3)
+					end
+				end
             end),
 
             TimeEvent(105*FRAMES, function(inst) 
@@ -717,7 +734,7 @@ local states=
             end),
 
             TimeEvent(152*FRAMES, function(inst) 
-                inst.SoundEmitter:PlaySound("dontstarve_DLC003/music/iron_lord_suit", "ironlord_music")
+                -- inst.SoundEmitter:PlaySound("dontstarve_DLC003/music/iron_lord_suit", "ironlord_music") -- DS - Need to move this to after the seamless swap, otherwise it stops
             end),
         },
 
@@ -962,13 +979,15 @@ local states=
         onupdate = function(inst)
             -- if inst.components.playercontroller.RMBaction == nil then
                 -- inst.components.playercontroller.RMBaction = nil
-			if inst.bufferedaction == nil then
+			-- if inst.bufferedaction == nil then -- This was uncommented before the bottom rightbuttonup line
             -- if inst.rightbuttonup then
                 -- inst.rightbuttonup = nil
                 inst.shoot = true 
-            end
+            -- end
 
-            if inst.shoot and inst.readytoshoot then
+			-- Hacking it because I want to see this thing shoot at all
+            -- if inst.shoot and inst.readytoshoot then
+            if inst.shoot then --and inst.readytoshoot then
                 inst.shooting = true
                 inst.SoundEmitter:PlaySoundWithParams("dontstarve_DLC003/creatures/boss/hulk_metal_robot/laser",  {intensity = math.random(0.7, 1)})---jason can i use a random number from .7 to 1 instead of a static number (.8)?
 
@@ -1001,6 +1020,8 @@ local states=
         
         onenter = function(inst)       
             inst.components.locomotor:Stop()
+			-- shoot(inst) -- Testing random stuff, I dunno
+			inst.Shoot(inst, inst.fullcharge) -- Still testing, trying to make the ball appear and do something. Why it isn't already, I'm not sure
             if inst.fullcharge then
                 inst.AnimState:PlayAnimation("charge_super_pst")
             else

@@ -369,6 +369,9 @@ local function BecomeIronLord_post(inst, player)
 	if player.components.seamlessplayerswapper then
 		player.components.seamlessplayerswapper:_StartSwap("waterbot")
 	end
+	-- inst.SoundEmitter:PlaySound("dontstarve_DLC003/music/iron_lord_suit", "ironlord_music") -- Moved from Stategraph, because it stops as a side-effect of the seamless swap.
+	-- Changes the timing of the music my a second, maybe, which should be fine
+	
     -- player.AnimState:SetBuild("living_suit_build")
 	
 	if inst.components.playeractionpicker ~= nil then
