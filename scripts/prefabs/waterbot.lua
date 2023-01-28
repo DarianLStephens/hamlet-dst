@@ -217,7 +217,9 @@ end
 -- local function IronLordhurt(inst, delta)
 local function IronLordhurt(inst, amount, overtime, cause, ignore_invincible, afflicter, ignore_absorb)
     if amount < 0 then
-        inst.sg:PushEvent("attacked")
+		if not cause == "fire" then -- Waterbot can burn, but it won't stagger
+			inst.sg:PushEvent("attacked")
+		end
     end
 	return 0 -- This might be needed to make it take no real damage
 end
@@ -420,6 +422,12 @@ local function master_postinit(inst)
     inst.components.health.redirect = IronLordhurt
     -- inst.components.health.redirect_percent = 0
 	inst.components.health.canheal = false
+	
+	inst.components.temperature.maxtemp = 20
+	inst.components.temperature.mintemp = 20
+	-- To try and make it immune to burning/overheat/anything
+	
+	-- inst.RemoveComponent("burnable") -- Maybe this will stop them catching fire and the damage that comes with it?
 
     inst:AddTag("laser_immune")
     inst:AddTag("mech")

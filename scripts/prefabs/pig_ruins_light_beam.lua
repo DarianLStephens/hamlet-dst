@@ -227,7 +227,7 @@ end
 
 local function ruinsfn(Sim)
     local inst = fn(Sim)
-	inst.entity:AddNetwork()
+	-- inst.entity:AddNetwork()
     inst:AddTag("ruins_light")
     inst:AddComponent("lighttweener")
     inst.components.lighttweener:StartTween(inst.entity:AddLight(), 1, .6, .7, {180/255, 195/255, 150/255}, 0)
@@ -237,7 +237,7 @@ end
 
 local function cavefn(Sim)
     local inst = fn(Sim)
-	inst.entity:AddNetwork()
+	-- inst.entity:AddNetwork()
     inst:AddTag("cave_light")
     inst:AddComponent("lighttweener") -- 0.6
     inst.components.lighttweener:StartTween(inst.entity:AddLight(), 1*3, .8, .7, {180/255, 195/255, 150/255}, 0)
