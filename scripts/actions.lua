@@ -56,6 +56,11 @@ HAMARTIFACTIVATE.id = "HAMARTIFACTIVATE"
 HAMARTIFACTIVATE.str = "Activate"
 HAMENV.AddAction(HAMARTIFACTIVATE)
 
+local SMELTER_HARVEST = Action({priority = 1, distance = 1})
+SMELTER_HARVEST.id = "SMELTER_HARVEST"
+SMELTER_HARVEST.str = "Harvest"
+HAMENV.AddAction(SMELTER_HARVEST)
+
 local CHARGE_UP = Action({priority = ACTIONS.HIGH_ACTION_PRIORITY, rmb=true, distance = 10})
 CHARGE_UP.id = "CHARGE_UP"
 CHARGE_UP.str = "Charge"
@@ -127,6 +132,15 @@ ACTIONS.DISLODGE.fn = function(act)
 			end
 		end
 		return true
+	end
+end
+
+ACTIONS.SMELTER_HARVEST.fn = function(act)
+	if act.target.components.melter then
+		-- if act.target.components.melter.done then
+			act.target.components.melter:Harvest(act.doer)
+			return true
+		-- end
 	end
 end
 
@@ -565,4 +579,13 @@ HAMENV.AddComponentAction("INVENTORY", "hamlivingartifact", function(inst, doer,
             table.insert(actions, ACTIONS.HAMARTIFACTIVATE)
         end
     -- end
+end)
+
+HAMENV.AddComponentAction("SCENE", "melter", function(inst, doer, actions, right)
+	if inst:HasTag("donecooking") then
+        if not right then
+			-- print("Door tag detected, you should be able to attempt entering it")
+            table.insert(actions, ACTIONS.SMELTER_HARVEST)
+        end
+    end
 end)

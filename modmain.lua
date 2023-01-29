@@ -55,3 +55,4 @@ modimport("strings/names") -- So things have their display names
 modimport("main/strings.lua")
 
 modimport("main/assets.lua")
+modimport("main/containers.lua")

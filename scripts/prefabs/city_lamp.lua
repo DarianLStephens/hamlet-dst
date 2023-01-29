@@ -58,6 +58,62 @@ local function fadeout(inst)
 	end
 end
 
+local phasefunctions = 
+{
+    day = function(inst)
+        if inst.lighton then
+            inst:DoTaskInTime(math.random()*2, function() 
+                fadeout(inst)
+            end)            
+        else
+            inst.Light:Enable(false)
+            inst.Light:SetIntensity(0)
+        end
+
+        inst.AnimState:Hide("FIRE")
+        inst.AnimState:Hide("GLOW")        
+
+        inst.lighton = false
+    end,
+
+    dusk = function(inst) 
+        if not inst.lighton then
+            inst:DoTaskInTime(math.random()*2, function() 
+                fadein(inst)
+            end)
+
+        else            
+            inst.Light:Enable(true)
+            inst.Light:SetIntensity(INTENSITY)
+        end
+        inst.AnimState:Show("FIRE")
+        inst.AnimState:Show("GLOW")        
+        inst.lighton = true
+    end,
+
+    night = function(inst) 
+        if not inst.lighton then
+            inst:DoTaskInTime(math.random()*2, function() 
+                fadein(inst)
+            end)
+
+        else            
+            inst.Light:Enable(true)
+            inst.Light:SetIntensity(INTENSITY)
+        end
+        inst.AnimState:Show("FIRE")
+        inst.AnimState:Show("GLOW")        
+        inst.lighton = true
+    end,
+}
+
+local function UpdateTime(inst)    
+	local phase = TheWorld.state.phase
+    if inst.Light then
+        phasefunctions[phase](inst)
+    end
+end
+
 local function updatelight(inst)
     -- if GetClock():IsDusk() or GetClock():IsNight() then
     if TheWorld.state.isnight or TheWorld.state.isdusk then
@@ -204,7 +260,7 @@ local function fn(Sim)
     inst.Light:SetRadius( 5 )
     inst.Light:Enable(false)
     
-    --inst.AnimState:SetBloomEffectHandle( "shaders/anim.ksh" )
+    inst.AnimState:SetBloomEffectHandle( "shaders/anim.ksh" )
     
     inst.build = "lamp_post2_city_build"
     inst.AnimState:SetBank("lamp_post")
@@ -219,14 +275,15 @@ local function fn(Sim)
     inst:AddTag("lightsource")
 
     inst:AddTag("city_hammerable")
-    inst:AddComponent("inspectable")
-    inst.components.inspectable.getstatus = GetStatus
 	
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
 		return inst
 	end
+	
+    inst:AddComponent("inspectable")
+    inst.components.inspectable.getstatus = GetStatus
 
 
     inst:AddComponent("lootdropper")
@@ -245,7 +302,7 @@ local function fn(Sim)
     -- inst:ListenForEvent( "dusktime", function()
         -- inst:DoTaskInTime(1/30, function() updatelight(inst) end)
     -- end, GetWorld())
-	inst:WatchWorldState("phase", updatelight)
+	inst:WatchWorldState("phase", UpdateTime)
 
     inst:ListenForEvent("onbuilt", onbuilt)
 

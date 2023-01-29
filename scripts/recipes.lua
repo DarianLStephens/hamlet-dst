@@ -106,20 +106,43 @@ TUNING.PROTOTYPER_TREES.HOME = {
 AddRecipe2("playerhouse_city",
 {Ingredient("boards", 4), Ingredient("cutstone", 3), Ingredient("pigskin", 4)},
 TECH.SCIENCE_TWO,
-{placer="playerhouse_city_placer"})
+{placer="playerhouse_city_placer"},
+{"STRUCTURES"})
  
- AddRecipe2("pighousewithinterior",
- {Ingredient("boards", 1), Ingredient("cutstone", 1), Ingredient("pigskin", 1)},
+ -- Finally disabled this test thing
+ -- AddRecipe2("pighousewithinterior",
+ -- {Ingredient("boards", 1), Ingredient("cutstone", 1), Ingredient("pigskin", 1)},
+ -- TECH.SCIENCE_TWO,
+ -- {placer="interiorhouse_placer"})
+ 
+AddRecipe2("common/inventory/iron_door",
+{Ingredient("oinc", 15)},
+TECH.HOME_TWO,
+{placer="common/inventory/iron_door_placer",
+image="iron_door.tex",
+testfn=place_door_test_fn,
+nounlock=true},
+{"STRUCTURES"})
+ 
+  -- Need to get that house tab. I wants it, but I don't know how to haves it!
+ AddRecipe2("city_lamp",
+ {Ingredient("alloy", 1), Ingredient("transistor", 1), Ingredient("lantern", 1)},
  TECH.SCIENCE_TWO,
- {placer="interiorhouse_placer"})
+ {placer="city_lamp_placer"}, {"LIGHT"})
  
- AddRecipe2("common/inventory/iron_door",
- {Ingredient("oinc", 15)},
- TECH.HOME_TWO,
- {placer="common/inventory/iron_door_placer",
- image="iron_door.tex",
- testfn=place_door_test_fn,
- nounlock=true})
+  -- Need to get that house tab. I wants it, but I don't know how to haves it!
+ AddRecipe2("smelter",
+ {Ingredient("cutstone", 6), Ingredient("boards", 4), Ingredient("redgem", 1)},
+ TECH.SCIENCE_TWO,
+ {placer="smelter_placer"}, {"PROTOTYPERS","STRUCTURES"})
+ 
+ 
+ AddRecipe2("ballpein_hammer",
+ {Ingredient("iron", 2), Ingredient("twigs", 1)},
+ TECH.SCIENCE_ONE,
+{"TOOLS"})
+ 
+ 
  
  table.insert(CRAFTING_FILTERS.CRAFTING_STATION.recipes, "iron_door")
 -- CRAFTING_FILTER_DEFS

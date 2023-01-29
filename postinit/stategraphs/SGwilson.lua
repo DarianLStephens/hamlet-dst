@@ -14,7 +14,8 @@ local actionhandlers = {
     -- ActionHandler(ACTIONS.REARM, "dolongaction"),   
     ActionHandler(ACTIONS.WEIGHDOWN, "doshortaction"),    
     ActionHandler(ACTIONS.HAMARTIFACTIVATE, "doshortaction"),    
-    ActionHandler(ACTIONS.DISLODGE, "tap"),
+    ActionHandler(ACTIONS.DISLODGE, "tap"), 
+    ActionHandler(ACTIONS.SMELTER_HARVEST, "dolongaction"),
     ActionHandler(ACTIONS.CHARGE_UP, "charge"),
 }
 

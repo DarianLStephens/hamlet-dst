@@ -39,7 +39,7 @@ PrefabFiles = {
 "pig_ruins_torch",
 "scorpion",
 "deep_jungle_fern_noise",
-"rocks",
+"rocks_ham",
 "snake",
 "smashingpot", -- This darn thing is instantly crashing the entire game, and I want to know why
 "ham_light_rays",
@@ -72,7 +72,10 @@ PrefabFiles = {
 "interior_collision",
 "chitin",
 "city_lamp",
-"pighouse_city"
+"pighouse_city",
+"alloy",
+"smelter",
+"reconstruction_project"
 }
 
 print("Hello world! Interior mod here! Coming at you from main.lua!")
