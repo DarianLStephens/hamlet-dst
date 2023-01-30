@@ -503,7 +503,8 @@ function InteriorSpawner:GetCurrentInteriorEntities(doer, storageOffset)
 	print("GetCurrentInteriorEntities - pt = X", pt.x, "Y", pt.y, "Z", pt.z)
 
 	-- Multiplying Z by -1 because, for some reason, we end up at negative coordinates in the main interior, and I have no idea why yet. I just want to see if the theory is sound.
-	local ents = TheSim:FindEntities(pt.x, pt.y, (pt.z * -1), 20, nil, {"INTERIOR_LIMBO","interior_spawn_storage"})
+	-- local ents = TheSim:FindEntities(pt.x, pt.y, (pt.z * -1), 20, nil, {"INTERIOR_LIMBO","interior_spawn_storage"})
+	local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 20, nil, {"INTERIOR_LIMBO","interior_spawn_storage"})
 	assert(ents ~= nil)
 	print("Got some sort of list of entities, I think. Take a dump:")
 	dumptable(ents, 1, 1, nil, 0)
@@ -756,7 +757,8 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 	local diffx = pt2.x - pt.x
 	print("diffx = ",diffx)
 	-- local diffz = pt2.z - (pt.z *-1)
-	local diffz = pt2.z - ((math.abs (pt.z)) * -1) -- Trying some stinky hacks to make the camera reliable
+	local diffz = pt2.z - pt.z
+	-- local diffz = pt2.z - ((math.abs (pt.z)) * -1) -- Trying some stinky hacks to make the camera reliable
 	print("diffz = ",diffz)
 	
 	-- local camX = pt.x+cameraoffset
@@ -946,8 +948,9 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 		-- player.player_classified
 
 		-- Configure The Camera	
-		-- self:GetLiveInteriorOffset
-		self:ApplyInteriorCamera(player, destination, intOffset)
+		local liveOffset = self:GetLiveInteriorOffset(targetInteriorName)
+		self:ApplyInteriorCamera(player, destination, liveOffset)
+		-- self:ApplyInteriorCamera(player, destination, intOffset)
 	else
 		print("FadeOutFinished - Player SHOULD be going outside, so remove them from the interior list")
 		-- self:RemovePlayerFromInteriorList(player) -- Removed because it's done higher up, now
@@ -1442,6 +1445,13 @@ function InteriorSpawner:GetLoadedInteriorCount()
 		end
 	end
 	return count
+end
+
+function InteriorSpawner:GetLiveInteriorOffset(interiorID)
+	local index = self:GetLoadedInteriorIndex(interiorID)
+	local offset = self.loaded_interiors[index].storage_offset
+	print("DS - Got loaded interior of ID ", interiorID," offset, returning as ", offset)
+	return offset
 end
 
 -- DS - and this. Comments so I can keep track
