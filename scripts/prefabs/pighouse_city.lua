@@ -278,7 +278,7 @@ end
 
 local function UpdateTime(inst)    
 	local phase = TheWorld.state.phase
-    if phase == day then
+    if phase == "day" then
 		OnDay()
 	end
 end
