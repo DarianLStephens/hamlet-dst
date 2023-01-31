@@ -9,6 +9,8 @@ local function addHamletComponents(inst)
 		inst:AddComponent("economy")
 		print("Adding aporkalypse component...")
 		inst:AddComponent("aporkalypse")
+		print("Adding... periodic poop manager component...")
+		inst:AddComponent("periodicpoopmanager")
 	end
 	inst.addHamletComponents = nil --self-destruct after use
 end

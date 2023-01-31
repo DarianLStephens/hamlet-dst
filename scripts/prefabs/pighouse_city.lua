@@ -276,13 +276,6 @@ local function checktax(inst)
     end
 end
 
-local function UpdateTime(inst)    
-	local phase = TheWorld.state.phase
-    if phase == "day" then
-		OnDay()
-	end
-end
-
 local function OnDay(inst)
 
     if not inst:HasTag("burnt") then
@@ -297,6 +290,13 @@ local function OnDay(inst)
     end
 
     checktax(inst)    
+end
+
+local function UpdateTime(inst)    
+	local phase = TheWorld.state.phase
+    if phase == "day" then
+		OnDay(inst)
+	end
 end
 
 local function reconstructed(inst)

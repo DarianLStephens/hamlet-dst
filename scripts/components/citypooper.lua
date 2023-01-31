@@ -15,7 +15,7 @@ function CityPooper:OnLoad(data)
 end
 
 function CityPooper:TestForPoop(force)
-    local poop_manager = GetWorld().components.periodicpoopmanager
+    local poop_manager = TheWorld.components.periodicpoopmanager
     local cityID = self.inst.components.citypossession.cityID
 
 	if force then
