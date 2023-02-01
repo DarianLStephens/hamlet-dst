@@ -25,9 +25,10 @@ PrefabFiles = {
 "deco_wall_ornament",
 "construction_permit",
 "house_door",
-"oinc",
-"oinc10",
-"oinc100",
+-- "oinc",
+-- "oinc10",
+-- "oinc100",
+"oincs", -- The new combined Oincs file
 "vampirebatcave",
 "pig_ruins_entrance",
 "pig_ruins_creeping_vines",
@@ -75,7 +76,9 @@ PrefabFiles = {
 "pighouse_city",
 "alloy",
 "smelter",
-"reconstruction_project"
+"reconstruction_project",
+"waterdrop",
+"floweroflife"
 }
 
 print("Hello world! Interior mod here! Coming at you from main.lua!")

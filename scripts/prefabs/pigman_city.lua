@@ -1121,9 +1121,15 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
 
     local function make_mechanic()
         local inst = make_common()
+		
+		if not TheWorld.ismastersim then
+			return inst
+		end
+		
 		inst:DoTaskInTime(0, function()
 								-- Get rid of any hammers we have, cuz bugs
-								local numHammers = inst.components.inventory:Count("hammer")
+								-- local numHammers = inst.components.inventory:Count("hammer")
+								local has, numHammers = inst.components.inventory:Has("hammer", 1) -- This looks like it might work, because it returns 2 things, and one is the hammer
 								local hammers = inst.components.inventory:GetItemByName("hammer", numHammers)
 								for k,v in pairs(hammers) do
 										local thisHammer = inst.components.inventory:RemoveItem(k, true)

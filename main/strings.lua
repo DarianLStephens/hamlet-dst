@@ -5,7 +5,7 @@ local _speech = {
 	-- "generic",
 	-- "willow",
 	-- "wolfgang",
-	"wendy"--,
+	"wendy",
 	-- "wx78",
 	-- "wickerbottom",
 	-- "woodie",
@@ -19,7 +19,7 @@ local _speech = {
 	-- "warly",
 	-- "wurt",
 	-- "walter",
-	-- "wanda",
+	"wanda",
 }
 
 local _newspeech = {

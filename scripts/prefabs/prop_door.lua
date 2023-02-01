@@ -50,56 +50,89 @@ end
 local phasefunctions = 
 {
     day = function(inst)
-	    if not inst:IsInLimbo() then inst.Light:Enable(true) end
-        inst.components.lighttweener:StartTween(nil, lights.day.rad, lights.day.intensity, lights.day.falloff, {lights.day.color[1],lights.day.color[2],lights.day.color[3]}, 2)
-    end,
-
-    dusk = function(inst) 
-        if not inst:IsInLimbo() then inst.Light:Enable(true) end       
-        inst.components.lighttweener:StartTween(nil, lights.dusk.rad, lights.dusk.intensity, lights.dusk.falloff, {lights.dusk.color[1],lights.dusk.color[2],lights.dusk.color[3]}, 2)
-    end,
-
-    night = function(inst) 
-        if TheWorld.state.isfullmoon then
-            inst.components.lighttweener:StartTween(nil, lights.full.rad, lights.full.intensity, lights.full.falloff, {lights.full.color[1],lights.full.color[2],lights.full.color[3]}, 4)
-        else
-            inst.components.lighttweener:StartTween(nil, 0, 0, 1, {0,0,0}, 6, turnoff)
-        end    
-    end,
-}
-
-local function timechange(inst)    
-    if TheWorld.state.isday then
+	
+		
 
     	if inst:HasTag("timechange_anims") then
         	inst.AnimState:PlayAnimation("to_day")
        		inst.AnimState:PushAnimation("day_loop", true)
     	end
+		
+		if inst.Light then
+			if not inst:IsInLimbo() then inst.Light:Enable(true) end
+			inst.components.lighttweener:StartTween(nil, lights.day.rad, lights.day.intensity, lights.day.falloff, {lights.day.color[1],lights.day.color[2],lights.day.color[3]}, 2)
+		end
+    end,
 
-        if inst.Light then
-            phasefunctions["day"](inst)
-        end
-    elseif TheWorld.state.isnight then
-
-    	if inst:HasTag("timechange_anims") then
-       		inst.AnimState:PlayAnimation("to_night")
-        	inst.AnimState:PushAnimation("night_loop", true)
-    	end
-
-        if inst.Light then
-            phasefunctions["night"](inst)
-        end
-    elseif TheWorld.state.isdusk then
+    dusk = function(inst) 
 
     	if inst:HasTag("timechange_anims") then
         	inst.AnimState:PlayAnimation("to_dusk")
         	inst.AnimState:PushAnimation("dusk_loop", true)
     	end
+		
+		if inst.Light then
+			if not inst:IsInLimbo() then inst.Light:Enable(true) end       
+			inst.components.lighttweener:StartTween(nil, lights.dusk.rad, lights.dusk.intensity, lights.dusk.falloff, {lights.dusk.color[1],lights.dusk.color[2],lights.dusk.color[3]}, 2)
+		end
+    end,
 
-        if inst.Light then
-            phasefunctions["dusk"](inst)
-        end
-    end
+    night = function(inst) 
+
+    	if inst:HasTag("timechange_anims") then
+       		inst.AnimState:PlayAnimation("to_night")
+        	inst.AnimState:PushAnimation("night_loop", true)
+    	end
+		
+		if inst.Light then
+			if TheWorld.state.isfullmoon then
+				inst.components.lighttweener:StartTween(nil, lights.full.rad, lights.full.intensity, lights.full.falloff, {lights.full.color[1],lights.full.color[2],lights.full.color[3]}, 4)
+			else
+				inst.components.lighttweener:StartTween(nil, 0, 0, 1, {0,0,0}, 6, turnoff)
+			end    
+		end
+    end,
+}
+
+-- local function timechange(inst)    
+    -- if TheWorld.state.isday then
+
+    	-- if inst:HasTag("timechange_anims") then
+        	-- inst.AnimState:PlayAnimation("to_day")
+       		-- inst.AnimState:PushAnimation("day_loop", true)
+    	-- end
+
+        -- if inst.Light then
+            -- phasefunctions["day"](inst)
+        -- end
+    -- elseif TheWorld.state.isnight then
+
+    	-- if inst:HasTag("timechange_anims") then
+       		-- inst.AnimState:PlayAnimation("to_night")
+        	-- inst.AnimState:PushAnimation("night_loop", true)
+    	-- end
+
+        -- if inst.Light then
+            -- phasefunctions["night"](inst)
+        -- end
+    -- elseif TheWorld.state.isdusk then
+
+    	-- if inst:HasTag("timechange_anims") then
+        	-- inst.AnimState:PlayAnimation("to_dusk")
+        	-- inst.AnimState:PushAnimation("dusk_loop", true)
+    	-- end
+
+        -- if inst.Light then
+            -- phasefunctions["dusk"](inst)
+        -- end
+    -- end
+-- end
+
+local function timechange(inst)    
+	local phase = TheWorld.state.phase
+    -- if inst.Light then
+        phasefunctions[phase](inst)
+    -- end
 end
 
 local function settimechange(inst)

@@ -24,6 +24,9 @@ Assets = {
     Asset("ANIM", "anim/living_suit_explode_fx.zip"),
     Asset("ANIM", "anim/livingartifact_meter.zip"),
 	
+    Asset("ANIM", "anim/player_lifeplant.zip"), -- Will either of these work?
+    Asset("ANIM", "anim/player_rebirth.zip"),
+	
 	Asset("IMAGE", "levels/textures/interiors/pig_ruins_panel.tex"),
 	Asset("IMAGE", "levels/textures/interiors/ground_ruins_slab.tex"),
 	Asset("IMAGE", "levels/textures/interiors/pig_ruins_panel_blue.tex"),

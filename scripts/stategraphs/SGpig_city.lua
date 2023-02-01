@@ -494,8 +494,16 @@ local states=
                     inst:RemoveTag("paytax")
                     inst.taxing = false
                     -- GetPlayer().components.inventory:GiveItem(
-                    FindClosestPlayer.components.inventory:GiveItem(
-                        SpawnPrefab("oinc"), nil, Vector3(TheSim:GetScreenPos(inst.Transform:GetWorldPosition())))
+					-- local pt = inst.Transform:GetWorldPosition()
+					-- local x = pt.x
+					-- local y = pt.y
+					-- local z = pt.z
+					local x,y,z = inst.Transform:GetWorldPosition()
+					local player = FindClosestPlayer(x, y, z, true)
+					local payment = SpawnPrefab("oinc")
+					player.components.inventory:GiveItem(payment, nil, inst:GetPosition())
+					-- player.components.inventory:GiveItem(
+                        -- SpawnPrefab("oinc"), nil, Vector3(TheSim:GetScreenPos(pt)))
                 end ),
         },
         

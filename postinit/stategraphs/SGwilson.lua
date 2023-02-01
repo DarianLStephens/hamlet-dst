@@ -19,6 +19,32 @@ local actionhandlers = {
     ActionHandler(ACTIONS.CHARGE_UP, "charge"),
 }
 
+-- Why can't I access this normally? Whatever, it looks to be the same regardless.
+local statue_symbols =
+{
+    "ww_head",
+    "ww_limb",
+    "ww_meathand",
+    "ww_shadow",
+    "ww_torso",
+    "frame",
+    "rope_joints",
+    "swap_grown"
+}
+
+
+local plant_symbols = 
+{
+    "waterpuddle",
+    "sparkle",
+    "puddle",
+    "plant",
+    "lunar_mote3",
+    "lunar_mote",
+    "glow",
+    "blink"
+}
+
 local states = {
     -- State{
         -- name = "enterdoor",
@@ -46,7 +72,48 @@ local states = {
     -- }
 -- }
 
+    State{
+        name = "rebirth2",
+        
+        onenter = function(inst)
+            inst.components.playercontroller:Enable(false)
+            inst.AnimState:PlayAnimation("rebirth2")
+            
+            inst.components.hunger:Pause()
+            for k,v in pairs(plant_symbols) do
+                inst.AnimState:OverrideSymbol(v, "lifeplant", v)
+            end
+        end,
+        
+        timeline=
+        {
+            TimeEvent(16*FRAMES, function(inst) 
+             --   inst.SoundEmitter:PlaySound("dontstarve/common/dropwood")
+            end),
+            TimeEvent(45*FRAMES, function(inst) 
+              --  inst.SoundEmitter:PlaySound("dontstarve/common/dropwood")
+            end),
+            TimeEvent(92*FRAMES, function(inst) 
+               -- inst.SoundEmitter:PlaySound("dontstarve/common/rebirth")
+            end),
+        },
+        
+        onexit = function(inst)
+            inst.components.hunger:Resume()
+            for k,v in pairs(statue_symbols) do
+                inst.AnimState:ClearOverrideSymbol(v)
+            end
+        
+            inst.components.playercontroller:Enable(true)
+        end,
+        
+        
+        events=
+        {
+            EventHandler("animover", function(inst) inst.sg:GoToState("idle") end),
+        },
 
+    }, 
 
     State{
         name = "tap",

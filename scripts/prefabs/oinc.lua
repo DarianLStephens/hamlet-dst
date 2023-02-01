@@ -26,6 +26,25 @@ local function shine(inst)
     end
 end
 
+local function onpickup(inst, pickupguy)
+	
+    local num = 1
+	if inst.components.stackable then
+		num = inst.components.stackable.stacksize
+	end
+	
+	if num == 1 then
+	  inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/objects/coins/1")
+	elseif num == 2 then
+	  inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/objects/coins/2")
+	else
+	  inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/objects/coins/3_plus")
+	end 
+	-- Highly simplified version of what's in Hamlet's 'inventory.lua' 'TestForOincSound' function
+	-- Probably still needs some stuff to account for transactions, but perhaps that can be a global-ish function?
+	-- inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/objects/coins/1") 
+end
+
 local function onwake(inst)
     inst.task = inst:DoTaskInTime(4+math.random()*5, function() shine(inst) end)
 end
@@ -74,6 +93,7 @@ local function fn(Sim)
     inst:AddComponent("waterproofer")
     inst.components.waterproofer.effectiveness = 0
     inst:AddComponent("inventoryitem")
+	inst.components.inventoryitem:SetOnPickupFn(onpickup)
 
     inst:AddComponent("bait")
     inst:AddTag("molebait")
