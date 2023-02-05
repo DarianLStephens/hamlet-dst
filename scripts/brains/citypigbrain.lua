@@ -425,7 +425,6 @@ function getfacespeech(inst)
         econprefab = inst.econprefab
     end  
     local desc = econ:GetTradeItemDesc(econprefab)
-    -- local aporkalypse = GetAporkalypse()
     local aporkalypse = TheWorld.components.aporkalypse
     if desc then
         -- local speech = ThePlayer:HasTag("pigroyalty") and deepcopy(getSpeechType(inst, STRINGS.CITY_PIG_TALK_LOOKATROYALTY_TRADER)) or

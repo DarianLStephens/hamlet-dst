@@ -36,7 +36,6 @@ SetSharedLootTable( 'anchientrobot',
 })
 
 local function removemoss(inst)
-
     if inst:HasTag("mossy") then           
         inst:RemoveTag("mossy")
         local x, y, z = inst.Transform:GetWorldPosition()
@@ -62,9 +61,7 @@ local function KeepTarget(inst, target)
 end
 
 local function periodicupdate(inst)
-
-    local aporkalypse = GetAporkalypse()
-    if aporkalypse and aporkalypse:IsActive() then
+    if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:IsActive() then
         return
     end
 

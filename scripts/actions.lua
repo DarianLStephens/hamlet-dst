@@ -1,151 +1,5 @@
-local HAMENV = env
-GLOBAL.setfenv(1, GLOBAL)
-
-local ENTERDOOR = Action({priority = 2, distance = 1})
-ENTERDOOR.id = "ENTERDOOR"
-ENTERDOOR.str = "Enter"
-HAMENV.AddAction(ENTERDOOR)
-
-local BUILD_ROOM = Action({priority = 1, distance = 1})
-BUILD_ROOM.id = "BUILD_ROOM"
-BUILD_ROOM.str = "Build Room"
-HAMENV.AddAction(BUILD_ROOM)
-
-local DEMOLISH_ROOM = Action({priority = 1, distance = 1})
-DEMOLISH_ROOM.id = "DEMOLISH_ROOM"
-DEMOLISH_ROOM.str = "Demolish"
-HAMENV.AddAction(DEMOLISH_ROOM)
-
-local WEIGHDOWN = Action({priority = 1, distance = 1})
-WEIGHDOWN.id = "WEIGHDOWN"
-WEIGHDOWN.str = "Weigh Down"
-HAMENV.AddAction(WEIGHDOWN)
-
-local DISLODGE = Action({priority = 1, distance = 1})
-DISLODGE.id = "DISLODGE"
-DISLODGE.str = "Dislodge"
-HAMENV.AddAction(DISLODGE)
-
-local STOCK = Action({priority = 1, distance = 1})
-STOCK.id = "STOCK"
-STOCK.str = "Stock I guess"
-HAMENV.AddAction(STOCK)
-
-local SHOP = Action({priority = 1, distance = 1})
-SHOP.id = "SHOP"
-SHOP.str = "Buy"
-HAMENV.AddAction(SHOP)
-
-local FIX = Action({priority = 1, distance = 1})
-FIX.id = "FIX"
-FIX.str = "FIX I guess"
-HAMENV.AddAction(FIX)
-
-local SPECIAL_ACTION = Action({priority = 1, distance = 1})
-SPECIAL_ACTION.id = "SPECIAL_ACTION"
-SPECIAL_ACTION.str = "SPECIAL_ACTION I guess"
-HAMENV.AddAction(SPECIAL_ACTION)
-
-local SPECIAL_ACTION2 = Action({priority = 1, distance = 1})
-SPECIAL_ACTION2.id = "SPECIAL_ACTION2"
-SPECIAL_ACTION2.str = "SPECIAL_ACTION2 I guess"
-HAMENV.AddAction(SPECIAL_ACTION2)
-
-local HAMARTIFACTIVATE = Action({priority = 1, distance = 1})
-HAMARTIFACTIVATE.id = "HAMARTIFACTIVATE"
-HAMARTIFACTIVATE.str = "Activate"
-HAMENV.AddAction(HAMARTIFACTIVATE)
-
-local SMELTER_HARVEST = Action({priority = 1, distance = 1})
-SMELTER_HARVEST.id = "SMELTER_HARVEST"
-SMELTER_HARVEST.str = "Harvest"
-HAMENV.AddAction(SMELTER_HARVEST)
-
-local CHARGE_UP = Action({priority = ACTIONS.HIGH_ACTION_PRIORITY, rmb=true, distance = 10})
-CHARGE_UP.id = "CHARGE_UP"
-CHARGE_UP.str = "Charge"
-HAMENV.AddAction(CHARGE_UP)
-
-
-HAMARTIFACTIVATE.fn = function(act)
-
-	if act.target.components.hamlivingartifact then
-		act.target.components.hamlivingartifact:Activate(act.doer)
-		return true
-	else
-		return false
-	end
-end
-
-CHARGE_UP.fn = function(act)
- 	act.doer:PushEvent("beginchargeup")
-end
-
-
-ACTIONS.SPECIAL_ACTION.fn = function(act)
-	if act.doer.special_action then
-		act.doer.special_action(act)
-		return true
-	end
-end
-ACTIONS.SPECIAL_ACTION2.fn = function(act)
-	if act.doer.special_action2 then
-		act.doer.special_action2(act)
-		return true
-	end
-end
-
-ACTIONS.FIX.fn = function(act)
-	if act.target then
-		local target = act.target
-		local numworks = 1
-		target.components.workable:WorkedBy(act.doer, numworks)
-	--	return target:fix(act.doer)		
-	end
-end
-
-ACTIONS.STOCK.fn = function(act)
-	if act.target then		
-		act.target.restock(act.target,true)
-		act.doer.changestock = nil
-		return true
-	end
-end
-
-ACTIONS.WEIGHDOWN.fn = function(act)
-	local pos = Vector3(act.target.Transform:GetWorldPosition())
-	-- if act.doer.components.inventory then	
-	return act.doer.components.inventory ~= nil
-		and act.doer.components.inventory:DropItem(act.invobject, false, false, pos) 
-		-- return true
-	-- end
-end
-
-ACTIONS.DISLODGE.fn = function(act)
-	if act.target.components.dislodgeable then
-		act.target.components.dislodgeable:Dislodge(act.doer)
-		-- action with inventory object already explicitly calls OnUsedAsItem
-		if not act.invobject and act.doer and act.doer.components.inventory and act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) then
-			local invobject = act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
-			if invobject.components.finiteuses then
-				invobject.components.finiteuses:OnUsedAsItem(ACTIONS.DISLODGE)
-			end
-		end
-		return true
-	end
-end
-
-ACTIONS.SMELTER_HARVEST.fn = function(act)
-	if act.target.components.melter then
-		-- if act.target.components.melter.done then
-			act.target.components.melter:Harvest(act.doer)
-			return true
-		-- end
-	end
-end
-
-
-ENTERDOOR.fn = function(act)
+-----------------------------------------------------------------------------------------
+local ENTERDOOR = AddAction("ENTERDOOR", "ENTERDOOR", function(act)
 	if act.target:HasTag("secret_room") or act.target:HasTag("predoor") then
 		return false
 	end
@@ -158,27 +12,28 @@ ENTERDOOR.fn = function(act)
 	-- elseif act.target:HasTag("door") and act.target:HasTag("door_disabled") then
 		return false, "LOCKED"
 	end
-end
+end)
+ENTERDOOR.priority = 2
+ENTERDOOR.distance = 1
 
+AddStategraphActionHandler("wilson", ActionHandler(ENTERDOOR, "dostandingaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(ENTERDOOR, "dostandingaction"))
 
--- ENTERDOOR.fn = function(act)
-	-- if act.target:HasTag("activedoor") then --act.target.components.door then
-		-- print("Door activation action go!")
-		-- --act.target:PushEvent("usedoor", (act.doer))
-		-- act.target.components.door:Activate(act.doer)
-		-- return true
-	-- else
-		-- print("Failed door check, no door activation")
-		-- return false
-	-- end
--- end
+AddComponentAction("SCENE", "door", function(inst, doer, actions, right)
+    if inst:HasTag("door") then
+	--if inst.components.door then
+        if not right then
+            table.insert(actions, ACTIONS.ENTERDOOR)
+        end
+    end
+end)
+-----------------------------------------------------------------------------------------
 
-BUILD_ROOM.fn = function(act)
+local BUILD_ROOM = AddAction("BUILD_ROOM", "BUILD_ROOM", function(act)
 	if act.invobject.components.roombuilder and act.target:HasTag("predoor") then
 	-- if act.invobject:HasTag("roombuilder") and act.target:HasTag("predoor") then
 		print("Detected room builder object")
 		
-		-- local interior_spawner = GetInteriorSpawner()
 		local interior_spawner = TheWorld.components.interiorspawner		
 		local current_interior = interior_spawner.current_interior
 
@@ -187,26 +42,26 @@ BUILD_ROOM.fn = function(act)
 			local ID = interior_spawner:GetNewID()
 			ID = "p" .. ID -- Added the "p" so it doesn't trigger FixDoors on the InteriorSpawner
 
-            local floortexture = "levels/textures/noise_woodfloor.tex"
-            local walltexture = "levels/textures/interiors/shop_wall_woodwall.tex"
-            local minimaptexture = "levels/textures/map_interior/mini_ruins_slab.tex"
-            local colorcube = "images/colour_cubes/pigshop_interior_cc.tex"
+			local floortexture = "levels/textures/noise_woodfloor.tex"
+			local walltexture = "levels/textures/interiors/shop_wall_woodwall.tex"
+			local minimaptexture = "levels/textures/map_interior/mini_ruins_slab.tex"
+			local colorcube = "images/colour_cubes/pigshop_interior_cc.tex"
 
-            local addprops = {
-                { name = "deco_roomglow", x_offset = 0, z_offset = 0 }, 
+			local addprops = {
+				{ name = "deco_roomglow", x_offset = 0, z_offset = 0 }, 
 
-                { name = "deco_antiquities_cornerbeam",  x_offset = -5, z_offset =  -15/2, rotation = 90, flip=true, addtags={"playercrafted"} },
-                { name = "deco_antiquities_cornerbeam",  x_offset = -5, z_offset =   15/2, rotation = 90,            addtags={"playercrafted"} },      
-                { name = "deco_antiquities_cornerbeam2", x_offset = 4.7, z_offset = -15/2, rotation = 90, flip=true, addtags={"playercrafted"} },
-                { name = "deco_antiquities_cornerbeam2", x_offset = 4.7, z_offset =  15/2, rotation = 90,            addtags={"playercrafted"} },  
+				{ name = "deco_antiquities_cornerbeam",  x_offset = -5, z_offset =  -15/2, rotation = 90, flip=true, addtags={"playercrafted"} },
+				{ name = "deco_antiquities_cornerbeam",  x_offset = -5, z_offset =   15/2, rotation = 90,            addtags={"playercrafted"} },      
+				{ name = "deco_antiquities_cornerbeam2", x_offset = 4.7, z_offset = -15/2, rotation = 90, flip=true, addtags={"playercrafted"} },
+				{ name = "deco_antiquities_cornerbeam2", x_offset = 4.7, z_offset =  15/2, rotation = 90,            addtags={"playercrafted"} },  
 
-                { name = "swinging_light_rope_1", x_offset = -2, z_offset =  0, rotation = -90,                      addtags={"playercrafted"} },
-            }
+				{ name = "swinging_light_rope_1", x_offset = -2, z_offset =  0, rotation = -90,                      addtags={"playercrafted"} },
+			}
 
-            local room_exits = {}
+			local room_exits = {}
 			
-            local width = 15
-            local depth = 10
+			local width = 15
+			local depth = 10
 
 			room_exits[player_interior_exit_dir_data[dir].opposing_exit_dir] = {
 				target_room = current_interior.unique_name,
@@ -251,56 +106,79 @@ BUILD_ROOM.fn = function(act)
 			end
 
 			-- Actually creates the room
-            interior_spawner:CreateRoom("generic_interior", width, nil, depth, name, ID, addprops, room_exits, walltexture, floortexture, minimaptexture, nil, colorcube, nil, true, "inside", "HOUSE","WOOD")
+			interior_spawner:CreateRoom("generic_interior", width, nil, depth, name, ID, addprops, room_exits, walltexture, floortexture, minimaptexture, nil, colorcube, nil, true, "inside", "HOUSE","WOOD")
 
-            -- Activates all the doors in the adjacent rooms
-            for door_to_activate, found_room in pairs(doors_to_activate) do
-            	print ("################## ACTIVATING FOUND DOOR")
-            	door_to_activate.ActivateSelf(door_to_activate, ID, found_room)
-            end
+			-- Activates all the doors in the adjacent rooms
+			for door_to_activate, found_room in pairs(doors_to_activate) do
+				print ("################## ACTIVATING FOUND DOOR")
+				door_to_activate.ActivateSelf(door_to_activate, ID, found_room)
+			end
 
-            -- If there are already built doors in the same direction as the door being used to build, activate them
-            local pt = interior_spawner:getSpawnOrigin()
-            local other_doors = TheSim:FindEntities(pt.x, pt.y, pt.z, 50, {"predoor"}, {"INTERIOR_LIMBO", "INLIMBO"})
-            for _, other_door in ipairs(other_doors) do
-            	if other_door ~= act.target and other_door.baseanimname and other_door.baseanimname == act.target.baseanimname then
-            		print ("############### ACTIVATING DOOR")
-            		other_door.ActivateSelf(other_door, ID, current_interior)
-            	end
-            end
+			-- If there are already built doors in the same direction as the door being used to build, activate them
+			local pt = interior_spawner:getSpawnOrigin()
+			local other_doors = TheSim:FindEntities(pt.x, pt.y, pt.z, 50, {"predoor"}, {"INTERIOR_LIMBO", "INLIMBO"})
+			for _, other_door in ipairs(other_doors) do
+				if other_door ~= act.target and other_door.baseanimname and other_door.baseanimname == act.target.baseanimname then
+					print ("############### ACTIVATING DOOR")
+					other_door.ActivateSelf(other_door, ID, current_interior)
+				end
+			end
 
 			act.target.components.door:checkDisableDoor(false, "house_prop")
 			
-	        local door_def =
-	        {
-	        	my_interior_name = current_interior.unique_name,
-	        	my_door_id = current_interior.unique_name .. player_interior_exit_dir_data[dir].my_door_id_dir,
-	        	target_interior = ID,
-	        	target_door_id = ID .. player_interior_exit_dir_data[dir].target_door_id_dir
-	    	}
+			local door_def =
+			{
+				my_interior_name = current_interior.unique_name,
+				my_door_id = current_interior.unique_name .. player_interior_exit_dir_data[dir].my_door_id_dir,
+				target_interior = ID,
+				target_door_id = ID .. player_interior_exit_dir_data[dir].target_door_id_dir
+			}
 
-	        interior_spawner:AddDoor(act.target, door_def)
-	        act.target.InitHouseDoor(act.target, dir)
-        end
+			interior_spawner:AddDoor(act.target, door_def)
+			act.target.InitHouseDoor(act.target, dir)
+		end
 
-		-- local dir = GetInteriorSpawner():GetExitDirection(act.target)
 		local dir = interior_spawner:GetExitDirection(act.target)
-        CreateNewRoom(dir)
+		CreateNewRoom(dir)
 
-        act.target:AddTag("interior_door")
+		act.target:AddTag("interior_door")
 		act.target:RemoveTag("predoor")
 		act.invobject:Remove()
 		return true
 	end
 
 	return false
-end
+end)
 
-DEMOLISH_ROOM.fn = function(act)
+BUILD_ROOM.priority = 1
+BUILD_ROOM.distance = 1
+
+AddStategraphActionHandler("wilson", ActionHandler(BUILD_ROOM, "doshortaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(BUILD_ROOM, "doshortaction"))
+
+AddComponentAction("USEITEM", "roombuilder", function(inst, doer, target, actions, right)
+	-- print("Interior test: Roombuilder parameters dump:")
+	-- print("Inst:", inst)
+	-- print("Doer:", doer)
+	-- print("Target:", target)
+	
+    --if inst:HasTag("activedoor") then
+	-- if inst.invobject.components.roombuilder then
+    -- if inst:HasTag("roombuilder") then
+	-- if doer.invobject.components.roombuilder then
+	
+		if target:HasTag("predoor") then
+			-- print("Room builder detected for component action?")
+			table.insert(actions, ACTIONS.BUILD_ROOM)
+		end
+    -- end
+end)
+-----------------------------------------------------------------------------------------
+local DEMOLISH_ROOM = AddAction("DEMOLISH_ROOM", "DEMOLISH_ROOM", function(act)
 	if act.invobject.components.roomdemolisher and act.target:HasTag("house_door") and act.target:HasTag("interior_door") then
 		
 
-		local interior_spawner = TheWorld.components.interiorspawner --GetInteriorSpawner()
+		local interior_spawner = TheWorld.components.interiorspawner
 		local target_interior = interior_spawner:GetInteriorByName(act.target.components.door.target_interior)
 		local index_x, index_y = interior_spawner:GetPlayerRoomIndex(target_interior.dungeon_name, target_interior.unique_name)
 		
@@ -392,58 +270,19 @@ DEMOLISH_ROOM.fn = function(act)
 			act.invobject:Remove()
 
 		else
-			GetPlayer().components.talker:Say(GetString(GetPlayer().prefab, "ANNOUNCE_ROOM_STUCK"))
+			act.doer.components.talker:Say(GetString(act.doer.prefab, "ANNOUNCE_ROOM_STUCK"))
 		end
 
 		return true
 	end
-end
+end)
+DEMOLISH_ROOM.priority = 1
+DEMOLISH_ROOM.distance = 1
 
-ACTIONS.SHOP.stroverridefn = function(act)
-	if not act.target or not act.target.costprefab or not act.target.components.shopdispenser:GetItem() then
-		return nil
-	else
-
-		local blueprint = false
-
-		local item = act.target.components.shopdispenser:GetItem()
-		local blueprintstart= string.find(item,"_blueprint")
-		if blueprintstart then
-			item = string.sub(item,1,blueprintstart-1)
-			blueprint = true
-		end
-
-		local wantitem = STRINGS.NAMES[string.upper(item)]
-		if blueprint then
-			wantitem = string.format(STRINGS.BLUEPRINT_ITEM,wantitem)
-		end
-		if not wantitem then
-			local temp = SpawnPrefab(item)
-			if temp.displaynamefn then
-				wantitem = temp.displaynamefn(temp)
-			else
-				wantitem = item
-			end
-			temp:Remove()
-		end
-		local payitem = STRINGS.NAMES[string.upper(act.target.costprefab)]
-		local qty = ""
-		if act.target.costprefab == "oinc" then		
-			qty = act.target.cost		
-			if act.target.cost > 1 then
-				payitem = STRINGS.NAMES.OINC_PL
-			end
-		end
-
-		if act.doer.components.shopper:IsWatching(act.target) then		
-			return subfmt(STRINGS.ACTIONS.SHOP_LONG, { wantitem = wantitem, qty=qty, payitem = payitem })
-		else
-			return subfmt(STRINGS.ACTIONS.SHOP_TAKE, { wantitem = wantitem })
-		end
-	end
-end 
-
-ACTIONS.SHOP.fn = function(act)
+AddStategraphActionHandler("wilson", ActionHandler(DEMOLISH_ROOM, "doshortaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(DEMOLISH_ROOM, "doshortaction"))
+-----------------------------------------------------------------------------------------
+local SHOP = AddAction("SHOP", "SHOP", function(act)
 	if act.doer.components.inventory then
 		print("SHOP - Doer has inventory")
 		if act.doer:HasTag("player") and act.doer.components.shopper then 
@@ -497,9 +336,58 @@ ACTIONS.SHOP.fn = function(act)
 			end 
 		end
 	end
-end
+end)
+SHOP.priority = 1
+SHOP.distance = 1
 
-HAMENV.AddComponentAction("SCENE", "shopdispenser", function(inst, doer, actions, right)
+ACTIONS.SHOP.stroverridefn = function(act)
+	if not act.target or not act.target.costprefab or not act.target.components.shopdispenser:GetItem() then
+		return nil
+	else
+
+		local blueprint = false
+
+		local item = act.target.components.shopdispenser:GetItem()
+		local blueprintstart= string.find(item,"_blueprint")
+		if blueprintstart then
+			item = string.sub(item,1,blueprintstart-1)
+			blueprint = true
+		end
+
+		local wantitem = STRINGS.NAMES[string.upper(item)]
+		if blueprint then
+			wantitem = string.format(STRINGS.BLUEPRINT_ITEM,wantitem)
+		end
+		if not wantitem then
+			local temp = SpawnPrefab(item)
+			if temp.displaynamefn then
+				wantitem = temp.displaynamefn(temp)
+			else
+				wantitem = item
+			end
+			temp:Remove()
+		end
+		local payitem = STRINGS.NAMES[string.upper(act.target.costprefab)]
+		local qty = ""
+		if act.target.costprefab == "oinc" then		
+			qty = act.target.cost		
+			if act.target.cost > 1 then
+				payitem = STRINGS.NAMES.OINC_PL
+			end
+		end
+
+		if act.doer.components.shopper:IsWatching(act.target) then		
+			return subfmt(STRINGS.ACTIONS.SHOP_LONG, { wantitem = wantitem, qty=qty, payitem = payitem })
+		else
+			return subfmt(STRINGS.ACTIONS.SHOP_TAKE, { wantitem = wantitem })
+		end
+	end
+end 
+
+AddStategraphActionHandler("wilson", ActionHandler(SHOP, "doshortaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(SHOP, "doshortaction"))
+
+AddComponentAction("SCENE", "shopdispenser", function(inst, doer, actions, right)
     if inst:HasTag("shop_pedestal") then
 	--if inst.components.door then
         if not right then
@@ -508,25 +396,49 @@ HAMENV.AddComponentAction("SCENE", "shopdispenser", function(inst, doer, actions
         end
     end
 end)
+-----------------------------------------------------------------------------------------
+local WEIGHDOWN = AddAction("WEIGHDOWN", "WEIGHDOWN", function(act)
+	local pos = Vector3(act.target.Transform:GetWorldPosition())
+	-- if act.doer.components.inventory then	
+	return act.doer.components.inventory ~= nil
+		and act.doer.components.inventory:DropItem(act.invobject, false, false, pos) 
+		-- return true
+	-- end
+end)
+WEIGHDOWN.priority = 1
+WEIGHDOWN.distance = 1
 
+AddStategraphActionHandler("wilson", ActionHandler(WEIGHDOWN, "doshortaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(WEIGHDOWN, "doshortaction"))
 
-HAMENV.AddComponentAction("USEITEM", "inventoryitem", function(inst, doer, target, actions, right)
+AddComponentAction("USEITEM", "inventoryitem", function(inst, doer, target, actions, right)
     if target:HasTag("weighdownable") then
         if not right then
             table.insert(actions, ACTIONS.WEIGHDOWN)
         end
     end
 end)
+-----------------------------------------------------------------------------------------
+local DISLODGE = AddAction("DISLODGE", "DISLODGE", function(act)
+	if act.target.components.dislodgeable then
+		act.target.components.dislodgeable:Dislodge(act.doer)
+		-- action with inventory object already explicitly calls OnUsedAsItem
+		if not act.invobject and act.doer and act.doer.components.inventory and act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS) then
+			local invobject = act.doer.components.inventory:GetEquippedItem(EQUIPSLOTS.HANDS)
+			if invobject.components.finiteuses then
+				invobject.components.finiteuses:OnUsedAsItem(ACTIONS.DISLODGE)
+			end
+		end
+		return true
+	end
+end)
+DISLODGE.priority = 1
+DISLODGE.distance = 1
 
--- HAMENV.AddComponentAction("SCENE", "dislodgable", function(inst, doer, actions, right)
-    -- -- if target.components.dislodgeable then
-        -- if not right then
-            -- table.insert(actions, ACTIONS.DISLODGE)
-        -- end
-    -- -- end
--- end)
+AddStategraphActionHandler("wilson", ActionHandler(DISLODGE, "tap"))
+AddStategraphActionHandler("wilson_client", ActionHandler(DISLODGE, "tap"))
 
-HAMENV.AddComponentAction("EQUIPPED", "dislodger", function(inst, doer, target, actions, right)
+AddComponentAction("EQUIPPED", "dislodger", function(inst, doer, target, actions, right)
     -- if target.components.dislodgeable then
     if target:HasTag("dislodgeable") then
         if not right then
@@ -535,35 +447,68 @@ HAMENV.AddComponentAction("EQUIPPED", "dislodger", function(inst, doer, target, 
     end
 end)
 
-HAMENV.AddComponentAction("SCENE", "door", function(inst, doer, actions, right)
-    if inst:HasTag("door") then
-	--if inst.components.door then
-        if not right then
-			-- print("Door tag detected, you should be able to attempt entering it")
-            table.insert(actions, ACTIONS.ENTERDOOR)
-        end
-    end
+-- AddComponentAction("SCENE", "dislodgable", function(inst, doer, actions, right)
+    -- -- if target.components.dislodgeable then
+        -- if not right then
+            -- table.insert(actions, ACTIONS.DISLODGE)
+        -- end
+    -- -- end
+-- end)
+-----------------------------------------------------------------------------------------
+local STOCK = AddAction("STOCK", "", function(act)
+	if act.target then		
+		act.target.restock(act.target,true)
+		act.doer.changestock = nil
+		return true
+	end
 end)
-
-HAMENV.AddComponentAction("USEITEM", "roombuilder", function(inst, doer, target, actions, right)
-	-- print("Interior test: Roombuilder parameters dump:")
-	-- print("Inst:", inst)
-	-- print("Doer:", doer)
-	-- print("Target:", target)
-	
-    --if inst:HasTag("activedoor") then
-	-- if inst.invobject.components.roombuilder then
-    -- if inst:HasTag("roombuilder") then
-	-- if doer.invobject.components.roombuilder then
-	
-		if target:HasTag("predoor") then
-			-- print("Room builder detected for component action?")
-			table.insert(actions, ACTIONS.BUILD_ROOM)
-		end
-    -- end
+STOCK.priority = 1
+STOCK.distance = 1
+-----------------------------------------------------------------------------------------
+local FIX = AddAction("FIX", "", function(act)
+	if act.target then
+		local target = act.target
+		local numworks = 1
+		target.components.workable:WorkedBy(act.doer, numworks)
+	--	return target:fix(act.doer)		
+	end
 end)
+FIX.priority = 1
+FIX.distance = 1
+-----------------------------------------------------------------------------------------
+local SPECIAL_ACTION = AddAction("SPECIAL_ACTION", "", function(act)
+	if act.doer.special_action then
+		act.doer.special_action(act)
+		return true
+	end
+end)
+SPECIAL_ACTION.priority = 1
+SPECIAL_ACTION.distance = 1
+-----------------------------------------------------------------------------------------
+local SPECIAL_ACTION2 = AddAction("SPECIAL_ACTION2", "", function(act)
+	if act.doer.special_action2 then
+		act.doer.special_action2(act)
+		return true
+	end
+end)
+SPECIAL_ACTION2.priority = 1
+SPECIAL_ACTION2.distance = 1
+-----------------------------------------------------------------------------------------
+local HAMARTIFACTIVATE = AddAction("HAMARTIFACTIVATE", "HAMARTIFACTIVATE", function(act)
+	if act.target.components.hamlivingartifact then
+		act.target.components.hamlivingartifact:Activate(act.doer)
+		return true
+	else
+		return false
+	end
+end)
+HAMARTIFACTIVATE.priority = 1
+HAMARTIFACTIVATE.distance = 1
 
-HAMENV.AddComponentAction("SCENE", "hamlivingartifact", function(inst, doer, actions, right)
+AddStategraphActionHandler("wilson", ActionHandler(HAMARTIFACTIVATE, "doshortaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(HAMARTIFACTIVATE, "doshortaction"))
+
+AddComponentAction("SCENE", "hamlivingartifact", function(inst, doer, actions, right)
 	--if inst.components.door then
         if right then
 			-- print("Door tag detected, you should be able to attempt entering it")
@@ -572,7 +517,7 @@ HAMENV.AddComponentAction("SCENE", "hamlivingartifact", function(inst, doer, act
     -- end
 end)
 
-HAMENV.AddComponentAction("INVENTORY", "hamlivingartifact", function(inst, doer, actions, right)
+AddComponentAction("INVENTORY", "hamlivingartifact", function(inst, doer, actions, right)
 	--if inst.components.door then
         if right then
 			-- print("Door tag detected, you should be able to attempt entering it")
@@ -580,8 +525,22 @@ HAMENV.AddComponentAction("INVENTORY", "hamlivingartifact", function(inst, doer,
         end
     -- end
 end)
+-----------------------------------------------------------------------------------------
+local SMELTER_HARVEST = AddAction("SMELTER_HARVEST", "SMELTER_HARVEST", function(act)
+	if act.target.components.melter then
+		-- if act.target.components.melter.done then
+			act.target.components.melter:Harvest(act.doer)
+			return true
+		-- end
+	end
+end)
+SMELTER_HARVEST.priority = 1
+SMELTER_HARVEST.distance = 1
 
-HAMENV.AddComponentAction("SCENE", "melter", function(inst, doer, actions, right)
+AddStategraphActionHandler("wilson", ActionHandler(SMELTER_HARVEST, "dolongaction"))
+AddStategraphActionHandler("wilson_client", ActionHandler(SMELTER_HARVEST, "dolongaction"))
+
+AddComponentAction("SCENE", "melter", function(inst, doer, actions, right)
 	if inst:HasTag("donecooking") then
         if not right then
 			-- print("Door tag detected, you should be able to attempt entering it")
@@ -589,3 +548,14 @@ HAMENV.AddComponentAction("SCENE", "melter", function(inst, doer, actions, right
         end
     end
 end)
+-----------------------------------------------------------------------------------------
+local CHARGE_UP = AddAction("CHARGE_UP", "CHARGE_UP", function(act)
+	act.doer:PushEvent("beginchargeup")
+end)
+CHARGE_UP.priority = ACTIONS.HIGH_ACTION_PRIORITY
+CHARGE_UP.distance = 10
+CHARGE_UP.rmb = true
+
+AddStategraphActionHandler("wilson", ActionHandler(CHARGE_UP, "charge"))
+AddStategraphActionHandler("wilson_client", ActionHandler(CHARGE_UP, "charge"))
+-----------------------------------------------------------------------------------------

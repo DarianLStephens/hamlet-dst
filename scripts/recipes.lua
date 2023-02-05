@@ -1,7 +1,3 @@
---require "recipe"
---require "recipecategory"
---require "tuning"
-
 local TechTree = require("techtree")
 
 local _GLOBAL = GLOBAL

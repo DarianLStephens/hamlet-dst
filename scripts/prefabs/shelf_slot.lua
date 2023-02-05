@@ -51,9 +51,9 @@ local function OnLoadPostPass(inst)
 				-- drop whatever was placed in there
 				local loot = droploot(inst)
 				if loot then
-					local interior = GetInteriorSpawner():getPropInterior(inst)
+					local interior = TheWorld.components.interiorspawner:getPropInterior(inst)
 					if interior then
-			    	    GetInteriorSpawner():injectprefab(loot,interior)
+			    	    TheWorld.components.interiorspawner:injectprefab(loot,interior)
 					end
 				end
 			end

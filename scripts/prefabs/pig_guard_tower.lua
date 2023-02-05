@@ -351,7 +351,7 @@ local function fn(Sim)
     inst:ListenForEvent("onremove", function(inst) clearobstacle(inst) end)
 
     inst.OnEntityWake = function (_inst)
-        if GetAporkalypse() and GetAporkalypse():GetFiestaActive() then
+        if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() then
             inst.AnimState:Show("YOTP")
         else
             inst.AnimState:Hide("YOTP")

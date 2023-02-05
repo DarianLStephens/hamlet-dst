@@ -1,18 +1,18 @@
-name = "Live Interior System Tests"
-description = "Trying to make Hamlet-style interiors, synced with Github"
-author = "Darian Stephens"
+name = "Interior System"
+description = "Trying to make Hamlet-style interiors."
+author = "Darian Stephens \nAssistant: asura"
 version = "0.1"
 
-forumthread = ""
+local workshop_mod = folder_name and folder_name:find("workshop-") ~= nil
 
--- This lets other players know if your mod is out of date, update it to match the current version in the game
+if not workshop_mod then
+	name = "[GitHub] "..name
+	description = description.."\n\n\n\nDeveloper version"
+end
+
+forumthread = ""
 api_version = 10
 
--- Can specify a custom icon for this mod!
-
--- Specify compatibility with the game!
-dont_starve_compatible = true
-reign_of_giants_compatible = true
 dst_compatible = true
 
 all_clients_require_mod = true

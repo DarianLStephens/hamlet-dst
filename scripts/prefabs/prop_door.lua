@@ -175,7 +175,6 @@ local function InitInteriorPrefab(inst, doer, prefab_definition, interior_defini
 	
 	print("prop_door - Adding door with interiorspawner")
 	TheWorld.components.interiorspawner:AddDoor(inst, door_definition)
-	--GetInteriorSpawner():AddDoor(inst, door_definition)
 	if prefab_definition.animdata then
 
 		if prefab_definition.animdata.bank then
@@ -512,7 +511,6 @@ local function testPlayerHouseDoor(inst)
 	local door = inst.components.door
 	if door then
 		local interior = TheWorld.components.interiorspawner:GetInteriorByName(door.interior_name)
-		--GetInteriorSpawner():GetInteriorByName(door.interior_name)
 		if interior and interior.playerroom then
 		    local minimap = inst.entity:AddMiniMapEntity()
 		    minimap:SetIcon( "player_frontdoor.png" )

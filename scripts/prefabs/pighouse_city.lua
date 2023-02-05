@@ -563,7 +563,7 @@ local function makefn(animset, setbuild, spawnList)
 
 
         inst.OnEntityWake = function (_inst)
-        if GetAporkalypse() and GetAporkalypse():GetFiestaActive() then
+        if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() then
             inst.AnimState:Show("YOTP")
         else
             inst.AnimState:Hide("YOTP")

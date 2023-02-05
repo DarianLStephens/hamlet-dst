@@ -337,7 +337,7 @@ local function onload(inst, data)
                 local patched = false
                 local interior_ents = {}
 
-                local interior_spawner = GetInteriorSpawner()
+                local interior_spawner = TheWorld.components.interiorspawner
                 local interior = interior_spawner:GetInteriorByName(inst.interiorID)
                 local inside_interior = interior == interior_spawner.current_interior
                 local pt = interior_spawner:getSpawnOrigin()

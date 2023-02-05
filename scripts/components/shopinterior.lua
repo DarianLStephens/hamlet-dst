@@ -207,7 +207,7 @@ function ShopInterior:OnRemoveEntity()
 end
 
 function ShopInterior:GetNewProduct(shoptype)
-    if GetAporkalypse() and GetAporkalypse():GetFiestaActive() and SHOPTYPES[shoptype.."_fiesta"] then
+    if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() and SHOPTYPES[shoptype.."_fiesta"] then
         shoptype = shoptype.."_fiesta"
     end
     local items = SHOPTYPES[shoptype]

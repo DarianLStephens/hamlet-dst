@@ -132,7 +132,7 @@ function Aporkalypse:PatchSave()
 	end
 	-- This needs to happen after any ruins are generated, and that is spaced out in time, so give it a while
 	self.inst:DoTaskInTime(3, function() 
-		local interiorspawner = GetInteriorSpawner()
+		local interiorspawner = TheWorld.components.interiorspawner
 		if #interiorspawner:GetInteriorsByDungeonName("RUINS_5") == 0 then
 			if not self.patched then
 				local ruin_interiors = interiorspawner:GetInteriorsByDungeonName("RUINS_1")
@@ -375,7 +375,7 @@ function Aporkalypse:ScheduleHeraldCheck()
 				local herald = GetClosestInstWithTag("ancient", player, 20)
 				
 				if herald == nil then
-					if not GetInteriorSpawner():IsPlayerConsideredInside() then
+					if not TheWorld.components.interiorspawner:IsPlayerConsideredInside() then
 						self:SpawnRandomInRange("ancient_herald", 1, 1, 10)
 					end
 				else

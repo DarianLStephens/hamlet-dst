@@ -15,7 +15,6 @@ local prefabs =
 }
 
 local function spawnpart(inst, prefab, x,y,z,rotation)
-   
     local part = SpawnPrefab(prefab)
     part.Transform:SetPosition(x,y,z)
     part.spawned = true
@@ -32,7 +31,7 @@ local function spawnpart(inst, prefab, x,y,z,rotation)
 
 end
 
-local function breakapart(inst)
+local function BreakApart(inst)
     local x,y,z = inst.Transform:GetWorldPosition()
     local down = TheCamera:GetDownVec()             
     local angle = math.atan2(down.z, down.x) / DEGREES
@@ -48,8 +47,6 @@ local function breakapart(inst)
 
     if inst.arms > 0 then
         for i=1, inst.arms do
-            print("spawning arm")
-
             local sx = x - down.x
             local sz = z + down.z
             local sy = y
@@ -66,7 +63,6 @@ local function breakapart(inst)
     end     
     if inst.legs > 0 then
         for i=1,inst.legs do
-
             local sx = x - (2*down.x)
             local sz = z + down.z
             local sy = y
@@ -84,11 +80,10 @@ local function breakapart(inst)
 end 
 
 local function onmerge(inst)
-    inst.refreshart(inst)
+    inst.RefreshArt(inst)
     inst.AnimState:PlayAnimation("merge")
     inst.AnimState:PushAnimation("idle",true)  
     local pos = Vector3(inst.Transform:GetWorldPosition())
-    -- GetSeasonManager():DoLightningStrike(pos)            
 	TheWorld:PushEvent("ms_sendlightningstrike", pos)
     SpawnPrefab("laserhit"):SetTarget(inst)
 
@@ -105,42 +100,41 @@ local function OnLightning(inst, data)
 
 end
 
-local function refreshart(inst)
-    local anim = inst.AnimState
+local function RefreshArt(inst)
     if inst.legs == 0 then
-        anim:Hide("leg01")
-        anim:Hide("leg02")
+        inst.AnimState:Hide("leg01")
+        inst.AnimState:Hide("leg02")
     elseif inst.legs == 1 then
-        anim:Show("leg01")
-        anim:Hide("leg02")
+        inst.AnimState:Show("leg01")
+        inst.AnimState:Hide("leg02")
     else
-        anim:Show("leg01")
-        anim:Show("leg02")
+        inst.AnimState:Show("leg01")
+        inst.AnimState:Show("leg02")
     end
     if inst.arms == 0 then
-        anim:Hide("arm01")
-        anim:Hide("arm02")
+        inst.AnimState:Hide("arm01")
+        inst.AnimState:Hide("arm02")
     elseif inst.arms == 1 then
-        anim:Show("arm01")
-        anim:Hide("arm02")
+        inst.AnimState:Show("arm01")
+        inst.AnimState:Hide("arm02")
     else
-        anim:Show("arm01")
-        anim:Show("arm02")
+        inst.AnimState:Show("arm01")
+        inst.AnimState:Show("arm02")
     end
     if inst.head == 0 then
-        anim:Hide("head")
+        inst.AnimState:Hide("head")
     else
-        anim:Show("head")
+        inst.AnimState:Show("head")
     end
     if inst.spine == 0 then
-        anim:Hide("spine")
+        inst.AnimState:Hide("spine")
     else
-        anim:Show("spine")
+        inst.AnimState:Show("spine")
     end   
     if inst.spine == 1 and inst.head == 1 then
-        anim:Show("spine_head")
+        inst.AnimState:Show("spine_head")
     else
-        anim:Hide("spine_head")
+        inst.AnimState:Hide("spine_head")
     end
 end
 
@@ -154,7 +148,7 @@ local function OnAttacked(inst, data)
             inst.hits = 0
 
             if math.random() < 0.6 then
-                inst.breakapart(inst)                                                                        
+                inst.BreakApart(inst)                                                                        
                 inst:Remove()
             end    
         end
@@ -189,7 +183,6 @@ end
 
 local function OnLoad(inst,data)
     if data then
-
         if data.hits then
             inst.hits = data.hits
         end
@@ -199,7 +192,7 @@ local function OnLoad(inst,data)
         inst.arms = data.arms
         inst.legs = data.legs
 
-        inst.refreshart(inst)
+        inst:RefreshArt()
     end
 end
 
@@ -214,10 +207,24 @@ end
 
 local function commonfn(Sim)
 	local inst = CreateEntity()
-	local trans = inst.entity:AddTransform()
-	local anim = inst.entity:AddAnimState()
-	local sound = inst.entity:AddSoundEmitter()
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
+	inst.entity:AddSoundEmitter()
     inst.entity:AddNetwork()
+    
+    inst.entity:AddMiniMapEntity()
+    int.MiniMapEntity:SetIcon("metal_spider.png")
+
+    inst:AddTag("lightningrod")
+    inst:AddTag("laser_immune")
+    inst:AddTag("ancient_robot")
+    inst:AddTag("mech")
+    inst:AddTag("monster")
+    inst:AddTag("ancient_robots_assembly")
+
+    inst.AnimState:SetBank("metal_hulk_merge")
+    inst.AnimState:SetBuild("metal_hulk_merge")
+    inst.AnimState:PlayAnimation("idle", true)
 
     inst.Transform:SetFourFaced()
 
@@ -227,22 +234,8 @@ local function commonfn(Sim)
 		return inst
 	end
 
-    local minimap = inst.entity:AddMiniMapEntity()
-    minimap:SetIcon("metal_spider.png")
     inst.collisionradius = 2
     MakeObstaclePhysics(inst, inst.collisionradius)
-
-    inst:AddTag("lightningrod")
-
-    inst:AddTag("laser_immune")
-    inst:AddTag("ancient_robot")
-    inst:AddTag("mech")
-    inst:AddTag("monster")
-    inst:AddTag("ancient_robots_assembly")
-
-    anim:SetBank("metal_hulk_merge")
-    anim:SetBuild("metal_hulk_merge")
-    anim:PlayAnimation("idle", true)
 
     inst:AddComponent("timer")
      
@@ -284,10 +277,10 @@ local function commonfn(Sim)
     inst.spine = 0
     inst.arms = 0
     inst.legs = 0
-    inst.refreshart = refreshart
-    inst.breakapart = breakapart
+    inst.RefreshArt = RefreshArt
+    inst.BreakApart = BreakApart
 
-    refreshart(inst)
+    RefreshArt(inst)
     
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
@@ -298,5 +291,5 @@ local function commonfn(Sim)
     return inst
 end
 
-return Prefab( "forest/animals/ancient_robots_assembly", commonfn, assets, prefabs)
+return Prefab( "ancient_robots_assembly", commonfn, assets, prefabs)
        
