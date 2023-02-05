@@ -1,7 +1,4 @@
-local HAMENV = env
-GLOBAL.setfenv(1, GLOBAL)
-
-function MakeWallPhysics(inst, rad, height)
+function _G.MakeWallPhysics(inst, rad, height)
     height = height or 2
 
     inst:AddTag("blocker")
@@ -17,7 +14,7 @@ function MakeWallPhysics(inst, rad, height)
 	return phys
 end
 
-function MakeInteriorPhysics(inst, rad, height, width)
+function _G.MakeInteriorPhysics(inst, rad, height, width)
     height = height or 20
 	
     inst:AddTag("blocker")

@@ -1,10 +1,3 @@
--- local _GLOBAL = GLOBAL
-
--- _GLOBAL.setfenv(1, _GLOBAL)
-
--- local Vector3 = Vector3
--- local STRINGS = STRINGS
-
 local FX =
 {
     -- {

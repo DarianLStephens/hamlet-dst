@@ -1,5 +1,3 @@
---GLOBAL.setfenv(1, GLOBAL)
-
 local wallWidth = 7
 local wallLength = 24
 

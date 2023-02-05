@@ -1,11 +1,5 @@
 local TechTree = require("techtree")
 
-local _GLOBAL = GLOBAL
-local AddRecipe2 = AddRecipe2
-
-_GLOBAL.setfenv(1, _GLOBAL)
-
-
 -- If this doesn't pan out, maybe I can make a unique one for each door with the name pre-filled, and generic-ize the main test thing to get passed the needed data? How can I make the anim stuff work, though...
 local function place_door_test_fn(pt,rot)
     -- self.Transform:SetRotation(-90)

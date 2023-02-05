@@ -22,7 +22,9 @@ end
 AddReplicableComponent("interiorplayer")
 
 modimport("scripts/actions")
-modimport("scripts/tuning.lua")
+for k, v in ipairs(require("ham_tunings")) do
+    TUNINGS[k] = v
+end
 modimport("scripts/constants.lua")
 modimport("scripts/recipes.lua")
 modimport("scripts/patches.lua")
