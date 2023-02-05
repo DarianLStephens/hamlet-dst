@@ -9,8 +9,8 @@ return {
         },
         USEDOOR = 
       	{
-        GENERIC = "(sigh) Everything is closed to me.",
-        LOCKED = "I could find a way in, but why bother.",
+			GENERIC = "(sigh) Everything is closed to me.",
+			LOCKED = "I could find a way in, but why bother.",
       	}, 
 	},
 
