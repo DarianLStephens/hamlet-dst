@@ -74,5 +74,5 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab( "common/inventory/ballpein_hammer", fn, assets)	   
+return Prefab( "ballpein_hammer", fn, assets)	   
 

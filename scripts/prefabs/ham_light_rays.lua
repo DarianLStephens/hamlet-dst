@@ -240,4 +240,4 @@ end
 return rays("lightrays_jungle"),
        rays("lightrays")
 
---return Prefab( "common/lightrays", fn, assets) 
+--return Prefab( "lightrays", fn, assets) 

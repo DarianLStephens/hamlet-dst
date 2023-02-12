@@ -1,94 +1,133 @@
-local InteriorPlayer = Class(function(self, inst)
-    self.inst = inst
-	self.oldcamera = TheCamera
-	self._camX = 0
-	self._camZ = 0
-	self._camZoom = 0
-	
-	self._interiorMode = false
-	self._lastMode = false -- Specifically don't save this
-	
-	self._interiorWidth = 0
-	self._interiorDepth = 0
-	self._wallTexture = nil
-	self._floorTexture = nil
-	self._groundSound = "WOOD"
-	
-	self.soundupdatertask = nil
-	
-	-- self.intccmode
 
-end)
-
--- local INTERIOR_COLOURCUBES =
--- {
-    -- day = "images/colour_cubes/pigshop_interior_cc.tex",
-    -- dusk = "images/colour_cubes/pigshop_interior_cc.tex",
-    -- night = "images/colour_cubes/pigshop_interior_cc.tex",
-    -- full_moon = "images/colour_cubes/pigshop_interior_cc.tex",
--- }
-
--- function InteriorPlayer:ApplyColorCube(cc)
-	-- inst.components.playervision:SetCustomCCTable(INTERIOR_COLOURCUBES)
--- end
-
--- function InteriorPlayer:RemoveColorCube()
-	-- inst.components.playervision:SetCustomCCTable(nil)
--- end
-
-local function SoundUpdater(inst, self)
-	-- self.inst.components.locomotor:PushTempGroundSpeedMultiplier(1, self._groundSound)
-	self.inst.components.locomotor:PushTempGroundSpeedMultiplier(1, WORLD_TILES.WOOD)
-	-- self.inst.components.locomotor:PushTempGroundSpeedMultiplier(1, WORLD_TILES[self._groundSound])
+local function oncamxthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.camx:set(val)
+	end
 end
 
-function InteriorPlayer:UpdateCamera()
+local function oncamzthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.camz:set(val)
+	end
+end
 
-	print("DS - Main interiorplayer component, attempting to send data via net to replica...")
-	print("X ", self._camX, "Z ", self._camZ, "Zoom ", self._camZoom, "Interior mode ", self._interiorMode)
+local function oncamzoomthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.camzoom:set(val)
+	end
+end
+
+local function onintmodthresh(self, val)
+	if val ~= nil then
+		self.inst.replica.interiorplayer.interiormode:set(val)
+	end
+end
+
+local function onintwidththresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.interiorwidth:set(val)
+	end
+end
+
+local function onintdepththresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.interiordepth:set(val)
+	end
+end
+
+local function onintheightthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.interiorheight:set(val)
+	end
+end
+
+local function onwalltexthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.walltexture:set(val)
+	end
+end
+
+local function onfloortexthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.floortexture:set(val)
+	end
+end
+
+local function ongroundsoundthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.groundsound:set(val)
+	end
+end
+
+local function onroomidthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.roomid:set(val)
+	end
+end
+
+local InteriorPlayer = Class(function(self, inst)
+    self.inst = inst
+	self.camx = 0
+	self.camz = 0
+	self.camzoom = 0
 	
-	self.inst.player_classified.net_roomx:set(self._camX)
-	self.inst.player_classified.net_roomz:set(self._camZ)
-	self.inst.player_classified.net_roomzoom:set(self._camZoom)
-	self.inst.player_classified.net_intcamera:set(self._interiorMode)
-		
-	if self._interiorMode then
-		self.inst.player_classified.net_roomwidth:set(self._interiorWidth)
-		self.inst.player_classified.net_roomdepth:set(self._interiorDepth)
-		self.inst.player_classified.net_roomtexturewall:set(self._wallTexture)
-		self.inst.player_classified.net_roomtexturefloor:set(self._floorTexture)
-		self.inst.player_classified.net_roomgroundsound:set(self._groundSound)
-		
-		if self._lastMode == self._interiorMode then
+	self.interiormode = false
+	self._lastMode = false -- Specifically don't save this
+	
+	self.interiorwidth = 0
+	self.interiordepth = 0
+	self.interiorheight = 0
+	self.walltexture = nil
+	self.floortexture = nil
+	self.groundsound = "WOOD"
+	self.roomid = "unknown"
+	
+	self.soundupdatertask = nil
+end,
+nil,
+{
+    camx = oncamxthresh,
+    camz = oncamzthresh,
+    camzoom = oncamzoomthresh,
+    interiormode = onintmodthresh,
+    interiorwidth = onintwidththresh,
+    interiordepth = onintdepththresh,
+    interiorheight = onintheightthresh,
+    walltexture = onwalltexthresh,
+    floortexture = onfloortexthresh,
+    groundsound = ongroundsoundthresh,
+    roomid = onroomidthresh,
+})
+
+function InteriorPlayer:UpdateCamera()
+	print("DS - Main interiorplayer component, attempting to send data via net to replica...")
+	print("X ", self.camx, "Z ", self.camz, "Zoom ", self.camzoom, "Interior mode ", self.interiormode)
+	if self.interiormode then
+		if self._lastMode == self.interiormode then
 			print("Detected same interior mode, force-update camera position")
-			self.inst.player_classified.net_forceupdatecamera:set(true)
-		end
-		
-		self.soundupdatertask = self.inst:DoPeriodicTask(0, SoundUpdater, 0, self)
-	else
-		if self.soundupdatertask ~= nil then -- Safety checking, mostly in case of load weirdness
-			self.soundupdatertask:Cancel()
+			self.inst.replica.interiorplayer.forceupdatecamera:set(true)
 		end
 	end
 	
-	self._lastMode = self._interiorMode
-	
+	self._lastMode = self.interiormode
 end
 
 function InteriorPlayer:OnSave()
 	local data = {
-		_camX = self._camX,
-		_camZ = self._camZ,
-		_camZoom = self._camZoom,
-		_interiorMode = self._interiorMode,
+		camx = self.camx,
+		camz = self.camz,
+		camzoom = self.camzoom,
+		interiormode = self.interiormode,
 		
-		_interiorWidth = self._interiorWidth,
-		_interiorDepth = self._interiorDepth,
-		_wallTexture = self._wallTexture,
-		_floorTexture = self._floorTexture,
-		_groundSound = self._groundSound,
+		interiorwidth = self.interiorwidth,
+		interiordepth = self.interiordepth,
+		interiorheight = self.interiorheight,
+		walltexture = self.walltexture,
+		floortexture = self.floortexture,
+		groundsound = self.groundsound,
+		roomid = self.roomid,
 	}
-	if self._interiorMode == true then
+	if self.interiormode == true then
 		return data
 	end
 end
@@ -98,16 +137,18 @@ function InteriorPlayer:OnLoad(data)
 	if data ~= nil then
 		print("Got data from load, dumping...")
 		dumptable(data, 1, 1, nil, 0)
-		self._camX = data._camX
-		self._camZ = data._camZ
-		self._camZoom = data._camZoom
-		self._interiorMode = data._interiorMode
+		self.camx = data.camx
+		self.camz = data.camz
+		self.camzoom = data.camzoom
+		self.interiormode = data.interiormode
 		
-		self._interiorWidth = data._interiorWidth
-		self._interiorDepth = data._interiorDepth
-		self._wallTexture = data._wallTexture
-		self._floorTexture = data._floorTexture
-		self._groundSound = data._groundSound
+		self.interiorwidth = data.interiorwidth
+		self.interiordepth = data.interiordepth
+		self.interiorheight = data.interiorheight
+		self.walltexture = data.walltexture
+		self.floortexture = data.floortexture
+		self.groundsound = data.groundsound
+		self.roomid = data.roomid
 	else
 		print("Got no data from load, nothing should happen")
 	end
@@ -115,7 +156,7 @@ end
 
 function InteriorPlayer:LoadPostPass(data)
 	print("DS - InteriorPlayer load POST pass")
-	if data._interiorMode then
+	if data.interiormode then
 		print("Interiormode is true, update camera")
 		self:UpdateCamera() -- Moving it a bit later in init so it can hopefully wait for the client to fully load
 	else

@@ -1,13 +1,8 @@
 local ToLoad = {
 	Prefabs = {
 		"playerhouse_city",
-		"pighousewithinterior",
-		"generic_door",
 		"home_prototyper",
-		"generic_wall_back",
-		"generic_wall_side",
 		"prop_door",
-		"generic_interior",
 		"deco_roomglow",
 		"shelf",
 		"shelf_slot",
@@ -76,10 +71,12 @@ local ToLoad = {
 		"smelter",
 		"reconstruction_project",
 		"waterdrop",
-		"floweroflife"
+		"floweroflife",
 	},
 	
 	Assets = {
+        Asset("SHADER", "shaders/interior.ksh"),
+
 		Asset("IMAGE", "images/colour_cubes/pigshop_interior_cc.tex"),
 	
 		Asset("IMAGE", "images/inventoryimages.tex"),
@@ -114,7 +111,7 @@ local ToLoad = {
 		Asset("IMAGE", "levels/textures/interiors/ground_ruins_slab_blue.tex"),
 		Asset("IMAGE", "levels/textures/interiors/batcave_wall_rock.tex"),
 		Asset("IMAGE", "levels/textures/interiors/batcave_floor.tex"),
-		Asset("IMAGE", "levels/textures/noise_woodfloor.tex"),
+		Asset("IMAGE", "levels/textures/interiors/noise_woodfloor.tex"),
 		Asset("IMAGE", "levels/textures/interiors/harlequin_panel.tex"),
 		Asset("IMAGE", "levels/textures/interiors/shop_wall_woodwall.tex"),
 		Asset("IMAGE", "levels/textures/interiors/shop_floor_hexagon.tex"),

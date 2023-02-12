@@ -108,7 +108,7 @@ local function placeTestCornerPillarFn(inst, pt)
     if interiorSpawner.current_interior then
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
 
         local dMax = originpt.x + depth/2
         local dMin = originpt.x - depth/2
@@ -169,7 +169,7 @@ local function placeTestCeilingLightFn(inst, pt)
 
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
 
         local dMax = originpt.x + depth/2
         local dMin = originpt.x - depth/2
@@ -204,7 +204,7 @@ local function placeTestWallFn(inst, pt, distance)
     local interiorSpawner = GetWorld().components.interiorspawner 
     if interiorSpawner.current_interior then
 
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
 
@@ -289,7 +289,7 @@ local function placeTestWindowFn(inst, pt)
     local interiorSpawner = GetWorld().components.interiorspawner 
     if interiorSpawner.current_interior then
 
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
 
@@ -356,7 +356,7 @@ local function placeTestWindowWideFn(inst, pt)
     local interiorSpawner = GetWorld().components.interiorspawner 
     if interiorSpawner.current_interior then
 
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
 
@@ -427,7 +427,7 @@ local function placeTestFurnitureFn(inst, pt)
 
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
 
         local dMax = originpt.x + depth/2
         local dMin = originpt.x - depth/2
@@ -467,7 +467,7 @@ local function placeTestShelfFn(inst, pt)
     local interiorSpawner = GetWorld().components.interiorspawner 
     if interiorSpawner.current_interior then
 
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
 
@@ -527,7 +527,7 @@ local function placeTestRugPropFn(inst, pt, distance)
 
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
 
         local dMax = originpt.x + depth/2
         local dMin = originpt.x - depth/2
@@ -573,7 +573,7 @@ local function placeTestRugFn(inst, pt, distance)
 
         local width = interiorSpawner.current_interior.width
         local depth = interiorSpawner.current_interior.depth
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
 
         local dMax = originpt.x + depth/2
         local dMin = originpt.x - depth/2
@@ -621,7 +621,7 @@ local function modifypillarfn(inst)
 
     local interiorSpawner = GetWorld().components.interiorspawner 
     if interiorSpawner.current_interior then 
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
         local depth = interiorSpawner.current_interior.depth
         local pt = Point(inst.Transform:GetWorldPosition())
 
@@ -642,7 +642,7 @@ local function modifywallfn(inst)
 
     local interiorSpawner = GetWorld().components.interiorspawner 
     if interiorSpawner.current_interior then 
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
         local width = interiorSpawner.current_interior.width
         local pt = Point(inst.Transform:GetWorldPosition())
 
@@ -663,7 +663,7 @@ local function modifywindowfn(inst)
 
     local interiorSpawner = GetWorld().components.interiorspawner 
     if interiorSpawner.current_interior then 
-        local originpt = interiorSpawner:getSpawnOrigin()
+        local originpt = interiorSpawner:GetSpawnOrigin()
         local width = interiorSpawner.current_interior.width
         local pt = Point(inst.Transform:GetWorldPosition())
 

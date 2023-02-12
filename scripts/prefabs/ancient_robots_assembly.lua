@@ -14,7 +14,7 @@ local prefabs =
     "laser_ring",
 }
 
-local function spawnpart(inst, prefab, x,y,z,rotation)
+local function SpawnPart(inst, prefab, x,y,z,rotation)
     local part = SpawnPrefab(prefab)
     part.Transform:SetPosition(x,y,z)
     part.spawned = true
@@ -28,7 +28,6 @@ local function spawnpart(inst, prefab, x,y,z,rotation)
     end)
     
     part.sg:GoToState("separate")
-
 end
 
 local function BreakApart(inst)
@@ -37,12 +36,11 @@ local function BreakApart(inst)
     local angle = math.atan2(down.z, down.x) / DEGREES
 
     if inst.head == 1 then
-        spawnpart(inst, "ancient_robot_head",x+down.x,y,z+down.z, math.random()*360)
+        SpawnPart(inst, "ancient_robot_head",x+down.x,y,z+down.z, math.random()*360)
          
     end
     if inst.spine == 1 then
-        spawnpart(inst, "ancient_robot_ribs",x-down.x,y,z-down.z, math.random()*360)
-        
+        SpawnPart(inst, "ancient_robot_ribs",x-down.x,y,z-down.z, math.random()*360)
     end  
 
     if inst.arms > 0 then
@@ -58,7 +56,7 @@ local function BreakApart(inst)
                 rotation = angle - 90                  
             end
 
-            spawnpart(inst, "ancient_robot_claw",sx,sy,sz, rotation)
+            SpawnPart(inst, "ancient_robot_claw",sx,sy,sz, rotation)
         end        
     end     
     if inst.legs > 0 then
@@ -74,13 +72,13 @@ local function BreakApart(inst)
                 rotation = angle - 90
             end
 
-            spawnpart(inst, "ancient_robot_leg",sx,sy,sz, rotation)            
+            SpawnPart(inst, "ancient_robot_leg",sx,sy,sz, rotation)            
         end
     end 
 end 
 
-local function onmerge(inst)
-    inst.RefreshArt(inst)
+local function OnMerge(inst)
+    inst:RefreshArt()
     inst.AnimState:PlayAnimation("merge")
     inst.AnimState:PushAnimation("idle",true)  
     local pos = Vector3(inst.Transform:GetWorldPosition())
@@ -160,8 +158,6 @@ local function OnAttacked(inst, data)
     local fx = SpawnPrefab("sparks_green_fx")
     local x, y, z= inst.Transform:GetWorldPosition()
     fx.Transform:SetPosition(x,y+1,z)
-
-    
 end
 
 local function GetStatus(inst)
@@ -213,7 +209,7 @@ local function commonfn(Sim)
     inst.entity:AddNetwork()
     
     inst.entity:AddMiniMapEntity()
-    int.MiniMapEntity:SetIcon("metal_spider.png")
+    inst.MiniMapEntity:SetIcon("metal_spider.png")
 
     inst:AddTag("lightningrod")
     inst:AddTag("laser_immune")
@@ -261,7 +257,7 @@ local function commonfn(Sim)
 
     inst.lightningpriority = 1
     inst:ListenForEvent("lightningstrike", OnLightning)
-    inst:ListenForEvent("merge", onmerge)
+    inst:ListenForEvent("merge", OnMerge)
 
     inst.entity:AddLight()
     inst.Light:SetIntensity(.6)
@@ -286,7 +282,7 @@ local function commonfn(Sim)
     inst.OnLoad = OnLoad
     inst.OnLoadPostPass = OnLoadPostPass
     
-    inst:ListenForEvent("beginaporkalypse", function(world) OnLightning(inst) end, GetWorld())
+    inst:ListenForEvent("beginaporkalypse", OnLightning, TheWorld)
 
     return inst
 end

@@ -1,6 +1,3 @@
-require "brains/ancientrobotbrain"
-require "stategraphs/SGAncientRobot"
-
 local UPDATETIME = 5
 
 local assets=
@@ -35,7 +32,7 @@ SetSharedLootTable( 'anchientrobot',
     {'gears', 0.33},
 })
 
-local function removemoss(inst)
+local function RemoveMoss(inst)
     if inst:HasTag("mossy") then           
         inst:RemoveTag("mossy")
         local x, y, z = inst.Transform:GetWorldPosition()
@@ -60,7 +57,7 @@ local function KeepTarget(inst, target)
     return true
 end
 
-local function periodicupdate(inst)
+local function PeriodicUpdate(inst)
     if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:IsActive() then
         return
     end
@@ -81,7 +78,7 @@ local function OnLightning(inst, data)
         inst:RemoveTag("dormant")
         inst:PushEvent("shock")
         if not inst.updatetask then
-            inst.updatetask = inst:DoPeriodicTask(UPDATETIME, periodicupdate)
+            inst.updatetask = inst:DoPeriodicTask(UPDATETIME, PeriodicUpdate)
         end
     end
 end
@@ -99,22 +96,14 @@ local function GetStatus(inst)
 end
 
 local function OnSave(inst,data)
-    local refs = {}
-    if inst.hits then
-        data.hits = inst.hits
-    end
-    if inst:HasTag("dormant") then
-        data.dormant = true
-    end
-    if inst:HasTag("mossy") then
-        data.mossy = true
-    end
-    if inst.lifetime then
-        data.lifetime = inst.lifetime
-    end
-    if inst.spawned then
-        data.spawned = true
-    end
+    local refs = {
+        hits = inst.hits,
+        dormant = inst:HasTag("dormant"),
+        mossy = inst:HasTag("mossy"),
+        lifetime = inst.lifetime,
+        spawned = inst.spawned,
+    }
+  
     if refs and #refs >0 then
         return refs
     end
@@ -136,7 +125,7 @@ local function OnLoad(inst,data)
         end
         if data.lifetime then
             inst.lifetime = data.lifetime
-            inst.updatetask = inst:DoPeriodicTask(UPDATETIME, periodicupdate)
+            inst.updatetask = inst:DoPeriodicTask(UPDATETIME, PeriodicUpdate)
         end
     end
     if inst:HasTag("dormant") then
@@ -153,47 +142,47 @@ local function OnLoadPostPass(inst,data)
     end
 end
 
-local function mergeaction(act)
+local function MergeAction(act)
     if act.target then
         local target = act.target
         if not target:HasTag("ancient_robots_assembly") then
             local hulk = SpawnPrefab("ancient_robots_assembly")
             local x,y,z = act.doer.Transform:GetWorldPosition()
             hulk.Transform:SetPosition(x,y,z)
-            target.mergefunction(target,hulk)
+            target:MergeFunction(hulk)
             target = hulk
             act.target:Remove()
         end
-        act.doer.mergefunction(act.doer,target)
+        act.doer:MergeFunction(target)
         target:PushEvent("merge")
         act.doer:Remove()
     end
 end
 
-local function commonfn(Sim)
+local function commonfn()
 	local inst = CreateEntity()
-	local trans = inst.entity:AddTransform()
-	local anim = inst.entity:AddAnimState()
-	local sound = inst.entity:AddSoundEmitter()
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
+	inst.entity:AddSoundEmitter()
+    inst.entity:AddMiniMapEntity()
     inst.entity:AddNetwork()
 
     inst.Transform:SetFourFaced()
 
-    local minimap = inst.entity:AddMiniMapEntity()
-    minimap:SetIcon("metal_spider.png")
+    inst.MiniMapEntity:SetIcon("metal_spider.png")
+
     inst.collisionradius = 1.2
     MakeCharacterPhysics(inst, 99999, inst.collisionradius)
 
     inst:AddTag("lightningrod")
-
     inst:AddTag("laser_immune")
     inst:AddTag("ancient_robot")
     inst:AddTag("mech")
     inst:AddTag("monster")
 
-    anim:SetBank("metal_spider")
-    anim:SetBuild("metal_spider")
-    anim:PlayAnimation("idle", true)
+    inst.AnimState:SetBank("metal_spider")
+    inst.AnimState:SetBuild("metal_spider")
+    inst.AnimState:PlayAnimation("idle", true)
 
 	inst.entity:SetPristine()
 
@@ -201,7 +190,6 @@ local function commonfn(Sim)
 		return inst
 	end
 
-    
     inst:AddComponent("timer")
     
     inst:AddComponent("combat")
@@ -239,48 +227,45 @@ local function commonfn(Sim)
     inst.Light:SetColour(1, 0, 0)
     inst.Light:Enable(false)
     
-    inst.periodicupdate = periodicupdate
-    inst.UPDATETIME = UPDATETIME
-    inst.hits = 0
-
-    inst.special_action = mergeaction
-    
-    inst.OnSave = OnSave
-    inst.OnLoad = OnLoad
-    inst.OnLoadPostPass = OnLoadPostPass
-    inst.removemoss = removemoss
-
     inst:AddComponent("locomotor") -- locomotor must be constructed before the stategraph
     inst.components.locomotor.walkspeed = 2
     inst.components.locomotor.runspeed = 2
     
-    local brain = require "brains/ancientrobotbrain"
-    inst:SetBrain(brain)
+    inst:SetBrain(require("brains/ancientrobotbrain"))
     inst:SetStateGraph("SGAncientRobot")
 
-    inst.spawntask = inst:DoTaskInTime(0,function()
-            if not inst.spawned then
-                inst:AddTag("mossy")
-                inst:AddTag("dormant")
-                inst.sg:GoToState("idle_dormant")
-                inst.spawned = true
-            end            
-        end)
+    inst.PeriodicUpdate = PeriodicUpdate
+    inst.UPDATETIME = UPDATETIME
+    inst.hits = 0
 
-    inst:ListenForEvent("beginaporkalypse", function(world) OnLightning(inst) end, GetWorld())
+    inst.SpecialAction = MergeAction
+    
+    inst.OnSave = OnSave
+    inst.OnLoad = OnLoad
+    inst.OnLoadPostPass = OnLoadPostPass
+    inst.RemoveMoss = RemoveMoss
+
+    inst.spawntask = inst:DoTaskInTime(0, function()
+        if not inst.spawned then
+            inst:AddTag("mossy")
+            inst:AddTag("dormant")
+            inst.sg:GoToState("idle_dormant")
+            inst.spawned = true
+        end            
+    end)
+
+    inst:ListenForEvent("beginaporkalypse", function(world) OnLightning(inst) end, TheWorld)
 
     return inst
 end
 
-local function ribsfn(Sim)
-    local inst = commonfn(Sim)
-    local shadow = inst.entity:AddDynamicShadow()
-    inst.collisionradius = 2
-    shadow:SetSize( 6, inst.collisionradius )
+local function ribsfn()
+    local inst = commonfn()
 
-	if not TheWorld.ismastersim then
-		return inst
-	end
+    inst.entity:AddDynamicShadow()
+    inst.DynamicShadow:SetSize( 6, inst.collisionradius )
+
+    inst.collisionradius = 2
 
     inst:AddTag("beam_attack")
     inst:AddTag("robot_ribs")
@@ -289,39 +274,45 @@ local function ribsfn(Sim)
     inst.AnimState:SetBuild("metal_spider")
     inst.AnimState:PlayAnimation("idle", true)
 
-    inst.mergefunction = function(inst,hulk)
+	if not TheWorld.ismastersim then
+		return inst
+	end
+
+    inst.MergeFunction = function(inst,hulk)
         hulk.spine = 1
     end
 
     return inst
 end
 
-local function armfn(Sim)
+local function armfn()
+    local inst = commonfn()
 
-    local inst = commonfn(Sim)
     inst.MiniMapEntity:SetIcon( "metal_claw.png" )
-    inst.collisionradius = 1.2
+
     MakeCharacterPhysics(inst, 99999, inst.collisionradius)
-    
+
+    inst.collisionradius = 1.2
+
+    inst.AnimState:SetBank("metal_claw")
+    inst.AnimState:SetBuild("metal_claw")
+    inst.AnimState:PlayAnimation("idle", true)
+
+    inst:AddTag("beam_attack")
+    inst:AddTag("robot_arm")
     inst:AddTag("IsSixFaced")
     inst:AddTag("noeightfaced")
+    
     inst.Transform:SetSixFaced()
 
 	if not TheWorld.ismastersim then
 		return inst
 	end
     
-    inst:AddTag("beam_attack")
-    inst:AddTag("robot_arm")
-
     inst.components.locomotor.walkspeed = 3
     inst.components.locomotor.runspeed = 3
 
-    inst.AnimState:SetBank("metal_claw")
-    inst.AnimState:SetBuild("metal_claw")
-    inst.AnimState:PlayAnimation("idle", true)
-
-    inst.mergefunction = function(inst,hulk)
+    inst.MergeFunction = function(inst,hulk)
         hulk.arms = hulk.arms + 1
     end    
 
@@ -329,22 +320,29 @@ local function armfn(Sim)
 end
 
 
-local function legfn(Sim)
+local function legfn()
+    local inst = commonfn()
 
-    local inst = commonfn(Sim)
+    inst.entity:AddDynamicShadow()
+    inst.DynamicShadow:SetSize( 4, 2 )
+
     inst.MiniMapEntity:SetIcon( "metal_leg.png" )
-    inst.collisionradius = 1.2
+
     MakeCharacterPhysics(inst, 99999, inst.collisionradius)
+ 
+    inst.collisionradius = 1.2
 
-    inst:AddTag("IsSixFaced")
-    inst:AddTag("noeightfaced")
     inst.Transform:SetSixFaced()
-    local shadow = inst.entity:AddDynamicShadow()
-    shadow:SetSize( 4, 2 )
-
+    
     inst:AddTag("jump_attack")
     inst:AddTag("lightning_taunt")
     inst:AddTag("robot_leg")
+    inst:AddTag("IsSixFaced")
+    inst:AddTag("noeightfaced")
+
+    inst.AnimState:SetBank("metal_leg")
+    inst.AnimState:SetBuild("metal_leg")
+    inst.AnimState:PlayAnimation("idle", true)
 
 	if not TheWorld.ismastersim then
 		return inst
@@ -353,11 +351,7 @@ local function legfn(Sim)
     inst.components.locomotor.walkspeed = 4
     inst.components.locomotor.runspeed = 4
 
-    inst.AnimState:SetBank("metal_leg")
-    inst.AnimState:SetBuild("metal_leg")
-    inst.AnimState:PlayAnimation("idle", true)
-
-    inst.mergefunction = function(inst,hulk)
+    inst.MergeFunction = function(inst,hulk)
         hulk.legs = hulk.legs + 1
     end 
 
@@ -366,25 +360,28 @@ local function legfn(Sim)
     return inst
 end
 
-local function headfn(Sim)
+local function headfn()
+    local inst = commonfn()
 
-    local inst = commonfn(Sim)
+    inst.entity:AddDynamicShadow()
+    inst.DynamicShadow:SetSize( 4, 2 )
+
     inst.MiniMapEntity:SetIcon( "metal_head.png" )
-    inst.collisionradius = 2
+
     MakeCharacterPhysics(inst, 99999, inst.collisionradius)
 
-    inst:AddTag("IsSixFaced")
-    inst:AddTag("noeightfaced")
-    inst.Transform:SetSixFaced()
-    local shadow = inst.entity:AddDynamicShadow()
-    shadow:SetSize( 4, 2 )
+    inst.collisionradius = 2
 
-	if not TheWorld.ismastersim then
-		return inst
-	end
+    inst.Transform:SetSixFaced()
 
     inst:AddTag("jump_attack")
     inst:AddTag("robot_head")
+    inst:AddTag("IsSixFaced")
+    inst:AddTag("noeightfaced")
+    
+	if not TheWorld.ismastersim then
+		return inst
+	end
 
     inst.components.locomotor.walkspeed = 4
     inst.components.locomotor.runspeed = 4
@@ -395,14 +392,14 @@ local function headfn(Sim)
 
     inst.components.combat:SetDefaultDamage(TUNING.ROBOT_LEG_DAMAGE)
 
-    inst.mergefunction = function(inst,hulk)
+    inst.MergeFunction = function(inst,hulk)
         hulk.head = 1
     end    
 
     return inst
 end
 
-return Prefab( "forest/animals/ancient_robot_ribs", ribsfn, assets, prefabs),
-       Prefab( "forest/animals/ancient_robot_claw", armfn, assets, prefabs),
-       Prefab( "forest/animals/ancient_robot_leg", legfn, assets, prefabs),
-       Prefab( "forest/animals/ancient_robot_head", headfn, assets, prefabs)
+return Prefab("ancient_robot_ribs", ribsfn, assets, prefabs),
+       Prefab("ancient_robot_claw", armfn, assets, prefabs),
+       Prefab("ancient_robot_leg", legfn, assets, prefabs),
+       Prefab("ancient_robot_head", headfn, assets, prefabs)

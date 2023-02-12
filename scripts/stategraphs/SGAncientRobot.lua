@@ -11,8 +11,8 @@ local actionhandlers =
 
 local SHAKE_DIST = 40
 
-local function removemoss(inst)
-    inst.removemoss(inst)
+local function RemoveMoss(inst)
+    inst.RemoveMoss(inst)
 --[[
     if inst:HasTag("mossy") then           
         inst:RemoveTag("mossy")
@@ -265,7 +265,7 @@ local events=
          end),          
     EventHandler("death", function(inst) inst.sg:GoToState("death") end),
     EventHandler("attacked", function(inst) 
-            removemoss(inst)
+            RemoveMoss(inst)
             inst.hits = inst.hits+ 1
            -- if inst.components.health:GetPercent() > 0 then                 
 
@@ -424,7 +424,7 @@ local states=
                 inst.sg:GoToState("separate")
                 local player = GetClosestInstWithTag("player", inst, SHAKE_DIST)
                 if player then
-                    player.components.playercontroller:ShakeCamera(inst, "FULL", 0.7, 0.02, 2, SHAKE_DIST)
+                    ShakeAllCameras(CAMERASHAKE.FULL, 0.7, .02, 2, inst, SHAKE_DIST)
                 end           
 
             end
@@ -478,7 +478,7 @@ local states=
         
         onenter = function(inst, pushanim)
             --inst.AnimState:SetBloomEffectHandle( "shaders/anim.ksh" )
-            removemoss(inst) 
+            RemoveMoss(inst) 
            -- inst:RemoveTag("dormant")      
             inst.components.locomotor:StopMoving()
             inst.AnimState:PlayAnimation("shock")
@@ -558,7 +558,7 @@ local states=
         tags = {"busy","activating"},
         
         onenter = function(inst, pushanim)
-            removemoss(inst)
+            RemoveMoss(inst)
             
             inst.components.locomotor:StopMoving()
             inst.AnimState:PlayAnimation("activate")

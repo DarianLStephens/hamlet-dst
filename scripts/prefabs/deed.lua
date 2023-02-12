@@ -99,4 +99,4 @@ local function makefn(inst)
     return inst
 end
 
-return Prefab( "common/inventory/deed", makefn, assets)
+return Prefab( "deed", makefn, assets)

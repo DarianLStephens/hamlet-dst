@@ -38,4 +38,4 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab( "common/objects/shop_spawner", fn ) 
+return Prefab( "shop_spawner", fn ) 

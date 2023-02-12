@@ -570,7 +570,7 @@ local function place_door_test_fn(inst, pt)
     local interior_spawner = TheWorld.components.TheWorld.components.interiorspawner
     if interior_spawner.current_interior then
 
-        local originpt = interior_spawner:getSpawnOrigin()
+        local originpt = interior_spawner:GetSpawnOrigin()
         local width = interior_spawner.current_interior.width
         local depth = interior_spawner.current_interior.depth
 
@@ -652,7 +652,7 @@ local function modify_house_door(inst)
     -- local interior_spawner = GetTheWorld.components.interiorspawner()
     local interior_spawner = TheWorld.components.interiorspawner
 
-    local originpt = interior_spawner:getSpawnOrigin()
+    local originpt = interior_spawner:GetSpawnOrigin()
     local width = interior_spawner.current_interior.width
     local depth = interior_spawner.current_interior.depth
 
@@ -721,14 +721,14 @@ local function MakeHouseDoor(name, build, bank)
 
 		return inst
 	end
-	return Prefab("common/inventory/" .. name, house_fn, assets, prefabs )
+	return Prefab(name, house_fn, assets, prefabs )
 end
 
 local function MakeHouseDoorPlacer(name, build, bank)
-	-- return MakePlacer( "common/inventory/" .. name .. "_placer", bank, build, name .. "_open_north", nil, nil, nil, nil, nil, nil, nil, nil, nil, place_door_test_fn, modify_house_door, nil)
+	-- return MakePlacer(name .. "_placer", bank, build, name .. "_open_north", nil, nil, nil, nil, nil, nil, nil, nil, nil, place_door_test_fn, modify_house_door, nil)
 	-- Gotta do something about the place test function.
 	-- Turns out it's done in the recipe itself, now!
-	return MakePlacer( "common/inventory/" .. name .. "_placer", bank, build, name .. "_open_north", nil, nil, 2, nil, nil, nil, nil, modify_house_door) --, InitHouseDoorInteriorPrefab)
+	return MakePlacer( name .. "_placer", bank, build, name .. "_open_north", nil, nil, 2, nil, nil, nil, nil, modify_house_door) --, InitHouseDoorInteriorPrefab)
 end
 
 local function InitInteriorPrefab_shadow(inst, doer, prefab_definition, interior_definition)
@@ -796,4 +796,4 @@ return MakeHouseDoor("wood_door",    "pig_ruins_door", "doorway_ruins"),
 	   MakeHouseDoorPlacer("round_door",   "player_house_doors", "player_house_doors"),
 	   MakeHouseDoorPlacer("plate_door",   "player_house_doors", "player_house_doors"),
 
-	   Prefab("common/inventory/house_door_shadow", shadowfn, assets, prefabs)
+	   Prefab("house_door_shadow", shadowfn, assets, prefabs)

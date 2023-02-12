@@ -33,7 +33,7 @@ local function smash(inst)
     if inst.components.lootdropper then
 		local interiorSpawner = GetWorld().components.interiorspawner 
         if interiorSpawner.current_interior then
-            local originpt = interiorSpawner:getSpawnOrigin()
+            local originpt = interiorSpawner:GetSpawnOrigin()
             local x, y, z = inst.Transform:GetWorldPosition()
             local dropdir = Vector3(originpt.x - x, 0.0, originpt.z - z):GetNormalized()
             inst.components.lootdropper.dropdir = dropdir

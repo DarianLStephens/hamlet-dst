@@ -1,52 +1,43 @@
--- Entire prefab thanks to Asura!
-
-local function build_mesh(vertices)
-	print("Building mesh with vertices about to be dumped")
-	dumptable(vertices, 1, 0, nil, 0)
-	local triangles = {}
-	local y0 = 0
-    local y1 = 3
-
-	local idx0 = #vertices
+local function BuildMesh(vertices, height)
+    local triangles = {}
+    local y0 = 0
+    local y1 = height
+ 
+    local idx0 = #vertices
     for idx1 = 1, #vertices do
-
-        local x0, z0 = vertices[idx0][1], vertices[idx0][2]
-		local x1, z1 = vertices[idx1][1], vertices[idx1][2]
-    
-		--vertical one    
+        local x0, z0 = vertices[idx0].x, vertices[idx0].z
+        local x1, z1 = vertices[idx1].x, vertices[idx1].z
+ 
         table.insert(triangles, x0)
         table.insert(triangles, y0)
         table.insert(triangles, z0)
-
+ 
         table.insert(triangles, x0)
         table.insert(triangles, y1)
         table.insert(triangles, z0)
-
+ 
         table.insert(triangles, x1)
         table.insert(triangles, y0)
         table.insert(triangles, z1)
-
+ 
         table.insert(triangles, x1)
         table.insert(triangles, y0)
         table.insert(triangles, z1)
-
+ 
         table.insert(triangles, x0)
         table.insert(triangles, y1)
         table.insert(triangles, z0)
-
+ 
         table.insert(triangles, x1)
         table.insert(triangles, y1)
         table.insert(triangles, z1)
-
-		idx0 = idx1
+ 
+        idx0 = idx1
     end
+ 
+    return triangles
+ end
 
-	print("Constructed triangles, dumping...")
-	dumptable(triangles, 1, 0, nil, 0)
-	return triangles
-end
-
---local vertices = {{-7.25, -9.25}, {-7.25, 9.25}, {5.25, 9.25}, {5.25, -9.25}}
 local function interior_collision()
     local inst = CreateEntity()
 
@@ -72,20 +63,58 @@ local function interior_collision()
     inst:AddTag("NOCLICK")
     inst:AddTag("NOBLOCK")
 	inst:AddTag("interior_collision")
-	
-    inst.SetVerticles = function(inst, depth, width)
-		print("Interior Collision prefab attempting to build a triangle mesh")
-        -- inst.Physics:SetTriangleMesh(build_mesh({{-depth+0.5, -width}, {-depth+0.5, width}, {depth, width}, {depth, -width}}))
-        inst.Physics:SetTriangleMesh(build_mesh({{-depth-0.5, -width}, {-depth-0.5, width}, {depth+0.5, width}, {depth+0.5, -width}}))
-		-- First 2 values are the back of the room (Negative depth), last 2 are the from (Positive Depth). Value 1 is... right?
-    end
-	
+
+    inst.depth = net_smallbyte(inst.GUID, "interior_collision.depth", "interiorcollisiondirty")
+    inst.width = net_smallbyte(inst.GUID, "interior_collision.width", "interiorcollisiondirty")
+    inst.height = net_smallbyte(inst.GUID, "interior_collision.height", "interiorcollisiondirty")
+    inst.name = net_string(inst.GUID, "interior_collision.name")
+
+    inst.depth:set(0)
+    inst.width:set(0)
+    inst.height:set(0)
+    inst.name:set("")
+    
     inst.entity:SetPristine()
 
     if not TheWorld.ismastersim then
+        inst:ListenForEvent("interiorcollisiondirty", function()
+            local vertexes = {
+                Vector3((inst.depth:value()/2), 0, -(inst.width:value()/2)),
+                Vector3(-(inst.depth:value()/2), 0, -(inst.width:value()/2)),
+                Vector3(-(inst.depth:value()/2), 0, (inst.width:value()/2)),
+                Vector3((inst.depth:value()/2), 0, (inst.width:value()/2)),
+            }
+            inst.Physics:SetTriangleMesh(BuildMesh(vertexes, inst.height:value() or 3))
+        end)
         return inst
     end
 
+    inst.SetName = function(inst, name)
+        print("LOOK AT ME", name)
+        inst.name:set(name)
+    end
+
+    inst.SetVerticles = function(inst, depth, width, height)
+        inst.depth:set(depth)
+        inst.width:set(width)
+        inst.height:set(height)
+        local vertexes = {
+            Vector3((depth/2), 0, -(width/2)),
+            Vector3(-(depth/2), 0, -(width/2)),
+            Vector3(-(depth/2), 0, (width/2)),
+            Vector3((depth/2), 0, (width/2)),
+        }
+        inst.Physics:SetTriangleMesh(BuildMesh(vertexes, height or 3))
+
+        if height then
+            if not inst.ceiling then
+                inst.ceiling = SpawnAt("interior_ceiling", inst)
+            end
+            local x, y, z = inst.Transform:GetWorldPosition()
+            inst.ceiling.Transform:SetPosition(x, 3+height, z)
+        end
+    end
+	
     return inst
 end
 
@@ -106,14 +135,9 @@ local function OnCollideCeiling(inst, collider)
 			if not inst:IsValid() then
 				return
 			end
-			collider.Physics:Teleport(inst:GetNormalPosition(collider:GetPosition()):Get()) 
+			--collider.Physics:Teleport(inst:GetNormalPosition(collider:GetPosition()):Get()) 
 		end
 	end
-end
-
-local function OnCeilingInit(inst)
-	local x, y, z = inst.Transform:GetWorldPosition()
-	inst.Transform:SetPosition(x, 8, z)
 end
 
 local function interior_ceiling()
@@ -131,8 +155,6 @@ local function interior_ceiling()
 	phys:CollidesWith(COLLISION.FLYERS)
 	phys:SetCylinder(70, 70)
 	phys:SetCollisionCallback(OnCollideCeiling)
-	
-	inst:DoTaskInTime(0, OnCeilingInit)
 	
 	return inst
 end

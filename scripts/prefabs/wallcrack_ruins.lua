@@ -176,4 +176,4 @@ local function fn()
     return inst
 end
 
-return Prefab( "common/inventory/wallcrack_ruins", fn, assets, prefabs)
+return Prefab( "wallcrack_ruins", fn, assets, prefabs)

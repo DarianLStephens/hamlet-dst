@@ -108,5 +108,5 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab( "common/objects/city_lamp_inside", fn, assets) 
+return Prefab( "city_lamp_inside", fn, assets) 
 

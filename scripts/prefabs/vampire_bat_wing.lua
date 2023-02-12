@@ -23,4 +23,4 @@ local function fn(Sim)
     return newinst
 end
 
-return Prefab( "common/inventory/vampire_bat_wing", fn, assets) 
+return Prefab( "vampire_bat_wing", fn, assets) 

@@ -27,4 +27,4 @@ local function fn()
     return inst
 end
 
-return Prefab( "common/inventory/musac", fn, assets, prefabs)
+return Prefab( "musac", fn, assets, prefabs)

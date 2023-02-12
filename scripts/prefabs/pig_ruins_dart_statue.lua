@@ -203,6 +203,6 @@ local function fn(Sim)
 end
 
 
-return  Prefab( "common/objects/pig_ruins_dart_statue", fn, assets, prefabs)        
+return  Prefab( "pig_ruins_dart_statue", fn, assets, prefabs)        
 
         

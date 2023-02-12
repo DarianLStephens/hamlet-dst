@@ -11,7 +11,7 @@ local function place_door_test_fn(pt,rot)
     -- local interior_spawner = TheWorld.components.interiorspawner
     -- if interior_spawner.current_interior then
 
-        local originpt = Vector3(1000, 0, 0)--interior_spawner:getSpawnOrigin()
+        local originpt = Vector3(1000, 0, 0)--interior_spawner:GetSpawnOrigin()
         local width = 15--interior_spawner.current_interior.width
         local depth = 10--interior_spawner.current_interior.depth
 
@@ -99,16 +99,10 @@ TECH.SCIENCE_TWO,
 {placer="playerhouse_city_placer"},
 {"STRUCTURES"})
  
- -- Finally disabled this test thing
- -- AddRecipe2("pighousewithinterior",
- -- {Ingredient("boards", 1), Ingredient("cutstone", 1), Ingredient("pigskin", 1)},
- -- TECH.SCIENCE_TWO,
- -- {placer="interiorhouse_placer"})
- 
-AddRecipe2("common/inventory/iron_door",
+AddRecipe2("iron_door",
 {Ingredient("oinc", 15)},
 TECH.HOME_TWO,
-{placer="common/inventory/iron_door_placer",
+{placer="iron_door_placer",
 image="iron_door.tex",
 testfn=place_door_test_fn,
 nounlock=true},

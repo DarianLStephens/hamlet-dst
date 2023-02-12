@@ -589,5 +589,5 @@ local function sparklefn(Sim)
 end
 
 
-return Prefab( "common/objects/lifeplant", fn, assets, prefabs),
-	   Prefab( "common/objects/lifeplant_sparkle", sparklefn, assets, prefabs)		
+return Prefab( "lifeplant", fn, assets, prefabs),
+	   Prefab( "lifeplant_sparkle", sparklefn, assets, prefabs)		

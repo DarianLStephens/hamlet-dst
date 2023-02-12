@@ -575,5 +575,5 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab("common/objects/pig_palace", fn, assets, prefabs)
+return Prefab("pig_palace", fn, assets, prefabs)
 

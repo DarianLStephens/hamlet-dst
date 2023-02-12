@@ -370,6 +370,6 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab( "common/smelter", fn, assets, prefabs),
-		MakePlacer( "common/smelter_placer", "smelter", "smelter", "idle_empty" ) 
+return Prefab( "smelter", fn, assets, prefabs),
+		MakePlacer( "smelter_placer", "smelter", "smelter", "idle_empty" ) 
 		-- Why not correct that typo, eh? smetler>smelter

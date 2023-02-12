@@ -201,7 +201,7 @@ local function smash(inst)
     if inst.components.lootdropper then
         local interiorSpawner = TheWorld.components.interiorspawner 
         if interiorSpawner.current_interior then
-            local originpt = interiorSpawner:getSpawnOrigin()
+            local originpt = interiorSpawner:GetSpawnOrigin()
             local x, y, z = inst.Transform:GetWorldPosition()
             local dropdir = Vector3(originpt.x - x, 0.0, originpt.z - z):GetNormalized()
             inst.components.lootdropper.dropdir = dropdir
@@ -302,9 +302,9 @@ local function onsave(inst, data)
         data.childrenspawned = inst.childrenspawned 
     end
 
-    -- if inst.flipped then
-        -- data.flipped = inst.flipped
-    -- end    
+    if inst.flipped then
+        data.flipped = inst.flipped
+    end    
     if inst.setbackground then
         data.setbackground = inst.setbackground
     end
@@ -370,9 +370,13 @@ local function onload(inst, data)
     if data.childrenspawned then
         inst.childrenspawned = data.childrenspawned
     end
-    -- if data.flipped then
-        -- inst.flipped = data.flipped        
-    -- end       
+    if data.flipped then
+        inst.flipped = data.flipped
+    end 
+    if data.rotation > 0 and not data.flipped then
+        inst.AnimState:SetScale(-1,1,1)
+    end    
+
     if data.dartthrower then
        inst:AddTag("dartthrower")
     end
@@ -437,7 +441,11 @@ local function loadpostpass(inst,ents, data)
         if data.children then
             for i,child in ipairs(data.children) do
                 local childent = ents[child]
+
                 if childent then
+                    if inst.Transform:GetRotation() > 0 then
+                        childent.entity.AnimState:SetScale(-1,1,1)
+                    end
                     table.insert(inst.decochildrenToRemove, childent.entity)
                 end
             end
@@ -491,7 +499,6 @@ local phasefunctions =
 
     night = function(inst) 
         local lights = inst.lightsetting
-        --if TheWorld.components.clock:GetMoonPhase() == "full" then
 		if TheWorld.state.isfullmoon then
             inst.components.lighttweener:StartTween(nil, lights.full.radius, lights.full.intensity, lights.full.falloff, {lights.full.color[1],lights.full.color[2],lights.full.color[3]}, 4)
         else
@@ -516,29 +523,10 @@ local timechange =
 		inst.AnimState:PlayAnimation("to_night")
 		inst.AnimState:PushAnimation("night_loop", true)
 	end,
--- --        if inst.Light then
- -- --           phasefunctions["day"](inst)
-  -- --      end
-    -- elseif TheWorld.state.isnight then
-       -- inst.AnimState:PlayAnimation("to_night")
-        -- inst.AnimState:PushAnimation("night_loop", true)
--- --        if inst.Light then
--- --            phasefunctions["night"](inst)
--- --        end
-    -- elseif TheWorld.state.isdusk then
-        -- inst.AnimState:PlayAnimation("to_dusk")
-        -- inst.AnimState:PushAnimation("dusk_loop", true)
--- --        if inst.Light then
- -- --           phasefunctions["dusk"](inst)
- -- --       end
-    -- end
--- end
 }
 
 local function UpdateTime(inst, instant)    
 	local phase = TheWorld.state.phase
-	-- phasefunctions[phase](inst, instant)
-	-- phasefunctions[phase](inst, false)
 	timechange[phase](inst)
 end
 
@@ -598,6 +586,7 @@ function decofn(build, bank, animframe, data, name)
     local light = data.light
     local followlight = data.followlight
     local scale = data.scale
+    local flipped = data.flipped
     local mirror = data.mirror
     local physics = data.physics
     local windowlight = data.windowlight
@@ -617,28 +606,24 @@ function decofn(build, bank, animframe, data, name)
 
 		inst.entity:AddNetwork()
 		
-        inst.Transform:SetRotation(-90)
 		-- inst:AddComponent("savedscale")-- DS - Testing a way to save the scale easier
 		
 		inst.entity:SetPristine()
 
-        -- if scale then
-			-- if flipped then
-				-- -- anim:SetScale(-1, 1)
-				-- scale.x = scale.x * -1
-			-- -- else
-			-- end
-			-- anim:SetScale(scale.x, scale.y, scale.z)
-		-- else
-			-- if flipped then
-				-- anim:SetScale(-1, 1, 1)
-			-- end
-        -- end
+        if scale then
+			if flipped then
+				scale.x = scale.x * -1
+			end
+			anim:SetScale(scale.x, scale.y, scale.z)
+		else
+			if flipped then
+				anim:SetScale(-1, 1, 1)
+			end
+        end
 
 		if not TheWorld.ismastersim then
 			return inst
 		end
-		
 
         for i, tag in ipairs(tags) do
             inst:AddTag(tag)
@@ -653,6 +638,9 @@ function decofn(build, bank, animframe, data, name)
                         print(childprop.prefab,pt.x,pt.y,pt.z)
                         childprop.Transform:SetPosition(pt.x ,pt.y, pt.z)
                         childprop.Transform:SetRotation(inst.Transform:GetRotation())
+                        if flipped or inst.Transform:GetRotation() > 0 then
+                            childprop.AnimState:SetScale(-1,1,1)
+                        end
                         if not inst.decochildrenToRemove then
                             inst.decochildrenToRemove = {}
                         end       
@@ -690,15 +678,15 @@ function decofn(build, bank, animframe, data, name)
 
         if physics then
             if physics == "sofa_physics" then
-                -- MakeInteriorPhysics(inst, 1.3, 1, 0.2)
+                MakeInteriorPhysics(inst, 1.3, 1, 0.2)
             elseif physics == "sofa_physics_vert" then
-                -- MakeInteriorPhysics(inst, 0.2, 1, 1.3)                
+                MakeInteriorPhysics(inst, 0.2, 1, 1.3)                
             elseif physics == "chair_physics_small" then
                 MakeObstaclePhysics(inst, .5)   
             elseif physics == "chair_physics" then
-                -- MakeInteriorPhysics(inst, 1, 1, 1)
+                MakeInteriorPhysics(inst, 1, 1, 1)
             elseif physics == "desk_physics" then
-                -- MakeInteriorPhysics(inst, 2, 1, 1)
+                MakeInteriorPhysics(inst, 2, 1, 1)
             elseif physics == "tree_physics" then
                 inst:AddTag("blocker")
                 inst.entity:AddPhysics()
@@ -752,10 +740,6 @@ function decofn(build, bank, animframe, data, name)
         end
 
         if data.dayevents then
-            -- inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
-            -- inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
-            -- inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)  
-            -- timechange(inst)
 			inst:WatchWorldState("phase", UpdateTime)
 			UpdateTime(inst, false)
         end
@@ -765,9 +749,9 @@ function decofn(build, bank, animframe, data, name)
                 inst:DoTaskInTime(0, function()
                     if not inst.sunraysspawned then
                         inst.swinglight = SpawnPrefab("swinglightobject")
-                        inst.swinglight.setLightType(inst.swinglight, followlight)
+                        inst.swinglight:setLightType(followlight)
                         if windowlight then
-                            inst.swinglight.setListenEvents(inst.swinglight)                           
+                            inst.swinglight:setListenEvents()                         
                         end                        
                         local follower = inst.swinglight.entity:AddFollower()
                         follower:FollowSymbol( inst.GUID, "light_circle", 0, 0, 0 )
@@ -823,10 +807,10 @@ function decofn(build, bank, animframe, data, name)
 
                     if TheWorld.components.quaker_interior then
                         if workleft <= 0 then
-                            TheWorld.components.quaker_interior:ForceQuake("cavein")                            
+                            TheWorld.components.quaker_interior:ForceQuake("cavein", inst)                            
                             print("QUAKE: CAVE IN!!!")
                         else
-                           TheWorld.components.quaker_interior:ForceQuake("pillarshake")
+                           TheWorld.components.quaker_interior:ForceQuake("pillarshake", inst)
                            print("QUAKE: pillar!!!")
                         end
                     end

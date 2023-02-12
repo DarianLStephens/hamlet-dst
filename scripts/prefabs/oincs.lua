@@ -137,6 +137,6 @@ local function oinc100_fn()
 	return inst
 end
 
-return Prefab( "common/inventory/oinc", oinc_fn, assets, prefabs),
-		Prefab( "common/inventory/oinc10", oinc10_fn, assets, prefabs),
-		Prefab( "common/inventory/oinc100", oinc100_fn, assets, prefabs)
+return Prefab( "oinc", oinc_fn, assets, prefabs),
+		Prefab( "oinc10", oinc10_fn, assets, prefabs),
+		Prefab( "oinc100", oinc100_fn, assets, prefabs)

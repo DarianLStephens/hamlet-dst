@@ -1824,17 +1824,17 @@ local function makefn(name,build_interiors, dungeonname)
     return fn
 end
  
-return Prefab("common/objects/pig_ruins_entrance", makefn("pig_ruins_entrance", true,"RUINS_1"), assets, prefabs ),
-       Prefab("common/objects/pig_ruins_exit", makefn("pig_ruins_entrance", false,"RUINS_1"), assets, prefabs ),
+return Prefab("pig_ruins_entrance", makefn("pig_ruins_entrance", true,"RUINS_1"), assets, prefabs ),
+       Prefab("pig_ruins_exit", makefn("pig_ruins_entrance", false,"RUINS_1"), assets, prefabs ),
 
-       Prefab("common/objects/pig_ruins_entrance2", makefn("pig_ruins_entrance", true,"RUINS_2"), assets, prefabs ),
-       Prefab("common/objects/pig_ruins_exit2", makefn("pig_ruins_entrance", false,"RUINS_2"), assets, prefabs ),
+       Prefab("pig_ruins_entrance2", makefn("pig_ruins_entrance", true,"RUINS_2"), assets, prefabs ),
+       Prefab("pig_ruins_exit2", makefn("pig_ruins_entrance", false,"RUINS_2"), assets, prefabs ),
 
-       Prefab("common/objects/pig_ruins_entrance3", makefn("pig_ruins_entrance", true,"RUINS_3"), assets, prefabs ),
+       Prefab("pig_ruins_entrance3", makefn("pig_ruins_entrance", true,"RUINS_3"), assets, prefabs ),
 
-       Prefab("common/objects/pig_ruins_entrance4", makefn("pig_ruins_entrance", true,"RUINS_4"), assets, prefabs ),
-       Prefab("common/objects/pig_ruins_exit4", makefn("pig_ruins_entrance", false,"RUINS_4"), assets, prefabs ),
+       Prefab("pig_ruins_entrance4", makefn("pig_ruins_entrance", true,"RUINS_4"), assets, prefabs ),
+       Prefab("pig_ruins_exit4", makefn("pig_ruins_entrance", false,"RUINS_4"), assets, prefabs ),
   
-       Prefab("common/objects/pig_ruins_entrance5", makefn("pig_ruins_entrance", true,"RUINS_5"), assets, prefabs ),
+       Prefab("pig_ruins_entrance5", makefn("pig_ruins_entrance", true,"RUINS_5"), assets, prefabs ),
 
-       Prefab("common/objects/pig_ruins_entrance_small", makefn("pig_ruins_entrance", true,"RUINS_SMALL"), assets, prefabs )
+       Prefab("pig_ruins_entrance_small", makefn("pig_ruins_entrance", true,"RUINS_SMALL"), assets, prefabs )

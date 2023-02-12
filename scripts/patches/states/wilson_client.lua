@@ -236,7 +236,7 @@ local STATES = {
                 inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/crafted/iron_lord/morph")
             end),
             TimeEvent(105*FRAMES, function(inst) 
-                -- inst.components.playercontroller:ShakeCamera(inst, "FULL", 0.7, 0.02, .5, 40)
+                ShakeAllCameras(CAMERASHAKE.FULL, 0.7, 0.02, .5, inst, 40)
             end),
 
             TimeEvent(105*FRAMES, function(inst) 

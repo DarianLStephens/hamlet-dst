@@ -1,6 +1,5 @@
 require "prefabutil"
 require "recipes"
---require "cameras/interiorcamera"
 
 local assets =
 {
@@ -266,5 +265,5 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab( "common/objects/shop_test", fn, assets, prefabs ),
-	   MakePlacer("common/shop_test_placer", "pig_house", "pig_house", "idle")  
+return Prefab( "shop_test", fn, assets, prefabs ),
+	   MakePlacer("shop_test_placer", "pig_house", "pig_house", "idle")  

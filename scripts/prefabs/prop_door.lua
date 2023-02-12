@@ -530,6 +530,7 @@ local function fn()
     inst.AnimState:SetBuild("acorn")
     inst.AnimState:PlayAnimation("idle")
 	inst.AnimState:SetSortOrder( 0 )
+	inst.AnimState:SetScale(-1, 1, 1) --They are flipped by default in hamlet
 
     --inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
 
@@ -597,6 +598,7 @@ local function shadowfn()
     inst.AnimState:SetBank("doorway_ruins")
     inst.AnimState:SetBuild("pig_ruins_door")
     inst.AnimState:PlayAnimation("south_floor")
+	inst.AnimState:SetScale(-1, 1, 1) --They are flipped by default in hamlet
     inst:AddTag("NOCLICK")  -- Note for future self: Was commented out, but not sure why.. if it's not there, the shadow eats the click on the door.
     inst:AddTag("NOBLOCK")
 	inst.initInteriorPrefab = InitInteriorPrefab_shadow
@@ -609,5 +611,5 @@ local function shadowfn()
 end
 
 
-return Prefab( "common/inventory/prop_door", fn, assets, prefabs),
-	   Prefab( "common/inventory/prop_door_shadow", shadowfn, assets, prefabs)
+return Prefab( "prop_door", fn, assets, prefabs),
+	   Prefab( "prop_door_shadow", shadowfn, assets, prefabs)

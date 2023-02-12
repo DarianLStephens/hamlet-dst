@@ -60,8 +60,8 @@ local TileUV_Y = 0
 
 local function InitEnvelopes()
 	
-	-- width = ThePlayer.replica.interiorplayer.interiorWidth
-	-- height = ThePlayer.replica.interiorplayer.interiorDepth
+	-- width = ThePlayer.replica.interiorplayer.interiorwidth
+	-- height = ThePlayer.replica.interiorplayer.interiordepth
     EnvelopeManager:AddColourEnvelope(
         COLOUR_ENVELOPE_NAME,
         {

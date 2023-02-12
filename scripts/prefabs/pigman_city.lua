@@ -836,7 +836,7 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
         end
         ------------------------------------------  
         
-        inst.special_action = function (act)
+        inst.SpecialAction = function (act)
             if inst.daily_gifting then
                 inst.sg:GoToState("daily_gift")
             elseif inst.poop_tip then
@@ -1090,7 +1090,7 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
 		
 		inst.entity:SetPristine()
 
-        inst.special_action = function (act)
+        inst.SpecialAction = function (act)
             inst.sg:GoToState("desk_pre")
         end
 
@@ -1177,7 +1177,7 @@ local function makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econ
 end
 
 local function makepigman(name, build, fixer, guard_pig, shopkeeper, tags, sex, econprefab)   
-    return Prefab("common/objects/" .. name, makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econprefab), assets, prefabs )  
+    return Prefab(name, makefn(name, build, fixer, guard_pig, shopkeeper, tags, sex, econprefab), assets, prefabs )  
 end
 
 --                      name                        build         fixer  guard shop tags               sex

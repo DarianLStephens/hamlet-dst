@@ -78,7 +78,7 @@ local function onload(inst, data)
         if data.flipped then
             inst.flipped = data.flipped
             local rx,ry,rz = inst.Transform:GetScale()
-            inst.Transform:SetScale(rx,ry,-rz)
+            inst.AnimState:SetScale(-rx,ry,rz)
         end         
     end  
 end
@@ -245,10 +245,10 @@ local function sidewallbluefn(Sim)
 end
 
 
-return  Prefab( "common/objects/pig_ruins_torch", pillarfn, assets, prefabs),
-        Prefab( "common/objects/pig_ruins_torch_wall", wallfn, assets, prefabs),
-        Prefab( "common/objects/pig_ruins_torch_sidewall", sidewallfn, assets, prefabs),
+return  Prefab( "pig_ruins_torch", pillarfn, assets, prefabs),
+        Prefab( "pig_ruins_torch_wall", wallfn, assets, prefabs),
+        Prefab( "pig_ruins_torch_sidewall", sidewallfn, assets, prefabs),
     
-        Prefab( "common/objects/pig_ruins_torch_wall_blue", wallbluefn, assets, prefabs),
-        Prefab( "common/objects/pig_ruins_torch_sidewall_blue", sidewallbluefn, assets, prefabs)
+        Prefab( "pig_ruins_torch_wall_blue", wallbluefn, assets, prefabs),
+        Prefab( "pig_ruins_torch_sidewall_blue", sidewallbluefn, assets, prefabs)
 

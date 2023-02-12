@@ -90,14 +90,14 @@ local events=
 local function ShakeIfClose(inst)
     local player = GetClosestInstWithTag("player", inst, SHAKE_DIST)
     if player then
-        player.components.playercontroller:ShakeCamera(inst, "FULL", 0.7, 0.02, 3, SHAKE_DIST)
+        ShakeAllCameras(CAMERASHAKE.FULL, 0.7, .02, 3, inst, SHAKE_DIST)
     end
 end
 
 local function ShakeIfClose_Footstep(inst)
     local player = GetClosestInstWithTag("player", inst, SHAKE_DIST)
     if player then
-        player.components.playercontroller:ShakeCamera(inst, "FULL", 0.35, 0.02, 1.25, SHAKE_DIST)
+        ShakeAllCameras(CAMERASHAKE.FULL, 0.35, .02, 1.25, inst, SHAKE_DIST)
     end
 end
 
@@ -350,7 +350,7 @@ local states=
             TimeEvent(81*FRAMES, function(inst) 
                     local player = GetClosestInstWithTag("player", inst, SHAKE_DIST)
                     if player then
-                        player.components.playercontroller:ShakeCamera(inst, "FULL", 0.7, 0.02, 2, SHAKE_DIST)
+                        ShakeAllCameras(CAMERASHAKE.FULL, 0.7, .02, 2, inst, SHAKE_DIST)
                     end           
                     local x,y,z = inst.Transform:GetWorldPosition()
                     SpawnPrefab("laserscorch").Transform:SetPosition(x, 0, z) 
@@ -372,7 +372,7 @@ local states=
                         end)
                     inst.DoDamage(inst, 6)
                     inst.components.lootdropper:DropLoot()      
-                    inst.dropparts(inst)
+                    inst.DropParts(inst)
                 end),
         },
     },
@@ -489,7 +489,7 @@ local states=
             TimeEvent(17*FRAMES, function(inst) inst.SoundEmitter:PlaySound("dontstarve_DLC001/creatures/bearger/groundpound")
             end),
             TimeEvent(17*FRAMES, function(inst)    
-                GetPlayer().components.playercontroller:ShakeCamera(inst, "FULL", 0.7, 0.02, 2, 40)          
+                ShakeAllCameras(CAMERASHAKE.FULL, 0.7, .02, 2, inst, 40)
                 inst.components.groundpounder:GroundPound()
             end),
             TimeEvent(19*FRAMES, function(inst) TheMixer:PopMix("boom")
@@ -829,15 +829,12 @@ local states=
                 inst.components.groundpounder.damageRings = 4
                 inst.components.groundpounder.destructionRings = 4
                 inst.components.groundpounder.numRings = 4                
-                GetPlayer().components.playercontroller:ShakeCamera(inst, "FULL", 0.7, 0.02, 2, 40)          
+                ShakeAllCameras(CAMERASHAKE.FULL, 0.7, .02, 2, inst, 40)
                 inst.components.groundpounder:GroundPound()
                 local pt = Vector3(inst.Transform:GetWorldPosition())
-                GetWorld():DoTaskInTime(0.6,function() inst.spawnbarrier(inst,pt) end)
+                inst:DoTaskInTime(0.6, inst.SpawnBarrier)
                 local fx = SpawnPrefab("metal_hulk_ring_fx")
                 fx.Transform:SetPosition(pt.x,pt.y,pt.z)
-                fx.AnimState:SetOrientation( ANIM_ORIENTATION.OnGround )
-                fx.AnimState:SetLayer( LAYER_BACKGROUND )
-                fx.AnimState:SetSortOrder( 2 )
             end),
         },
 

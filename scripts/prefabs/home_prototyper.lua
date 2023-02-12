@@ -96,7 +96,7 @@ local function CreatePrototyper(name, state, techtree)
 		return inst
 	end
 
-	return Prefab( "common/objects/"..name, InitFn, assets, prefabs)
+	return Prefab(name, InitFn, assets, prefabs)
 
 end
 

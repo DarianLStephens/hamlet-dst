@@ -101,7 +101,6 @@ local textures1 = {
     "honeyham.tex",
     "construction_permit.tex",
     "dragonfruit.tex",
-    "scarecrow.tex",
     "crow.tex",
     "tar.tex",
     "teleportato_box_adv.tex",

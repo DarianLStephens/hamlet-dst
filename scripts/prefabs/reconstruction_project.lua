@@ -191,8 +191,8 @@ local function OnLoad(inst, data)
                 childname = data.childname,
                 delay = data.delay
             }
+        end
     end
-end
 end
 
 local function OnLoadPostPass(inst, newents, data)
@@ -347,7 +347,7 @@ local function fn(Sim)
 
     inst.OnSave = OnSave
     inst.OnLoad = OnLoad
-
+    
     inst.task = inst:DoTaskInTime(REBUILD_REACTION_TIME +(math.random() *REBUILD_REACTION_VARIANCE), function() spawnFixer(inst) end)
     return inst
 end

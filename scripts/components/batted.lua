@@ -300,11 +300,11 @@ function Batted:CollectBatsFromCaves()
 	return bats
 end
 
-function Batted:registerInterior(interior)
+function Batted:RegisterInterior(interior)
 	table.insert(self.batcaves, interior)
 end
 
-function Batted:UnregisterInterior( interior )
+function Batted:UnRegisterInterior( interior )
 	for i, cave in ipairs(self.batcaves) do
 		if cave == interior then
 			self.batcaves[i] = nil

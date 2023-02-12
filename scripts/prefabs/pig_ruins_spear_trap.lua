@@ -363,5 +363,5 @@ local function debrisfn(Sim)
     return inst
 end
 
-return  Prefab( "common/objects/pig_ruins_spear_trap", fn, assets, prefabs),
-        Prefab( "common/objects/pig_ruins_spear_trap_broken", debrisfn, assets, prefabs)
+return  Prefab( "pig_ruins_spear_trap", fn, assets, prefabs),
+        Prefab( "pig_ruins_spear_trap_broken", debrisfn, assets, prefabs)

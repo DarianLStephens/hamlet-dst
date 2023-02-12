@@ -121,9 +121,9 @@ local prefabs =
     "securitycontract",
 }
 
-local SHOPSOUND_ENTER1 = "dontstarve_DLC003/common/objects/store/door_open"
-local SHOPSOUND_ENTER2 = "dontstarve_DLC003/common/objects/store/door_entrance"
-local SHOPSOUND_EXIT = "dontstarve_DLC003/common/objects/store/door_close"
+local SHOPSOUND_ENTER1 = "dontstarve_DLC003/objects/store/door_open"
+local SHOPSOUND_ENTER2 = "dontstarve_DLC003/objects/store/door_entrance"
+local SHOPSOUND_EXIT = "dontstarve_DLC003/objects/store/door_close"
 
 local spawnprefabs =
 {
@@ -196,7 +196,7 @@ end
 local function onoccupied(inst, child)
     if not inst:HasTag("burnt") then
         inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/city_pig/pig_in_house_LP", "pigsound")
-        -- inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
+        -- inst.SoundEmitter:PlaySound("dontstarve/pighouse_door")
         
         if inst.doortask then
             inst.doortask:Cancel()
@@ -217,7 +217,7 @@ local function onvacate(inst, child)
             inst.doortask:Cancel()
             inst.doortask = nil
         end
-        -- inst.SoundEmitter:PlaySound("dontstarve/common/pighouse_door")
+        -- inst.SoundEmitter:PlaySound("dontstarve/pighouse_door")
         inst.SoundEmitter:KillSound("pigsound")
         
         if child then
@@ -249,7 +249,7 @@ local function onhammered(inst, worker)
     end    
 
     SpawnPrefab("collapse_big").Transform:SetPosition(inst.Transform:GetWorldPosition())
-    inst.SoundEmitter:PlaySound("dontstarve/common/destroy_wood")
+    inst.SoundEmitter:PlaySound("dontstarve/destroy_wood")
     inst:Remove()
 end
 
@@ -287,7 +287,7 @@ end
 
 local function onbuilt(inst)
     inst.AnimState:PlayAnimation("place")
-    inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/crafted/pighouse/wood_1")
+    inst.SoundEmitter:PlaySound("dontstarve_DLC003/crafted/pighouse/wood_1")
     inst.AnimState:PushAnimation("idle")
 end
 
@@ -340,7 +340,7 @@ local function onload(inst, data)
                 local interior_spawner = TheWorld.components.interiorspawner
                 local interior = interior_spawner:GetInteriorByName(inst.interiorID)
                 local inside_interior = interior == interior_spawner.current_interior
-                local pt = interior_spawner:getSpawnOrigin()
+                local pt = interior_spawner:GetSpawnOrigin()
                 
                 -- Gets the interior entities wether the interior has been visited or not
                 local function GetInteriorEnts()
@@ -612,7 +612,7 @@ local function creatInterior(inst, name)
 
             elseif inst:HasTag("pig_shop_antiquities") then
                 
-                floortexture   = "levels/textures/noise_woodfloor.tex"
+                floortexture   = "levels/textures/interiors/noise_woodfloor.tex"
                 walltexture    = "levels/textures/interiors/harlequin_panel.tex"
                 minimaptexture = "levels/textures/map_interior/mini_ruins_slab.tex"
                 
@@ -802,7 +802,7 @@ local function creatInterior(inst, name)
 
             elseif inst:HasTag("pig_shop_florist") then
                 
-                floortexture = "levels/textures/noise_woodfloor.tex"
+                floortexture = "levels/textures/interiors/noise_woodfloor.tex"
                 walltexture = "levels/textures/interiors/shop_wall_sunflower2.tex"
                 minimaptexture = "levels/textures/map_interior/mini_ruins_slab.tex"
                 
@@ -927,7 +927,7 @@ local function creatInterior(inst, name)
                 } 
             elseif inst:HasTag("pig_shop_produce") then
                 
-                floortexture = "levels/textures/noise_woodfloor.tex"
+                floortexture = "levels/textures/interiors/noise_woodfloor.tex"
                 walltexture = "levels/textures/interiors/shop_wall_woodwall.tex"
                 minimaptexture = "levels/textures/map_interior/mini_ruins_slab.tex"
                 
@@ -1433,7 +1433,7 @@ local function makefn(name,build, bank, data)
 end
 
 local function makeshop(name, build, bank, data)   
-    return Prefab("common/objects/" .. name, makefn(name, build, bank, data), assets, prefabs )
+    return Prefab("objects/" .. name, makefn(name, build, bank, data), assets, prefabs )
 end
 
 local function placetestfn(inst)
@@ -1466,18 +1466,18 @@ return makeshop("pig_shop_deli",        "pig_shop_deli",        nil,    {sounds 
 
        makeshop("pig_shop_cityhall", "pig_cityhall", "pig_cityhall",    {indestructable=true, unburnable=true, sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} }),
        makeshop("pig_shop_cityhall_player", "pig_cityhall", "pig_cityhall",{ unburnable=true, sounds = {SHOPSOUND_ENTER1,SHOPSOUND_ENTER2} }),
-       Prefab("common/objects/pig_shop_spawner", makespawnerfn, assets, spawnprefabs ),
+       Prefab("pig_shop_spawner", makespawnerfn, assets, spawnprefabs ),
 
 
-       MakePlacer("common/pig_shop_deli_placer", "pig_shop", "pig_shop_deli", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_general_placer", "pig_shop", "pig_shop_general", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_hoofspa_placer", "pig_shop", "pig_shop_hoofspa", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_produce_placer", "pig_shop", "pig_shop_produce", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_florist_placer", "pig_shop", "pig_shop_florist", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_antiquities_placer", "pig_shop", "pig_shop_antiquities", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_arcane_placer", "pig_shop", "pig_shop_arcane", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_weapons_placer", "pig_shop", "pig_shop_weapons", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_hatshop_placer", "pig_shop", "pig_shop_millinery", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_cityhall_placer", "pig_cityhall", "pig_cityhall", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_bank_placer", "pig_shop", "pig_shop_bank", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
-       MakePlacer("common/pig_shop_tinker_placer", "pig_shop", "pig_shop_tinker", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn)
+       MakePlacer("pig_shop_deli_placer", "pig_shop", "pig_shop_deli", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_general_placer", "pig_shop", "pig_shop_general", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_hoofspa_placer", "pig_shop", "pig_shop_hoofspa", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_produce_placer", "pig_shop", "pig_shop_produce", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_florist_placer", "pig_shop", "pig_shop_florist", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_antiquities_placer", "pig_shop", "pig_shop_antiquities", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_arcane_placer", "pig_shop", "pig_shop_arcane", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_weapons_placer", "pig_shop", "pig_shop_weapons", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_hatshop_placer", "pig_shop", "pig_shop_millinery", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_cityhall_placer", "pig_cityhall", "pig_cityhall", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_bank_placer", "pig_shop", "pig_shop_bank", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn),
+       MakePlacer("pig_shop_tinker_placer", "pig_shop", "pig_shop_tinker", "idle", false, false, true, nil, nil, nil, nil, nil, nil, placetestfn)

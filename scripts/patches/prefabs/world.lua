@@ -4,6 +4,7 @@ return function(inst)
 	end
 
 	inst:AddComponent("interiorspawner")
+	inst:AddComponent("quaker_interior")
 	inst:AddComponent("economy")
 	inst:AddComponent("aporkalypse")
 	inst:AddComponent("periodicpoopmanager")

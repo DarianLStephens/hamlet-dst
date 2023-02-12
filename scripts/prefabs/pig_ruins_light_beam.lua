@@ -245,6 +245,6 @@ local function cavefn(Sim)
     return inst
 end
 
-return  Prefab( "common/objects/pig_ruins_light_beam", ruinsfn, assets, prefabs),
-        Prefab( "common/objects/roc_cave_light_beam", cavefn, assets, prefabs)        
+return  Prefab( "pig_ruins_light_beam", ruinsfn, assets, prefabs),
+        Prefab( "roc_cave_light_beam", cavefn, assets, prefabs)        
 

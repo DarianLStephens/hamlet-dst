@@ -1,10 +1,12 @@
 local GenericPlayerFn = require("patches/prefabs/player")
 local SimFn = require("patches/sim")
+local CamFn = require("patches/camera")
 
 local PATCHES = 
 {
 	COMPONENTS = {
 		"inventoryitem",
+		"birdspawner",
 	},
 	
 	PREFABS = {
@@ -44,6 +46,7 @@ end
 
 AddPlayerPostInit(GenericPlayerFn)
 AddSimPostInit(SimFn)
+AddClassPostConstruct("cameras/followcamera", CamFn)
 
 for _, name in ipairs(PATCHES.STATEGRAPHS) do
 	AddStategraphPostInit(name, require("patches/stategraphs/"..name))
@@ -69,4 +72,65 @@ end
 for _, file in ipairs(PATCHES.WIDGETS) do
 	local fn = require("patches/widgets/"..file)
 	AddClassPostConstruct("widgets/"..file, fn)
+end
+
+EmitterManager._updatefuncs = {snow = nil, rain = nil, pollen = nil}
+local _PostUpdate = EmitterManager.PostUpdate
+local function PostUpdate(self,...)
+	for inst, data in pairs( self.awakeEmitters.infiniteLifetimes ) do
+		if inst.prefab == "pollen" or inst.prefab == "snow" or inst.prefab == "rain" then
+			if not self._updatefuncs[inst.prefab] then
+				self._updatefuncs[inst.prefab] = data.updateFunc
+			end
+			local x,y,z = inst.Transform:GetWorldPosition()
+			if x > 1800 then
+				data.updateFunc = function() end 
+			else
+				data.updateFunc = self._updatefuncs[inst.prefab] and self._updatefuncs[inst.prefab] or function() end
+			end
+		end
+	end
+	if _PostUpdate then
+		return _PostUpdate(self,...)
+	end
+end
+EmitterManager.PostUpdate = PostUpdate
+
+local _PlayFootstep = _G.PlayFootstep
+function _G.PlayFootstep(inst, volume, ispredicted, ...)
+	local sound = inst.SoundEmitter
+	if sound then
+		local size_inst = inst
+        if inst:HasTag("player") then
+            local rider = inst.components.rider or inst.replica.rider
+            if rider  and rider:IsRiding() then
+                size_inst = rider:GetMount() or inst
+            end
+        end
+		local groundsound = inst.replica.interiorplayer and inst.replica.interiorplayer:GetGroundSound()--GetClosestInterior(inst)
+		if not groundsound  then
+			return _PlayFootstep(inst, volume, ispredicted, ...)
+		end
+		sound:PlaySound(
+			(inst.sg and inst.sg:HasStateTag("running") and "dontstarve/movement/run_"..groundsound or "dontstarve/movement/walk_"..groundsound
+			)..
+			(   (size_inst:HasTag("smallcreature") and "_small") or
+				(size_inst:HasTag("largecreature") and "_large" or "")
+			),
+			nil,
+			volume or 1,
+			ispredicted)	
+	end
+end
+
+local _MakeSnowCovered = _G.MakeSnowCovered
+function _G.MakeSnowCovered(inst)
+	inst:DoTaskInTime(0, function()
+		local interior = GetClosestInterior(inst)
+		if interior then
+			inst.AnimState:Hide("snow")
+			return
+		end
+		return _MakeSnowCovered(inst)
+	end)
 end

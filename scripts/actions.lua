@@ -42,7 +42,7 @@ local BUILD_ROOM = AddAction("BUILD_ROOM", "BUILD_ROOM", function(act)
 			local ID = interior_spawner:GetNewID()
 			ID = "p" .. ID -- Added the "p" so it doesn't trigger FixDoors on the InteriorSpawner
 
-			local floortexture = "levels/textures/noise_woodfloor.tex"
+			local floortexture = "levels/textures/interiors/noise_woodfloor.tex"
 			local walltexture = "levels/textures/interiors/shop_wall_woodwall.tex"
 			local minimaptexture = "levels/textures/map_interior/mini_ruins_slab.tex"
 			local colorcube = "images/colour_cubes/pigshop_interior_cc.tex"
@@ -115,7 +115,7 @@ local BUILD_ROOM = AddAction("BUILD_ROOM", "BUILD_ROOM", function(act)
 			end
 
 			-- If there are already built doors in the same direction as the door being used to build, activate them
-			local pt = interior_spawner:getSpawnOrigin()
+			local pt = interior_spawner:GetSpawnOrigin()
 			local other_doors = TheSim:FindEntities(pt.x, pt.y, pt.z, 50, {"predoor"}, {"INTERIOR_LIMBO", "INLIMBO"})
 			for _, other_door in ipairs(other_doors) do
 				if other_door ~= act.target and other_door.baseanimname and other_door.baseanimname == act.target.baseanimname then
@@ -227,7 +227,7 @@ local DEMOLISH_ROOM = AddAction("DEMOLISH_ROOM", "DEMOLISH_ROOM", function(act)
 				for i = obj_count, 1, -1 do
 
 					local current_obj = target_interior.object_list[i]
-					if current_obj and current_obj.prefab ~= "generic_wall_back" and current_obj.prefab ~= "generic_wall_side" then
+					if current_obj then
 						
 						if current_obj:HasTag("house_door") then
 							local connected_door = interior_spawner:GetDoorInst(current_obj.components.door.target_door_id)
@@ -477,8 +477,8 @@ FIX.priority = 1
 FIX.distance = 1
 -----------------------------------------------------------------------------------------
 local SPECIAL_ACTION = AddAction("SPECIAL_ACTION", "", function(act)
-	if act.doer.special_action then
-		act.doer.special_action(act)
+	if act.doer.SpecialAction then
+		act.doer.SpecialAction(act)
 		return true
 	end
 end)

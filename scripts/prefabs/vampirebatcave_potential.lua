@@ -5,4 +5,4 @@ local function fn(Sim)
     return inst
 end
 
-return Prefab( "common/objects/vampirebatcave_potential", fn ) 
+return Prefab( "vampirebatcave_potential", fn ) 

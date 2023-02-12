@@ -7,7 +7,6 @@ require "behaviours/panic"
 require "behaviours/minperiod"
 require "behaviours/chaseandram"
 
-
 local TIME_BETWEEN_EATING = 3.5
 
 local MAX_CHASE_TIME = 10
@@ -27,9 +26,6 @@ local Ancient_hulkBrain = Class(Brain, function(self, inst)
 end)
 
 function Ancient_hulkBrain:OnStart()
-
-    local clock = GetClock()
-
     local root =
         PriorityNode(
         {

@@ -63,7 +63,6 @@ function Aporkalypse:OnSave()
 		begin_date = self.begin_date,
 		aporkalypse_active = self.aporkalypse_active,
 		current_season = self.current_season,
-		patched = self.patched,
 		inside_ruins = self.inside_ruins,
 		fiesta_active = self.fiesta_active,
 		fiesta_begin_date = self.fiesta_begin_date,
@@ -99,14 +98,6 @@ function Aporkalypse:OnLoad(data)
 		self.inside_ruins = data.inside_ruins
 	end
 
-	if data.patched then
-		print ("NO PATCHING REQUIRED")
-		self.patched = data.patched
-	else
-		print ("PATCHING WITH APORKALYPSE ROOM")
-		self:PatchSave()
-	end
-
 	if data.fiesta_active then
 		-- TODO: should we push "beginfiesta" here?
 
@@ -123,138 +114,6 @@ function Aporkalypse:OnLoad(data)
 	end
 
 	self.first_time = data.first_time
-end
-
-function Aporkalypse:PatchSave()
-	-- Newer versions don't need this patching
-	if tonumber(GetWorld().meta.build_version) >= 337090 then
-		return
-	end
-	-- This needs to happen after any ruins are generated, and that is spaced out in time, so give it a while
-	self.inst:DoTaskInTime(3, function() 
-		local interiorspawner = TheWorld.components.interiorspawner
-		if #interiorspawner:GetInteriorsByDungeonName("RUINS_5") == 0 then
-			if not self.patched then
-				local ruin_interiors = interiorspawner:GetInteriorsByDungeonName("RUINS_1")
-				local selected_candidate = nil
-				while selected_candidate == nil do
-					
-					local candidate = ruin_interiors[math.random(1, #ruin_interiors)]
-
-					if candidate ~= interiorspawner.current_interior then
-
-						local northopen = true
-						local eastopen = true
-						local westopen = true
-
-						if candidate.prefabs then
-							for k,v in pairs(candidate.prefabs) do
-								if v.name == "prop_door" then
-									if v.animdata.anim == "north" or v.animdata.anim == "day_loop" then
-										northopen = false
-									elseif v.animdata.anim == "east" then
-										eastopen = false
-									elseif v.animdata.anim == "west" then
-										westopen = false
-									end
-								end
-							end
-						else
-							local doors = interiorspawner:GetInteriorDoors(candidate.unique_name)
-							if #doors < 4 then
-								for i,door in ipairs(doors) do
-									if door.inst.baseanimname == "north" or door.inst.baseanimname == "day_loop"then
-										northopen = false
-									elseif door.inst.baseanimname == "east" then
-										eastopen = false
-									elseif door.inst.baseanimname == "west" then
-										westopen = false
-									end
-								end
-							end
-						end
-
-						local function InsertInterior(dir)
-
-							local width = 24
-	    					local depth = 16
-
-							local dir_data =
-							{
-								["north"] = {
-									exit_dir = interiorspawner:GetSouth(),
-									anim = "north",
-									door_tag = "door_north",
-									my_door_id_dir = "_NORTH",
-									target_door_id_dir = "_SOUTH",
-									x_offset = -depth/2,
-									z_offset = 0,
-								},
-
-								["west"] = {
-									exit_dir = interiorspawner:GetEast(),
-									anim = "west",
-									door_tag = "door_west",
-									my_door_id_dir = "_WEST",
-									target_door_id_dir = "_EAST",
-									x_offset = 0,
-									z_offset = -width/2,
-								},
-
-								["east"] = {
-									exit_dir = interiorspawner:GetWest(),
-									anim = "east",
-									door_tag = "door_east",
-									my_door_id_dir = "_EAST",
-									target_door_id_dir = "_WEST",
-									x_offset = 0,
-									z_offset = width/2,
-								}
-							}
-
-							local dungeondef_name = "APORKALYPSE_DUNGEON"
-	    					local room_idx = dungeondef_name.."_"..interiorspawner:GetNewID()
-	    					local room_exits = {}
-							
-							room_exits[dir_data[dir].exit_dir] = {
-								target_room = candidate.unique_name,
-								bank =  "doorway_ruins",
-								build = "pig_ruins_door",
-								room = room_idx,
-								secret = true,
-							}
-
-	    					local addprops = {{ name = "aporkalypse_clock", x_offset = 0, z_offset = 0}}
-							local floortexture = "levels/textures/interiors/ground_ruins_slab.tex"
-					        local walltexture = "levels/textures/interiors/pig_ruins_panel.tex"
-					        local minimaptexture = "levels/textures/map_interior/mini_ruins_slab.tex"
-					        local bank =  "interior_wall_decals_ruins"
-	        				local build = "interior_wall_decals_ruins_cracks"
-
-	    					interiorspawner:CreateRoom("generic_interior", width, nil, depth, dungeondef_name, room_idx, addprops, room_exits, walltexture, floortexture, minimaptexture, nil, "images/colour_cubes/pigshop_interior_cc.tex", nil, nil, "ruins","STONE")
-							
-							local door_data = { name = "prop_door", x_offset = dir_data[dir].x_offset, z_offset = dir_data[dir].z_offset, sg_name = nil, startstate = nil, animdata = { bank = bank, build = build, anim = dir_data[dir].anim, background = true },
-	                        	my_door_id = candidate.unique_name .. dir_data[dir].my_door_id_dir, target_door_id = room_idx..dir_data[dir].target_door_id_dir, target_interior = room_idx, rotation = -90, hidden = false, angle=0, addtags = { "lockable_door", dir_data[dir].door_tag }, secret = true, hidden = true }
-
-	                        interiorspawner:InsertDoor(candidate, door_data)
-	                        print ("DOOR INSERTED AT ", candidate.unique_name)
-	                        selected_candidate = candidate
-						end
-
-						if northopen then
-							InsertInterior("north")
-						elseif eastopen then
-							InsertInterior("east")
-						elseif westopen then
-							InsertInterior("west")
-	    				end
-					end
-				end
-			end
-		end
-
-		self.patched = true
-	end)
 end
 
 function Aporkalypse:ScheduleAporkalypse(date)
@@ -411,7 +270,7 @@ function Aporkalypse:SpawnInteriorPrefabs(prefab, min, max, findtags)
 	    return offset_x, offset_z
 	end
 
-	local pt = GetWorld().components.interiorspawner:getSpawnOrigin()
+	local pt = GetWorld().components.interiorspawner:GetSpawnOrigin()
     local ents = TheSim:FindEntities(pt.x, pt.y,pt.z, 20, findtags)
 
 	if next(ents) == nil then

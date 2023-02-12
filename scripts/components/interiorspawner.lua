@@ -1,18 +1,9 @@
 local wallWidth = 7
 local wallLength = 24
 
-local BigPopupDialogScreen = require "screens/bigpopupdialog"
-local PopupDialogScreen = require "screens/popupdialog"
-
 local function GetVerb(inst, doer)
 	return STRINGS.ACTIONS.JUMPIN.ENTER
 end
-
-local ANTHILL_DUNGEON_NAME = "ANTHILL1"
-
---local Vector3 = GLOBAL.Vector3
-local interior_spawn_origin = nil --Vector3(2000,0,0)
-local interior_spawn_storage_origin = nil --Vector3(2000,0,2000)
 
 local InteriorSpawner = Class(function(self, inst)
     self.inst = inst
@@ -53,11 +44,6 @@ local InteriorSpawner = Class(function(self, inst)
 	self.interiorEntryPosition = Vector3()
 
 	self.dungeon_entries = {}
-	
-
-	self.exteriorCamera = TheCamera
-	self.interiorCamera = InteriorCamera() -- Works on single-shard, but multishard has networking stuff I haven't figured out yet
-	--self.interiorCamera = TheCamera -- Just made the same for testing, until I can get the proper camera in there.
 
 	-- self.homeprototyper = SpawnPrefab("home_prototyper")
 	
@@ -77,9 +63,9 @@ local NO_INTERIOR = -1
 function InteriorSpawner:ConfigureWalls(interior)
 	self.walls = self.walls or self:CreateWalls()
 
-	-- local spawnOrigin = self:getSpawnOrigin()
+	-- local spawnOrigin = self:GetSpawnOrigin()
 	-- local x,y,z = spawnOrigin.x, spawnOrigin.y, spawnOrigin.z
-	local spawnStorage = self:getSpawnStorage(nil, interior)
+	local spawnStorage = self:GetSpawnStorage(nil, interior)
 	local x,y,z = spawnStorage.x, spawnStorage.y, spawnStorage.z
 
 	local origwidth = 1
@@ -87,25 +73,16 @@ function InteriorSpawner:ConfigureWalls(interior)
 
 	local depth = interior.depth
 	local width = interior.width
+	local height = interior.height
 
-	-- back, front wall
-	self:Teleport(self.walls[1], Vector3(x - (depth/2) - 1 - delta,y,z))
-	self:Teleport(self.walls[2], Vector3(x + (depth/2) + 1 + delta,y,z))
-
-	-- left, right wall
-	self:Teleport(self.walls[3], Vector3(x,y,z + (width/2) + 1 + delta))
-	self:Teleport(self.walls[4], Vector3(x,y,z - (width/2) - 1 -delta))
-	
 	-- Collision
 	print("Doing configuration for collision, should match with interior's actual size now")
-	self:Teleport(self.walls[5], Vector3(x,y,z)) -- Center, maybe?
-	self.walls[5]:SetVerticles(depth/2, width/2)
-
-	-- for i=1,4 do
-	for i=1,5 do
-		self.walls[i]:ReturnToScene()
-		self.walls[i]:RemoveTag("INTERIOR_LIMBO")
-	end
+	self:Teleport(self.walls, Vector3(x,y,z)) -- Center, maybe?
+	self.walls:SetVerticles(depth, width, height)
+	self.walls:SetName(interior.unique_name)
+	
+	self.walls:ReturnToScene()
+	self.walls:RemoveTag("INTERIOR_LIMBO")
 
 	-- stomp out the walls for pathfinding
 	self:SetUpPathFindingBarriers(x,y,z,width, depth)
@@ -258,12 +235,12 @@ function InteriorSpawner:GetInteriorByName(name)
 	end
 end
 
-function InteriorSpawner:getSpawnOrigin()
+function InteriorSpawner:GetSpawnOrigin()
 	print("DS - Getting spawn origin...")
 	return Vector3(2000,0,2000) -- Because I need testing
 end
 
-function InteriorSpawner:getSpawnStorage(interiorID, forcedOffset)
+function InteriorSpawner:GetSpawnStorage(interiorID, forcedOffset)
 	-- local pt = nil
 	-- if not self.interior_spawn_storage_origin then
 		-- for k, v in pairs(Ents) do
@@ -373,7 +350,7 @@ end
 
 function InteriorSpawner:RefreshDoorsNotInLimbo()
 	print("Refreshing doors...")
-	local pt = self:getSpawnOrigin()
+	local pt = self:GetSpawnOrigin()
 
 	--collect all the things in the "interior area" minus the interior_spawn_origin and the player
 	local ents = TheSim:FindEntities(pt.x, pt.y, pt.z, 50, nil, {"INTERIOR_LIMBO"})
@@ -442,7 +419,7 @@ end
 
 function InteriorSpawner:MovePropToInteriorStorage(prop,interior,ignoredisplacement,interiorOffset)
 	if prop:IsValid() then
-		local pt1 = self:getSpawnOrigin()		
+		local pt1 = self:GetSpawnOrigin()		
 		print("DS - MovePropToInteriorStorage - Attempting to add the index offset")
 		-- local index = self:GetLoadedInteriorIndex(interior.unique_name)
 		local index = interior.storage_offset
@@ -452,17 +429,17 @@ function InteriorSpawner:MovePropToInteriorStorage(prop,interior,ignoredisplacem
 		-- Never mind about the 'changed it' thing, apparently this is what was in Hamlet. I probably changed it at some point and then changed it back without realizing that's what I did.
 		print("Changed it out for the stored storage offset, which is ", index)
 		
-		-- local pt2 = self:getSpawnStorage(index)	
-		-- local pt2 = self:getSpawnStorage(nil, index)	
-		local pt2 = self:getSpawnStorage(nil, interiorOffset)	
-		-- local ptdebug = self:getSpawnStorage(nil, interior)	-- Feeding it the interior to see if the automated detection can handle it
+		-- local pt2 = self:GetSpawnStorage(index)	
+		-- local pt2 = self:GetSpawnStorage(nil, index)	
+		local pt2 = self:GetSpawnStorage(nil, interiorOffset)	
+		-- local ptdebug = self:GetSpawnStorage(nil, interior)	-- Feeding it the interior to see if the automated detection can handle it
 		-- It couldn't, because this was the actual interior ref and I'd need to do a lot more in there to automatically detect it
-		local ptdebug = self:getSpawnStorage(nil, interiorOffset) -- Instead, I'm just passing the offset straight from the unload function
+		local ptdebug = self:GetSpawnStorage(nil, interiorOffset) -- Instead, I'm just passing the offset straight from the unload function
 		print("ptdebug = ",ptdebug)
-		-- local pt2 = self:getSpawnStorage(index, nil)	
+		-- local pt2 = self:GetSpawnStorage(index, nil)	
 		print(" DS - MovePropToInteriorStorage - PT2 = ", pt2)
 		
-		local pt3 = self:getSpawnStorage(0, nil)
+		local pt3 = self:GetSpawnStorage(0, nil)
 		print("PT3 = ",pt3)
 		
 
@@ -494,8 +471,8 @@ end
 
 function InteriorSpawner:GetCurrentInteriorEntities(doer, storageOffset)
 	-- local index = self:GetLoadedInteriorIndex(interiorID) -- unused, apparently
-	-- local pt = self:getSpawnOrigin(interiorID)
-	local pt = self:getSpawnStorage(nil, storageOffset) --interiorID)
+	-- local pt = self:GetSpawnOrigin(interiorID)
+	local pt = self:GetSpawnStorage(nil, storageOffset) --interiorID)
 
 	-- collect all the things in the "interior area" minus the interior_spawn_origin and the player
 	print("GetCurrentInteriorEntities - pt = X", pt.x, "Y", pt.y, "Z", pt.z)
@@ -684,7 +661,7 @@ function InteriorSpawner:FadeInFinished(was_invincible, doer)
 end	
 
 function InteriorSpawner:SetCameraOffset(cameraoffset, zoom)
-	local pt = self:getSpawnOrigin()
+	local pt = self:GetSpawnOrigin()
 
 	-- cameraoffset = -2
 	-- zoom = 35
@@ -716,10 +693,10 @@ end
 
 function InteriorSpawner:ApplyInteriorCamera(player, destination, intOffset)
 	-- Gonna need some net stuff to make this work per-player, I think
-	-- local pt = self:getSpawnOrigin()
+	-- local pt = self:GetSpawnOrigin()
 	
-	-- local pt = self:getSpawnStorage(nil, destination)
-	local pt = self:getSpawnStorage(nil, intOffset)
+	-- local pt = self:GetSpawnStorage(nil, destination)
+	local pt = self:GetSpawnStorage(nil, intOffset)
 	self:ApplyInteriorCameraWithPosition(player, destination, pt)
 end
 
@@ -747,10 +724,10 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 	local playerint = self:GetPlayerInterior(player)
 	print("PlayerInt = ",playerint)
 	
-	-- local pt1 = self:getSpawnStorage((playerint), nil)
+	-- local pt1 = self:GetSpawnStorage((playerint), nil)
 	-- print("pt1 = ", pt1)
 	print("pt = ", pt)
-	local pt2 = self:getSpawnOrigin()
+	local pt2 = self:GetSpawnOrigin()
 	print("pt2 = ",pt2)
 	local diffx = pt2.x - pt.x
 	print("diffx = ",diffx)
@@ -759,34 +736,34 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 	-- local diffz = pt2.z - ((math.abs (pt.z)) * -1) -- Trying some stinky hacks to make the camera reliable
 	print("diffz = ",diffz)
 	
-	-- local camX = pt.x+cameraoffset
-	-- local camZ = pt.z
+	-- local camx = pt.x+cameraoffset
+	-- local camz = pt.z
 	
-	local camX = pt2.x+diffx+cameraoffset
-	local camZ = pt2.z-diffz
-	print("CamX = ",camX," Cam Z = ",camZ)
+	local camx = pt2.x+diffx+cameraoffset
+	local camz = pt2.z-diffz
+	print("CamX = ",camx," Cam Z = ",camz)
 	
-	local wallTexture = destination.walltexture
-	local floorTexture = destination.floortexture
+	local walltexture = destination.walltexture
+	local floortexture = destination.floortexture
 	
-	if player.player_classified then
+	if player.components.interiorplayer then
 		print("DS - NETWORK - Detected classified, set netvars")
-		-- player.player_classified.net_roomx:set(camX)
-		-- player.player_classified.net_roomz:set(camZ)
-		-- player.player_classified.net_roomzoom:set(zoom)
-		-- player.player_classified.net_intcamera:set(true)
-		player.components.interiorplayer._camX = camX
-		player.components.interiorplayer._camZ = camZ
-		player.components.interiorplayer._camZoom = zoom
+		local plint = player.components.interiorplayer
+		plint.camx = camx
+		plint.camz = camz
+		plint.camzoom = zoom
 		
-		player.components.interiorplayer._interiorWidth = destination.width
-		player.components.interiorplayer._interiorDepth = destination.depth
-		player.components.interiorplayer._wallTexture = wallTexture
-		player.components.interiorplayer._floorTexture = floorTexture
-		player.components.interiorplayer._groundSound = destination.groundsound
-		
-		player.components.interiorplayer._interiorMode = true
-		player.components.interiorplayer:UpdateCamera() -- So it gets sent to the client, I hope
+		plint.interiorwidth = destination.width
+		plint.interiordepth = destination.depth
+		plint.interiorheight = destination.height
+		plint.walltexture = walltexture
+		plint.floortexture = floortexture
+		plint.groundsound = destination.groundsound
+
+		plint.roomid = destination.unique_name
+
+		plint.interiormode = true
+		plint:UpdateCamera()
 	else
 		print("DS - NETWORK - Player classified component missing?")
 	end
@@ -834,11 +811,10 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	else		
 		print("DS - Didn't get Destination ID, going to exterior?")
 		-- self:RemovePlayerFromInteriorList(player)
-		if player.player_classified then
+		if player.components.interiorplayer then
 			print("DS - NETWORK - Detected classified, set netvars")
 			-- player.player_classified.net_intcamera:set(false)
-			player.components.interiorplayer._interiorMode = false
-			player.components.interiorplayer:UpdateCamera()
+			player.components.interiorplayer.interiormode = false
 		else
 			print ("DS - WARNING: Player didn't have classified?!?!")
 		end
@@ -852,7 +828,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 		direction = "out"		
 		-- if going outside, blank the interior color cube setting.
 		--TheWorld.components.colourcubemanager:SetInteriorColourCube(nil)
-		player.interiorplayer:RemoveColorCube() -- This line might crash the game, but I think it can't be called because of the above 'local camerainterior' thing? Maybe? No idea, because this function doesn't seem to exist in the interiorplayer component. Or, is this even for the component?
+		player.replica.interiorplayer:RemoveColorCube() -- This line might crash the game, but I think it can't be called because of the above 'local camerainterior' thing? Maybe? No idea, because this function doesn't seem to exist in the interiorplayer component. Or, is this even for the component?
 		-- player.components.playervision:SetCustomCCTable(nil)
 	end
 	if not wasinterior and camerainterior then
@@ -969,7 +945,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 			local radius = 1.75
 			if to_target and to_target:IsValid() then
 				if to_target and to_target.Physics then
-					radius = to_target.Physics:GetRadius() + GetPlayer().Physics:GetRadius()
+					radius = to_target.Physics:GetRadius() + player.Physics:GetRadius()
 				end
 				-- make sure this is a walkable spot
 				local pt = to_target:GetPosition()
@@ -997,8 +973,8 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	self:ExecuteTeleport(player, to_target, direction)
 	-- Log some info for debugging purposes
 	if destination then
-		local pt1 = self:getSpawnOrigin()
-		local pt2 = self:getSpawnStorage()
+		local pt1 = self:GetSpawnOrigin()
+		local pt2 = self:GetSpawnStorage()
 		print("SpawnOrigin:",pt1,GetTileType(pt1))
 		print("SpawnStorage:",pt2,GetTileType(pt2))
 		print("SpawnDelta:",pt2-pt1)
@@ -1009,12 +985,8 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	--GetPlayer().components.locomotor:UpdateUnderLeafCanopy() 
 
 	if direction =="out" then
-		-- turn off amb snd
-
 		TheWorld:PushEvent("exitinterior", {to_target = self.to_target})
 	elseif direction == "in" then
-		--change amb sound ot this room.
-
 		TheWorld:PushEvent("enterinterior", {to_target = self.to_target})
 	end
 
@@ -1101,7 +1073,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 end
 
 function InteriorSpawner:PushDirectionEvent(target, direction)
-	if target.UpdateIsInInterior() then -- DS - Adding a check, because... maybe it's needed? I don't know
+	if target.UpdateIsInInterior then -- DS - Adding a check, because... maybe it's needed? I don't know
 		target:UpdateIsInInterior()
 	end
 end
@@ -1646,7 +1618,6 @@ function InteriorSpawner:PlayTransition(doer, inst, interiorID, to_target, dont_
 		end
 
 		TheWorld.doorfreeze = true		
-		
 
 		if TheWorld.ismastersim then
 			self.was_invincible = doer.components.health:IsInvincible()
@@ -1689,14 +1660,16 @@ function InteriorSpawner:CreateRoom(interior, width, height, depth, dungeon_name
     if not depth then
         depth = 10
     end        
-
+	if not height then
+		height = 5
+	end
     assert(roomindex)
 
 	-- SET A DEFAULT CC FOR INTERIORS
     if not cc then
     	cc = "images/colour_cubes/day05_cc.tex"
     end       
-
+	
     local interior_def =
     {
         unique_name = roomindex,
@@ -1721,8 +1694,6 @@ function InteriorSpawner:CreateRoom(interior, width, height, depth, dungeon_name
         zoom = zoom,
 		forceInteriorMinimap = forceInteriorMinimap
     }
-
-    table.insert(interior_def.prefabs, { name = interior, x_offset = -2, z_offset = 0 })
 
     local prefab = {}
 
@@ -1811,7 +1782,7 @@ function InteriorSpawner:AddInterior(interior_definition)
 	-- if batcave, register with the batted component.
 	if spawner_definition.batted then
 		if TheWorld.components.batted then
-			TheWorld.components.batted:registerInterior(spawner_definition.unique_name)
+			TheWorld.components.batted:RegisterInterior(spawner_definition.unique_name)
 		end
 	end
 end
@@ -1884,53 +1855,16 @@ end
 
 function InteriorSpawner:CreateWalls()
 	-- create 4 walls will be reconfigured for each room
-	self.walls = {}
 	local origWidth = 1
 	local delta = (2 * wallWidth - 2 * origWidth) / 2
 
-	local wall 
+	local spawnStorage = self:GetSpawnStorage()
 
-	local spawnStorage = self:getSpawnStorage()
-
-	wall = SpawnPrefab("generic_wall_back")
-	--wall.Transform:SetPosition(x - (interior_definition.depth/2) +1 - delta,y,z)
-	wall.Transform:SetPosition(spawnStorage.x, spawnStorage.y, spawnStorage.z)
-	wall.setUp(wall,wallLength, nil, nil, wallWidth)
-	self.walls[1] = wall
-	
-	--print("Moved player to wall")
-	--ThePlayer.Transform:SetPosition(wall.Transform:GetWorldPosition())
-
-	-- front wall
-	wall = SpawnPrefab("generic_wall_back")
-	--wall.Transform:SetPosition(x + (interior_definition.depth/2) + 3 + delta,y,z)
-	wall.Transform:SetPosition(spawnStorage.x, spawnStorage.y, spawnStorage.z)
-	wall.setUp(wall,wallLength, nil, nil, wallWidth)
-	self.walls[2] = wall	
-	--Spawn Side Walls [TODO] Base Values On Interior Width And Height
-
-	-- right wall
-	wall = SpawnPrefab("generic_wall_back")
-	--wall.Transform:SetPosition(x,y,z + (interior_definition.width/2) +1+delta)
-	wall.Transform:SetPosition(spawnStorage.x, spawnStorage.y, spawnStorage.z)
-	wall.setUp(wall,wallWidth,nil,nil,wallLength)				
-	self.walls[3] = wall
-	
-	-- left wall
-	wall = SpawnPrefab("generic_wall_back")
-	--wall.Transform:SetPosition(x,y,z - (interior_definition.width/2) -1-delta)
-	wall.Transform:SetPosition(spawnStorage.x, spawnStorage.y, spawnStorage.z)
-	wall.setUp(wall,wallWidth,nil,nil,wallLength)
-	self.walls[4] = wall
-	
 	print("DS - Making interior collision triangle thing")
-	local collision
-	collision = SpawnPrefab("interior_collision")
-	collision.Transform:SetPosition(spawnStorage.x, spawnStorage.y, spawnStorage.z) -- I forgot to do this and was wondering why it did nothing
-	-- collision:SetVerticles(wallLength/2, wallWidth/2)
-	-- collision:SetVerticles(wallWidth/2, wallLength/2)
+	local collision = SpawnPrefab("interior_collision")
+	collision.Transform:SetPosition(spawnStorage.x-2.5, spawnStorage.y, spawnStorage.z) -- I forgot to do this and was wondering why it did nothing
 	
-	self.walls[5] = collision -- This could get it automatically done with saves and stuff, let's find out
+	self.walls = collision -- This could get it automatically done with saves and stuff, let's find out
 	-- It might also be bad, because this stuff doesn't seem to have been redone with multiplayer in mind yet, only having the same walls reused for every interior. I suppose I can either make these again for every interior, or spawn and despawn them as needed depending on how many interiors are currently loaded?
 
 	return self.walls
@@ -1950,10 +1884,6 @@ function InteriorSpawner:CheckIfPlayerIsInside()
 		--self:PlayTransition(GetPlayer(), nil, nil, GetPlayer():GetPosition(), true, true)
 	end
 end
-
-function InteriorSpawner:IsInInterior()
-	return TheCamera == self.interiorCamera
-end 
 
 function InteriorSpawner:GetInteriorDoors(interiorID)
 	local found_doors = {}
@@ -2024,14 +1954,14 @@ function InteriorSpawner:SpawnInterior(interior, storageOffset)
 	-- This does nothing right now
 	local loadingInterior = self:GetLoadedInteriorIndex(interior.unique_name)
 
-	-- local pt = self:getSpawnStorage(loadingInterior, 1)
-	-- local pt = self:getSpawnStorage(loadingInterior)
+	-- local pt = self:GetSpawnStorage(loadingInterior, 1)
+	-- local pt = self:GetSpawnStorage(loadingInterior)
 	
-	-- local pt = self:getSpawnStorage(nil, interior.storage_space)
-	-- local pt = self:getSpawnStorage(nil, interior) -- Trying to fix concurrent interiors, because apparently that broke
+	-- local pt = self:GetSpawnStorage(nil, interior.storage_space)
+	-- local pt = self:GetSpawnStorage(nil, interior) -- Trying to fix concurrent interiors, because apparently that broke
 	
-	-- local pt = self:getSpawnStorage((self:FindFreeStorageSpace()), nil)
-	local pt = self:getSpawnStorage(nil, storageOffset)
+	-- local pt = self:GetSpawnStorage((self:FindFreeStorageSpace()), nil)
+	local pt = self:GetSpawnStorage(nil, storageOffset)
 	
 	print("DS - SpawnInterior - Got PT as ", pt)
 	
@@ -2048,18 +1978,13 @@ function InteriorSpawner:SpawnInterior(interior, storageOffset)
 			local object = SpawnPrefab(prefab.name)
 			object.Transform:SetPosition(pt.x + prefab.x_offset, 0, pt.z + prefab.z_offset)	
 
-			-- flips the art of the item. This must be manually saved on items it it's to persist over a save
-			if prefab.flip then
-				local rx, ry, rz = object.Transform:GetScale()
-				object.flipped = true
-				-- object.Transform:SetScale(rx, ry, -rz)
-				object.Transform:SetScale(-rx, ry, rz)
-				object.AnimState:SetScale(-1,1,1)
-			end
-
 			-- sets the initial roation of an object, NOTE: must be manually saved by the item to survive a save
-			if prefab.rotation then
+			if prefab.rotation and not prefab.flip then
 				object.Transform:SetRotation(prefab.rotation)
+				if prefab.rotation > 0 then
+					object.flipped = true
+					object.AnimState:SetScale(-1,1,1)
+				end
 			end
 
 			-- adds tags to the object
@@ -2239,16 +2164,16 @@ function InteriorSpawner:LoadInterior(doer, interior)
 		print("LoadInterior - Getting index of loaded interior...")
 		-- local loadingInterior = self:GetLoadedInteriorIndex(interior.unique_name)
 
-		-- local pt1 = self:getSpawnStorage(loadingInterior, 1)
-		-- local pt1 = self:getSpawnStorage(nil, (loadedInteriorCount + 1))
+		-- local pt1 = self:GetSpawnStorage(loadingInterior, 1)
+		-- local pt1 = self:GetSpawnStorage(nil, (loadedInteriorCount + 1))
 		
-		-- local pt1 = self:getSpawnStorage(nil, (storageOffset))
-		-- local pt1 = self:getSpawnStorage(nil, storageOffset)
-		local pt1 = self:getSpawnStorage(nil, storageOffset)
+		-- local pt1 = self:GetSpawnStorage(nil, (storageOffset))
+		-- local pt1 = self:GetSpawnStorage(nil, storageOffset)
+		local pt1 = self:GetSpawnStorage(nil, storageOffset)
 		
-		-- local pt1 = self:getSpawnStorage(loadingInterior)
-		-- local pt2 = self:getSpawnOrigin()
-		local pt2 = self:getSpawnOrigin()
+		-- local pt1 = self:GetSpawnStorage(loadingInterior)
+		-- local pt2 = self:GetSpawnOrigin()
+		local pt2 = self:GetSpawnOrigin()
 		
 		print("DS - LoadInterior - PT1 = ", pt1)
 		print("PT2 = ", pt2)
@@ -2336,7 +2261,7 @@ end
 function InteriorSpawner:insertprefab(interior, prefab, offset, prefabdata)
 	if interior == self.current_interior then
 		print("CURRENT")
-		local pt = self:getSpawnOrigin()
+		local pt = self:GetSpawnOrigin()
 		local object = SpawnPrefab(prefab)	
 		object.Transform:SetPosition(pt.x + offset.x_offset, 0, pt.z + offset.z_offset)
 		if prefabdata and prefabdata.startstate then
@@ -2348,7 +2273,7 @@ function InteriorSpawner:insertprefab(interior, prefab, offset, prefabdata)
 		end		
 	elseif interior.visited then
 		print("VISITED")
-		local pt = self:getSpawnOrigin()
+		local pt = self:GetSpawnOrigin()
 		local object = SpawnPrefab(prefab)	
 		object.Transform:SetPosition(pt.x + offset.x_offset, 0, pt.z + offset.z_offset)			
 		if prefabdata and prefabdata.startstate then
@@ -2373,7 +2298,7 @@ end
 function InteriorSpawner:InsertHouseDoor(interior, door_data)
 
 	if interior.visited then
-		local pt = self:getSpawnOrigin()
+		local pt = self:GetSpawnOrigin()
 
 		local object = SpawnPrefab(door_data.name)
 		object.Transform:SetPosition(pt.x + door_data.x_offset, 0, pt.z + door_data.z_offset)
@@ -2392,8 +2317,8 @@ end
 -- find the world entry points into dungeons. For multipe entries into one dungeon this is non-deterministic
 function InteriorSpawner:CheckForInvalidSpawnOrigin()
 	-- Trying to detect the issue with clouds in rooms/unplacable items
-	local xo, yo, zo = self:getSpawnOrigin()
-	local pt1 = self:getSpawnOrigin()
+	local xo, yo, zo = self:GetSpawnOrigin()
+	local pt1 = self:GetSpawnOrigin()
 	local x, y = TheWorld.Map:GetTileCoordsAtPoint(1000,0,0)
     local ground = TheWorld.Map:GetTile(x, y)
 	print("SpawnOrigin:",pt1,GetTileInfo(pt1))
@@ -2819,7 +2744,7 @@ function InteriorSpawner:OnLoad(data)
 		-- if batcave, register with the batted component.
 		if int_data.batted then
 			if TheWorld.components.batted then
-				TheWorld.components.batted:registerInterior(int_data.unique_name)
+				TheWorld.components.batted:RegisterInterior(int_data.unique_name)
 			end
 		end
 	end
@@ -3041,13 +2966,6 @@ function InteriorSpawner:LoadPostPass(ents, data)
 		-- end
 	-- end
 
-	-- camera load stuff
-	if self.exteriorCamera == nil then
-		-- TODO: Find better location for this
-		self.exteriorCamera = TheCamera
-		self.interiorCamera = InteriorCamera()
-	end
-	
 	-- print("Interior Postload - Dumping data tables:")
 	-- print("Dumping ents:")
 	-- dumptable(ents, 1, 0, nil, 0)
@@ -3059,7 +2977,6 @@ function InteriorSpawner:LoadPostPass(ents, data)
 
 	if data.interior_x then
 		--local player = GetPlayer()
-		--player.TheCamera = self.interiorCamera 
 		local interior_pos = Vector3(data.interior_x, data.interior_y, data.interior_z)
 		if self.spawnOriginDelta then
 			interior_pos = interior_pos + self.spawnOriginDelta
@@ -3075,8 +2992,8 @@ function InteriorSpawner:LoadPostPass(ents, data)
 	end
 
 	if self.current_interior then		
-		local pt_current = self:getSpawnOrigin()
-		local pt_dormant = self:getSpawnStorage()
+		local pt_current = self:GetSpawnOrigin()
+		local pt_dormant = self:GetSpawnStorage()
 		--InteriorManager:SetCurrentCenterPos2d( pt_current.x, pt_current.z )
 		--InteriorManager:SetDormantCenterPos2d( pt_dormant.x, pt_dormant.z )
 		--TheWorld.Map:SetInterior( self.current_interior.handle )		
@@ -3085,7 +3002,6 @@ function InteriorSpawner:LoadPostPass(ents, data)
 	end	
 
 	self:SanityCheck("Post Load")
-	--self:FixRelicOutOfBounds()
 
 	self:CheckIfPlayerIsInside()
 end
@@ -3093,7 +3009,7 @@ end
 -- find the world entry points into dungeons. For multipe entries into one dungeon this is non-deterministic
 function InteriorSpawner:CheckForInvalidSpawnOrigin()
 	-- Trying to detect the issue with clouds in rooms/unplacable items
-	local pt1 = self:getSpawnOrigin()
+	local pt1 = self:GetSpawnOrigin()
 	print("SpawnOrigin:",pt1,GetTileType(pt1))
 	if (GetTileType(pt1) == "IMPASSABLE") then
 		print("World has suspicious SpawnOrigin")
@@ -3135,8 +3051,8 @@ end
 
 function InteriorSpawner:getOriginForInteriorInst(inst)
 	-- it's either in interior storage or in interior spawn, return the right origin to work relative to
-	local spawnStorage = self:getSpawnStorage()
-	local spawnOrigin = self:getSpawnOrigin()
+	local spawnStorage = self:GetSpawnStorage()
+	local spawnOrigin = self:GetSpawnOrigin()
 
 	local pos = inst:GetPosition()
 	local storageDist = (pos - spawnStorage):Length()

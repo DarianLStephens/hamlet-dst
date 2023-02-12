@@ -36,4 +36,4 @@ local function makefn(inst)
     return inst
 end
 
-return Prefab( "common/inventory/construction_permit", makefn, assets)
+return Prefab( "construction_permit", makefn, assets)

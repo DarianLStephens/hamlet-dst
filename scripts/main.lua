@@ -25,6 +25,9 @@ modimport("scripts/actions")
 for k, v in pairs(require("ham_tunings")) do
     TUNING[k] = v
 end
+
+_G.UpvalueHacker =  require("tools/upvaluehacker")
+
 modimport("scripts/constants.lua")
 modimport("scripts/recipes.lua")
 modimport("scripts/patches.lua")

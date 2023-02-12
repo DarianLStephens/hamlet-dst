@@ -193,10 +193,10 @@ local function makewallfn(facing)
     return fn
 end
  
-return Prefab("common/objects/pig_ruins_creeping_vines", makefn(), assets, prefabs ),
-       Prefab("common/objects/pig_ruins_wall_vines_north", makewallfn("north_"), assets_wall, prefabs ),
-       Prefab("common/objects/pig_ruins_wall_vines_east", makewallfn("east_"), assets_wall, prefabs ),
-       Prefab("common/objects/pig_ruins_wall_vines_west", makewallfn("west_"), assets_wall, prefabs )
+return Prefab("pig_ruins_creeping_vines", makefn(), assets, prefabs ),
+       Prefab("pig_ruins_wall_vines_north", makewallfn("north_"), assets_wall, prefabs ),
+       Prefab("pig_ruins_wall_vines_east", makewallfn("east_"), assets_wall, prefabs ),
+       Prefab("pig_ruins_wall_vines_west", makewallfn("west_"), assets_wall, prefabs )
 
 
 

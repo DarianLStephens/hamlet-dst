@@ -416,7 +416,7 @@ local function mazemaker(inst, dungeondef)
         local    walltexture =  "levels/textures/interiors/batcave_wall_rock.tex"
         local    minimaptexture = "levels/textures/map_interior/mini_vamp_cave_noise.tex"
 
-        interior_spawner:CreateRoom("generic_interior", width, 10, height, dungeondef.name, room.idx, addprops, room.exits, walltexture, floortexture, minimaptexture, nil, "images/colour_cubes/pigshop_interior_cc.tex", nil, nil, "ruins","STONE")        
+        interior_spawner:CreateRoom("generic_interior", width, 10, height, dungeondef.name, room.idx, addprops, room.exits, walltexture, floortexture, minimaptexture, nil, "images/colour_cubes/pigshop_interior_cc.tex", nil, nil, "ruins","RUINS","STONE")        
     end
 
     return entranceRoom, exitRoom
@@ -453,7 +453,7 @@ local function patchindoor(inst,interior)
         print(prop.prefab,prop:HasTag("roc_cave_delete_me"))
         if prop.prefab == "deco_cave_floor_trim_front" then
             local ppt = Vector3(prop.Transform:GetWorldPosition())
-            local opt = interior_spawner:getSpawnStorage()
+            local opt = interior_spawner:GetSpawnStorage()
             if ppt.z == opt.z then
                 pt = Vector3(prop.Transform:GetWorldPosition())
                 table.remove(interior.object_list,i)
@@ -468,7 +468,7 @@ local function patchindoor(inst,interior)
             print(prop.prefab,prop:HasTag("roc_cave_delete_me"))
             if prop.prefab == "deco_cave_floor_trim_front" then
                 local ppt = Vector3(prop.Transform:GetWorldPosition())
-                local opt = interior_spawner:getSpawnStorage()
+                local opt = interior_spawner:GetSpawnStorage()
                 pt = Vector3(ppt.x,0,opt.z)                                      
                 break
                 
@@ -517,44 +517,6 @@ local function patchindoor(inst,interior)
     end
 end
 
-local function fixcave(inst)
-
-    -- THIS CODE IS TO SUPPORT OLDER SAVE FILES THAT MIGHT BE BROKEN
-    local interior_spawner = TheWorld.components.interiorspawner
-    local door = interior_spawner.doors["roc_cave_EXIT2"]
-    local door2 = interior_spawner.doors["roc_cave_ENTRANCE2"] --interior_spawner:GetDoorInst("roc_cave_ENTRANCE2") 
-
-    if door2 then
-        if door2.target_interior ~= door.my_interior_name then
-            interior_spawner.doors["roc_cave_ENTRANCE2"].target_interior = door.my_interior_name
-        end
-    end
-
-    if not door2 then
-        -- go throuth every interior , everyprefab in each interior and look for 
-        --my_door_id = "roc_cave_ENTRANCE2",
-        for i, interior in pairs(interior_spawner.interiors) do
-            if interior.prefabs then
-                for p,prop in ipairs(interior.prefabs) do
-                    if prop.my_door_id and prop.my_door_id == "roc_cave_ENTRANCE2" then                  
-                        door2 = true
-                    end
-                end
-            end
-        end
-    end
-
-    if door and not door2 then
-        local interior = interior_spawner.interiors[interior_spawner.doors["roc_cave_EXIT2"].target_interior]
-        if interior then
-            if interior.object_list then
-                -- tinker with the actual prefabs since the room has been visited
-                patchindoor(inst,interior)
-            end
-        end
-    end
-end
-
 local function onsave(inst, data)
     if inst:HasTag("maze_generated") then
         data.maze_generated = true
@@ -574,17 +536,13 @@ local function onload(inst, data)
 	end    
 end
 
-local function onloadPostPass(inst, data)
-    -- try and fix old broken worlds.
-    inst:DoTaskInTime(0,function() fixcave(inst) end)
-end
-
 local function fn(Sim)
 	local inst = CreateEntity()
-	local trans = inst.entity:AddTransform()
+	inst.entity:AddTransform()
 	local anim = inst.entity:AddAnimState()
-	inst.entity:AddNetwork()
     inst.entity:AddSoundEmitter()
+    inst.entity:AddNetwork()
+
     MakeObstaclePhysics(inst, 1)
     local minimap = inst.entity:AddMiniMapEntity()
 	minimap:SetIcon("cave_closed.png")
@@ -609,7 +567,6 @@ local function fn(Sim)
     Close(inst)
 	inst.OnSave = onsave
 	inst.OnLoad = onload
-    inst.OnLoadPostPass = onloadPostPass
 
 	inst.findBatCave = findBatCave
 	
@@ -621,8 +578,8 @@ end
 
 local function exitfn(Sim)
 	local inst = CreateEntity()
-	local trans = inst.entity:AddTransform()
-	local anim = inst.entity:AddAnimState()
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
 	inst.entity:AddSoundEmitter()    
 	
 	MakeObstaclePhysics(inst, 1.)
@@ -650,7 +607,7 @@ local function exitfn(Sim)
 				inst.SoundEmitter:PlaySound("dontstarve/wilson/rock_break")
 				inst.components.lootdropper:DropLoot(pt)
 
-				-- TheWorld.components.quaker_interior:ForceQuake("pillarshake")
+				TheWorld.components.quaker_interior:ForceQuake("pillarshake", inst)
 
 				local interior = findBatCave()
 				if interior then
@@ -783,5 +740,5 @@ end
 
 
 
-return Prefab( "common/cave_entrance_roc", fn, assets, prefabs),
-       Prefab( "common/cave_exit_roc", exitfn, assets, prefabs)
+return Prefab( "cave_entrance_roc", fn, assets, prefabs),
+       Prefab( "cave_exit_roc", exitfn, assets, prefabs)

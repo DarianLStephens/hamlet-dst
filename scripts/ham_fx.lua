@@ -790,7 +790,11 @@ local FX =
         bank = "metal_hulk_ring_fx", 
         build = "metal_hulk_ring_fx", 
         anim = "idle",
-        -- dlc = true,        
+        fn = function(inst)
+			inst.AnimState:SetOrientation( ANIM_ORIENTATION.OnGround )
+			inst.AnimState:SetLayer( LAYER_BACKGROUND )
+			inst.AnimState:SetSortOrder( 2 )
+        end,     
     },
     {
 	    name = "groundpound_fx_hulk",

@@ -1,3 +1,42 @@
+local function BuildMesh(vertices, height)
+    local triangles = {}
+    local y0 = 0
+    local y1 = height
+ 
+    local idx0 = #vertices
+    for idx1 = 1, #vertices do
+        local x0, z0 = vertices[idx0].x, vertices[idx0].z
+        local x1, z1 = vertices[idx1].x, vertices[idx1].z
+ 
+        table.insert(triangles, x0)
+        table.insert(triangles, y0)
+        table.insert(triangles, z0)
+ 
+        table.insert(triangles, x0)
+        table.insert(triangles, y1)
+        table.insert(triangles, z0)
+ 
+        table.insert(triangles, x1)
+        table.insert(triangles, y0)
+        table.insert(triangles, z1)
+ 
+        table.insert(triangles, x1)
+        table.insert(triangles, y0)
+        table.insert(triangles, z1)
+ 
+        table.insert(triangles, x0)
+        table.insert(triangles, y1)
+        table.insert(triangles, z0)
+ 
+        table.insert(triangles, x1)
+        table.insert(triangles, y1)
+        table.insert(triangles, z1)
+ 
+        idx0 = idx1
+    end
+    return triangles
+end
+
 return function()
 	-- local _IsPassableAtPointWithPlatformRadiusBias = Map.IsPassableAtPointWithPlatformRadiusBias
 	-- function Map:IsPassableAtPointWithPlatformRadiusBias(...)
@@ -40,7 +79,7 @@ return function()
 		---local x = arg[1]
 		---local z = arg[3]
 		--if x >= intx and z >= intz then -- Interior space, beginnings of multiplayer compat
-		--local intx, inty, intz = TheWorld.components.interiorspawner:getSpawnOrigin():Get()
+		--local intx, inty, intz = TheWorld.components.interiorspawner:GetSpawnOrigin():Get()
 		if x >= 990 then
 		--if TheWorld.components.interiorspawner.current_interior then
 			--print("Interior - Forcing tile type to dirt on the inside")
@@ -56,7 +95,7 @@ return function()
 		-- local arg = {...}
 		-- local x = arg[1]
 		-- local z = arg[3]
-		--local intx, inty, intz = TheWorld.components.interiorspawner:getSpawnOrigin():Get()
+		--local intx, inty, intz = TheWorld.components.interiorspawner:GetSpawnOrigin():Get()
 		--if x >= intx and z >= intz then
 		if x >= 990 then
 		--if TheWorld.components.interiorspawner.current_interior then
@@ -134,5 +173,15 @@ return function()
 		end
 
 		return FindValidPositionByFan(start_angle, radius, attempts, test)
+	end
+
+	function Physics:SetRectangle(inst, depth, height, width) -- Ported from "engine" :D
+        local vertexes = {
+            Vector3(width, 0, -depth),
+            Vector3(-width, 0, -depth),
+            Vector3(-width, 0, depth),
+            Vector3(width, 0, depth),
+        }
+		inst.Physics:SetTriangleMesh(BuildMesh(vertexes, height))
 	end
 end

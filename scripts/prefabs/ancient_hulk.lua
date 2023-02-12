@@ -1,8 +1,4 @@
-require("brains/ancient_hulkbrain")
-require "stategraphs/SGancient_hulk"
-
 local SHAKE_DIST = 40
-
 local easing = require("easing")
 
 local assets =
@@ -49,7 +45,6 @@ SetSharedLootTable('ancient_hulk',
 
     {'living_artifact_blueprint',   1},
 
-
     {'iron',            1.0},        
     {'iron',            1.0},        
     {'iron',            0.75},    
@@ -67,7 +62,6 @@ SetSharedLootTable('ancient_hulk',
 
 local INTENSITY = .75
 local function SetLightValue(inst, val1, val2, time)
-    print("LIGHT VALUE", val1, val2, time)
     inst.components.fader:StopAll()
     if val1 and val2 and time then
         inst.Light:Enable(true)
@@ -85,7 +79,7 @@ local function SetLightValue(inst, val1, val2, time)
     end
 end
 
-local function setfires(x,y,z, rad)
+local function SetFires(x,y,z, rad)
     for i, v in ipairs(TheSim:FindEntities(x, 0, z, rad, nil, { "laser", "DECOR", "INLIMBO" })) do 
         if v.components.burnable then
             v.components.burnable:Ignite()
@@ -93,7 +87,7 @@ local function setfires(x,y,z, rad)
     end
 end
 
-local function applydamagetoent(inst,ent, targets, rad, hit)
+local function ApplyDamageToEnt(inst,ent, targets, rad, hit)
     local x, y, z = inst.Transform:GetWorldPosition()
     if hit then 
         targets = {}
@@ -130,7 +124,7 @@ local function applydamagetoent(inst,ent, targets, rad, hit)
                     if v.components.workable then
                         v.components.workable:Destroy(inst) 
                         local vx,vy,vz = v.Transform:GetWorldPosition()
-                        v:DoTaskInTime(0.3, function() setfires(vx,vy,vz,1) end)
+                        v:DoTaskInTime(0.3, function() SetFires(vx,vy,vz,1) end)
                     end
                  end)
                 if v:IsValid() and v:HasTag("stump") then
@@ -193,7 +187,7 @@ local function DoDamage(inst, rad, startang, endang, spawnburns)
         angle = math.atan2(down.z, down.x)/DEGREES
     end
 
-    setfires(x,y,z, rad)
+    SetFires(x,y,z, rad)
     for i, v in ipairs(TheSim:FindEntities(x, 0, z, rad, nil, { "laser", "DECOR", "INLIMBO" })) do  --  { "_combat", "pickable", "campfire", "CHOP_workable", "HAMMER_workable", "MINE_workable", "DIG_workable" }
         local dodamage = true
         if startang and endang then
@@ -211,83 +205,70 @@ local function DoDamage(inst, rad, startang, endang, spawnburns)
             end
         end
         if dodamage then
-            targets = applydamagetoent(inst,v, targets, rad)
+            targets = ApplyDamageToEnt(inst,v, targets, rad)
         end
     end
 end
 
 ---------------------------------------------------------------------------------------
 
-local function color(x,y,tiles,islands,value)
-    tiles[y][x] = false
-    islands[y][x] = value
-end
-
-local function check_validity(x,y,w,h,tiles,stack)
+local function CheckValidity(x,y,w,h,tiles,stack)
     if x >= 1 and y >= 1 and x <= w and y <= h and tiles[y][x] then
         stack[#stack+1] = {x=x,y=y}
     end
 end
 
-local function floodfill(x,y,w,h,tiles,islands,value)
---    Queue q
+local function Fill(x,y,w,h,tiles,islands,value)
     local q = {}
---    q.push((x,y))
     q[#q+1] = {x=x,y=y}
---    while (q is not empty)
     while #q > 0 do
---       (x1,y1) = q.pop()
         local el = q[#q] 
         table.remove(q)
         local x1,y1 = el.x, el.y
---       color(x1,y1)         -- islandmap[x,y] = color
---print("Color",x1,y1)
-        color(x1,y1,tiles,islands,value)
-                            
-        check_validity(x1+1,y1,w,h,tiles,q)
-        check_validity(x1-1,y1,w,h,tiles,q)
-        check_validity(x1,y1+1,w,h,tiles,q)
-           check_validity(x1,y1-1,w,h,tiles,q)
-        -- diagonals
-        check_validity(x1-1,y1-1,w,h,tiles,q)
-        check_validity(x1-1,y1+1,w,h,tiles,q)
-        check_validity(x1+1,y1-1,w,h,tiles,q)
-            check_validity(x1+1,y1+1,w,h,tiles,q)
+        
+        tiles[y][x] = false
+        islands[y][x] = value
 
---            q.push(x1,y1-1)    
+        CheckValidity(x1+1,y1,w,h,tiles,q)
+        CheckValidity(x1-1,y1,w,h,tiles,q)
+        CheckValidity(x1,y1+1,w,h,tiles,q)
+        CheckValidity(x1,y1-1,w,h,tiles,q)
+        CheckValidity(x1-1,y1-1,w,h,tiles,q)
+        CheckValidity(x1-1,y1+1,w,h,tiles,q)
+        CheckValidity(x1+1,y1-1,w,h,tiles,q)
+        CheckValidity(x1+1,y1+1,w,h,tiles,q)
     end
 end
 
-local function dofloodfillfromcoord(x,y,w, h, tiles, islands)
+local function FillFromCoord(x,y,w, h, tiles, islands)
     local index = 3
     local rescan = true
     local val = tiles[y][x]
     if val then
-        floodfill(x,y,w,h,tiles,islands,index)
+        Fill(x,y,w,h,tiles,islands,index)
         index = index + 1
     end
 end
 
-function getDropLocations(inst)
+function GetDropLocations(inst)
    local islands = {}
    local tiles = {}
-   local map = GetWorld().Map
-   local w,h = map:GetSize()
+   local w,h = TheWorld.Map:GetSize()
 
    for y = 1,h do
        tiles[y] = {}
        islands[y] = {}
        for x = 1, w do
-           local tile = map:GetTile(x-1,y-1)
+           local tile = TheWorld.Map:GetTile(x-1,y-1)
 
-           tiles[y][x] = tile ~= GROUND.IMPASSABLE and tile ~= GROUND.LILYPOND
+           tiles[y][x] = not IsOceanTile(tile)
        end
    end
    local x,y,z = inst.Transform:GetWorldPosition()
 
    x = math.floor(x/4+ (w/2))
    z = math.floor(z/4 + (h/2))
-   dofloodfillfromcoord(x,z,w, h, tiles, islands)
+   FillFromCoord(x,z,w, h, tiles, islands)
 
    local locations = {}
    for z=1,h do
@@ -303,10 +284,9 @@ end
 
 ---------------------------------------------------------------------------------------
 
-local function dropparts(inst)
-
-    local locations = getDropLocations(inst)
-    local map = GetWorld().Map
+local function DropParts(inst)
+    local locations = GetDropLocations(inst)
+    local map = TheWorld.Map
     local w,h = map:GetSize()
 
     assert(#locations > 0,"NO LOCATIONS!?!?!?")
@@ -356,17 +336,6 @@ end
 
 local function KeepTargetFn(inst, target)
     return inst.components.combat:CanTarget(target)
-end
-
-
-local function OnSave(inst, data)
-
-end 
-
-local function OnLoad(inst, data)
-    if data then
-       
-    end
 end
 
 local function OnAttacked(inst, data)
@@ -453,28 +422,29 @@ local function ShootProjectile(inst, targetpos)
 
     local speed =  60 --  easing.linear(rangesq, 15, 3, maxrange * maxrange)
     projectile.components.complexprojectile:SetHorizontalSpeed(speed)
-    projectile.components.complexprojectile:SetGravity(-25)
+    projectile.components.complexprojectile:SetGravity(25)
     projectile.components.complexprojectile:Launch(targetpos, inst, inst)
     projectile.owner = inst
 end
 
-local function spawnbarrier(inst,pt)
+local function SpawnBarrier(inst)
+    local pt = Vector3(inst.Transform:GetWorldPosition())
     local angle = 0
     local radius = 13
     local number = 32
     for i=1,number do        
         local offset = Vector3(radius * math.cos( angle ), 0, -radius * math.sin( angle ))
         local newpt = pt + offset
-        local tile = GetWorld().Map:GetTileAtPoint(newpt.x, newpt.y, newpt.z)
+        local tile = TheWorld.Map:GetTileAtPoint(newpt.x, newpt.y, newpt.z)
 
-        if tile ~= GROUND.IMPASSABLE and tile ~= GROUND.INVALID and not GetWorld().Map:IsWater(tile) then
-            GetWorld():DoTaskInTime(math.random()*0.3, function()            
+        if tile ~= GROUND.IMPASSABLE and tile ~= GROUND.INVALID and not TheWorld.Map:IsOceanTileAtPoint(newpt.x, newpt.y, newpt.z) then
+            inst:DoTaskInTime(math.random()*0.3, function()            
                 local rock = SpawnPrefab("rock_basalt")
                 rock.AnimState:PlayAnimation("emerge")
                 inst.SoundEmitter:PlaySound("dontstarve_DLC003/creatures/boss/hulk_metal_robot/rock")
                 rock.AnimState:PushAnimation("full")
 
-                rock.Transform:SetPosition(newpt.x,newpt.y,newpt.z)
+                rock.Transform:SetPosition(newpt.x, newpt.y, newpt.z)
 
             end)
         end
@@ -482,10 +452,10 @@ local function spawnbarrier(inst,pt)
     end
 end
 
-local function checkforAttacks(inst)
+local function CheckForAttacks(inst)
     -- mine
     local x, y, z = inst.Transform:GetWorldPosition()
-    local ents = TheSim:FindEntities(x,y,z,20,{"ancient_hulk_mine"})
+    local ents = TheSim:FindEntities(x, y, z, 20, {"ancient_hulk_mine"})
     if #ents < 2 then 
         inst.wantstomine = true
     else
@@ -556,27 +526,27 @@ end
 
 local function fn(Sim)
     local inst = CreateEntity()
-	local trans = inst.entity:AddTransform()
-	local anim = inst.entity:AddAnimState()
-	local sound = inst.entity:AddSoundEmitter()
-	local shadow = inst.entity:AddDynamicShadow()
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
+	inst.entity:AddSoundEmitter()
+	inst.entity:AddDynamicShadow()
 	inst.entity:AddNetwork()
-	shadow:SetSize(6, 3.5)
     
     inst.Transform:SetSixFaced()
+	inst.DynamicShadow:SetSize(6, 3.5)
 
 	MakeCharacterPhysics(inst, 1000, 1.5)
 
     inst.Physics:SetCollisionCallback(OnCollide)
 
-    anim:SetBank("metal_hulk")
-    anim:SetBuild("metal_hulk_build")
-    anim:PlayAnimation("idle", true)
+    inst.AnimState:SetBank("metal_hulk")
+    inst.AnimState:SetBuild("metal_hulk_build")
+    inst.AnimState:PlayAnimation("idle", true)
     
-    anim:AddOverrideBuild("laser_explode_sm")
-    anim:AddOverrideBuild("smoke_aoe")    
-    anim:AddOverrideBuild("laser_explosion")   
-    anim:AddOverrideBuild("ground_chunks_breaking")   
+    inst.AnimState:AddOverrideBuild("laser_explode_sm")
+    inst.AnimState:AddOverrideBuild("smoke_aoe")    
+    inst.AnimState:AddOverrideBuild("laser_explosion")   
+    inst.AnimState:AddOverrideBuild("ground_chunks_breaking")   
      
     ------------------------------------------
 
@@ -658,18 +628,16 @@ local function fn(Sim)
     inst.glow:SetColour(1, 0.3, 0.3)
     inst.glow:Enable(false)
 
-    inst.OnSave = OnSave
-    inst.OnLoad = OnLoad
     inst.LaunchProjectile = LaunchProjectile
     inst.ShootProjectile = ShootProjectile
     inst.DoDamage = DoDamage
-    inst.spawnbarrier = spawnbarrier
-    inst.dropparts = dropparts
+    inst.SpawnBarrier = SpawnBarrier
+    inst.DropParts = DropParts
     inst.SetLightValue = SetLightValue
 
-    inst:DoPeriodicTask(1,function() checkforAttacks(inst) end)
+    inst:DoPeriodicTask(1, CheckForAttacks)
 
-    inst:ListenForEvent( "onremove", function() inst.SoundEmitter:KillSound("gears") print("KILLLL GEARS!!!!!!!!!")  end, inst )
+    inst:ListenForEvent("onremove", function() inst.SoundEmitter:KillSound("gears") end, inst )
     
     ------------------------------------------
 
@@ -679,23 +647,17 @@ local function fn(Sim)
     inst.components.locomotor:SetShouldRun(true)
 
     inst:SetStateGraph("SGancient_hulk")
-    local brain = require("brains/ancient_hulkbrain")
-    inst:SetBrain(brain)
+    inst:SetBrain(require("brains/ancient_hulkbrain"))
 
     if not inst.shotspawn then
-        inst.shotspawn = SpawnPrefab( "ancient_hulk_marker" )        
+        inst.shotspawn = SpawnPrefab("ancient_hulk_marker" )        
         inst.shotspawn:Hide()
         inst.shotspawn.persists = false
         local follower = inst.shotspawn.entity:AddFollower()
         follower:FollowSymbol( inst.GUID, "hand01", 0,0,0 )
     end
 
-
     return inst
-end
-
-local function OnMineCollide(inst, other)
-    -- may want to do some charging damage?
 end
 
 local function OnHit(inst, dist)    
@@ -730,7 +692,7 @@ local function onnearmine(inst, ents)
         inst.SoundEmitter:KillSound("boom_loop")
             local player = GetClosestInstWithTag("player", inst, SHAKE_DIST)
             if player then
-                player.components.playercontroller:ShakeCamera(inst, "VERTICAL", 0.5, 0.03, 2, SHAKE_DIST)
+                ShakeAllCameras(CAMERASHAKE.VERTICAL, 0.5, .03, 2, inst, SHAKE_DIST)
             end
             inst:Hide()
             local ring = SpawnPrefab("laser_ring")
@@ -746,18 +708,16 @@ end
 
 local function minefn(Sim)
     local inst = CreateEntity()
-    local trans = inst.entity:AddTransform()
-    local anim = inst.entity:AddAnimState()
-    local sound = inst.entity:AddSoundEmitter()
+    inst.entity:AddTransform()
+    inst.entity:AddAnimState()
+    inst.entity:AddSoundEmitter()
 	inst.entity:AddNetwork()
 
     MakeInventoryPhysics(inst, 75, 0.5)
 
-    --inst.Physics:SetCollisionCallback(OnMineCollide)
-
-    anim:SetBank("metal_hulk_mine")
-    anim:SetBuild("metal_hulk_bomb")
-    anim:PlayAnimation("green_loop", true)
+    inst.AnimState:SetBank("metal_hulk_mine")
+    inst.AnimState:SetBuild("metal_hulk_bomb")
+    inst.AnimState:PlayAnimation("green_loop", true)
 
     inst:AddTag("ancient_hulk_mine")
 	
@@ -767,7 +727,7 @@ local function minefn(Sim)
 		return inst
 	end
 
-    inst.primed =true
+    inst.primed = true
 
     inst:AddComponent("locomotor")
     inst:AddComponent("complexprojectile")
@@ -799,7 +759,7 @@ end
 local function OnHitOrb(inst, dist)    
     local player = GetClosestInstWithTag("player", inst, SHAKE_DIST)
     if player then
-        player.components.playercontroller:ShakeCamera(inst, "VERTICAL", 0.4, 0.03, 1.5, SHAKE_DIST)
+        ShakeAllCameras(CAMERASHAKE.VERTICAL, 0.4, .03, 1.5, inst, SHAKE_DIST)
     end    
     inst.AnimState:PlayAnimation("impact")  
     inst:ListenForEvent("animover", function() 
@@ -815,16 +775,16 @@ end
 
 local function orbfn(Sim)
     local inst = CreateEntity()
-    local trans = inst.entity:AddTransform()
-    local anim = inst.entity:AddAnimState()
-    local sound = inst.entity:AddSoundEmitter()
+    inst.entity:AddTransform()
+    inst.entity:AddAnimState()
+    inst.entity:AddSoundEmitter()
 	inst.entity:AddNetwork()
 
     MakeInventoryPhysics(inst, 75, 0.5)
 
-    anim:SetBank("metal_hulk_projectile")
-    anim:SetBuild("metal_hulk_projectile")
-    anim:PlayAnimation("spin_loop", true)
+    inst.AnimState:SetBank("metal_hulk_projectile")
+    inst.AnimState:SetBuild("metal_hulk_projectile")
+    inst.AnimState:PlayAnimation("spin_loop", true)
 
     inst:AddTag("ancient_hulk_orb")
 	
@@ -839,7 +799,9 @@ local function orbfn(Sim)
     inst:AddComponent("locomotor")
     inst:AddComponent("complexprojectile")
     inst.components.complexprojectile:SetOnHit(OnHitOrb)
-    inst.components.complexprojectile.yOffset = 2.5
+    inst.components.complexprojectile:SetHorizontalSpeed(60)
+    inst.components.complexprojectile:SetGravity(25)
+    inst.components.complexprojectile:SetLaunchOffset(Vector3(0, 2.5, 0))
 
     inst:AddComponent("combat")
     inst.components.combat:SetDefaultDamage(TUNING.ANCIENT_HULK_MINE_DAMAGE)
@@ -859,7 +821,7 @@ local function orbfn(Sim)
 end
 
 local function OnCollidesmall(inst,other)
-    applydamagetoent(inst,other,nil,nil,true)
+    ApplyDamageToEnt(inst,other,nil,nil,true)
 
     local explosion = SpawnPrefab("laser_explosion")
     explosion.Transform:SetPosition(inst.Transform:GetWorldPosition())  
@@ -871,18 +833,14 @@ end
 
 local function orbsmallfn(Sim)
     local inst = CreateEntity()
-    local trans = inst.entity:AddTransform()
-    local anim = inst.entity:AddAnimState()
-    local sound = inst.entity:AddSoundEmitter()
+    inst.entity:AddTransform()
+    inst.entity:AddAnimState()
+    inst.entity:AddSoundEmitter()
 	inst.entity:AddNetwork()
 
     MakeCharacterPhysics(inst, 1, 0.5)
 	
-	inst.entity:SetPristine()
-
-	if not TheWorld.ismastersim then
-		return inst
-	end
+    inst:AddTag("projectile")
 
 	-- Don't collide with the land edge
     inst.Physics:ClearCollisionMask()
@@ -892,25 +850,25 @@ local function orbsmallfn(Sim)
     -- inst.Physics:CollidesWith(COLLISION.INTWALL)
     
     inst.Physics:SetCollisionCallback(OnCollidesmall)
+    inst.Physics:SetMotorVelOverride(60,0,0)
 
-    anim:SetBank("metal_hulk_projectile")
-    anim:SetBuild("metal_hulk_projectile")
-    anim:PlayAnimation("spin_loop", true)    
+    inst.AnimState:SetBank("metal_hulk_projectile")
+    inst.AnimState:SetBuild("metal_hulk_projectile")
+    inst.AnimState:PlayAnimation("spin_loop", true)    
 
-    inst.Transform:SetScale(0.5,0.5,0.5)
+    inst.Transform:SetScale(0.5, 0.5, 0.5)
 
-    inst.persists = false
+    inst.entity:SetPristine()
+
+	if not TheWorld.ismastersim then
+		return inst
+	end
 
     inst:AddComponent("locomotor")
-    inst:AddTag("projectile")
 
     inst:AddComponent("combat")
     inst.components.combat:SetDefaultDamage(TUNING.ANCIENT_HULK_MINE_DAMAGE/3)
     inst.components.combat.playerdamagepercent = 0.5
-
-    inst.Physics:SetMotorVelOverride(60,0,0)
-
-    inst:DoTaskInTime(2,function() inst:Remove() end)
 
     inst:AddComponent("fader")
     inst.glow = inst.entity:AddLight()    
@@ -922,6 +880,9 @@ local function orbsmallfn(Sim)
 
     inst.SetLightValue = SetLightValue
 
+    inst:DoTaskInTime(2, int.Remove)
+
+    inst.persists = false
 
     return inst
 end
@@ -930,7 +891,7 @@ local function OnCollidecharge(inst,other)
     inst.Physics:SetMotorVelOverride(0,0,0)
     local player = GetClosestInstWithTag("player", inst, SHAKE_DIST)
     if player then
-        player.components.playercontroller:ShakeCamera(inst, "VERTICAL", 0.4, 0.03, 1.5, SHAKE_DIST)
+        ShakeAllCameras(CAMERASHAKE.VERTICAL, 0.4, .03, 1.5, inst, SHAKE_DIST)
     end    
     inst.AnimState:PlayAnimation("impact")  
     inst:ListenForEvent("animover", function() 
@@ -945,20 +906,19 @@ local function OnCollidecharge(inst,other)
 end
 
 local function orbchargefn(Sim)
-
     local inst = CreateEntity()
-    local trans = inst.entity:AddTransform()
-    local anim = inst.entity:AddAnimState()
-    local sound = inst.entity:AddSoundEmitter()
+    inst.entity:AddTransform()
+    inst.entity:AddAnimState()
+    inst.entity:AddSoundEmitter()
 	inst.entity:AddNetwork()
 
     MakeCharacterPhysics(inst, 1, 0.5)
     
     inst.Physics:SetCollisionCallback(OnCollidecharge)
 
-    anim:SetBank("metal_hulk_projectile")
-    anim:SetBuild("metal_hulk_projectile")
-    anim:PlayAnimation("spin_loop", true)    
+    inst.AnimState:SetBank("metal_hulk_projectile")
+    inst.AnimState:SetBuild("metal_hulk_projectile")
+    inst.AnimState:PlayAnimation("spin_loop", true)    
 	
 	inst.entity:SetPristine()
 
@@ -977,7 +937,7 @@ local function orbchargefn(Sim)
  
     inst.Physics:SetMotorVelOverride(40,0,0)
 
-    inst:DoTaskInTime(2,function() inst:Remove() end)
+    inst:DoTaskInTime(2, inst.Remove)
 
     inst:AddComponent("fader")
     inst.glow = inst.entity:AddLight()    
@@ -994,7 +954,7 @@ end
 
 local function markerfn(Sim)
     local inst = CreateEntity()
-    local trans = inst.entity:AddTransform()
+    inst.entity:AddTransform()
 	inst.entity:AddNetwork()
 	
 	inst.entity:SetPristine()
@@ -1004,13 +964,14 @@ local function markerfn(Sim)
 	end
 
     inst.persists = false
+
     return inst
 end
 
 
-return Prefab( "ancient_hulk", fn, assets, prefabs),
-       Prefab( "ancient_hulk_mine", minefn, assets, prefabs),
-       Prefab( "ancient_hulk_orb", orbfn, assets, prefabs),
-       Prefab( "ancient_hulk_orb_small", orbsmallfn, assets, prefabs),
-       Prefab( "ancient_hulk_orb_charge", orbchargefn, assets, prefabs),
-       Prefab( "ancient_hulk_marker", markerfn, assets, prefabs)
+return Prefab("ancient_hulk", fn, assets, prefabs),
+       Prefab("ancient_hulk_mine", minefn, assets, prefabs),
+       Prefab("ancient_hulk_orb", orbfn, assets, prefabs),
+       Prefab("ancient_hulk_orb_small", orbsmallfn, assets, prefabs),
+       Prefab("ancient_hulk_orb_charge", orbchargefn, assets, prefabs),
+       Prefab("ancient_hulk_marker", markerfn, assets, prefabs)

@@ -58,4 +58,4 @@ local function makefn(inst)
     return inst
 end
 
-return Prefab( "common/inventory/securitycontract", makefn, assets)
+return Prefab( "securitycontract", makefn, assets)

@@ -644,6 +644,6 @@ local function lightfn(Sim)
     return inst
 end
 
-return Prefab( "common/inventory/living_artifact", fn, assets),
-       Prefab( "common/inventory/living_artifact_light", lightfn, assets)
+return Prefab( "living_artifact", fn, assets),
+       Prefab( "living_artifact_light", lightfn, assets)
 

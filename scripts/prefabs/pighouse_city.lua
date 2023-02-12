@@ -592,13 +592,13 @@ local function placetestfn(inst)
 end
 
 local function house(name, anim, build, spawnList)
-    return Prefab( "common/objects/"..name, makefn(anim, build, spawnList ), assets, prefabs)
+    return Prefab(name, makefn(anim, build, spawnList ), assets, prefabs)
 end
 
 return house("pighouse_city",nil,nil),
        house("pighouse_farm","pig_shop","pig_farmhouse_build",spawned_farm),
        house("pighouse_mine","pig_shop","pig_farmhouse_build",spawned_mine),
 
-       MakePlacer("common/pighouse_city_placer", "pig_shop", "pig_townhouse1_green_build", "idle", nil, nil, true, 0.75, nil, nil, nil, nil, nil, placetestfn)
+       MakePlacer("pighouse_city_placer", "pig_shop", "pig_townhouse1_green_build", "idle", nil, nil, true, 0.75, nil, nil, nil, nil, nil, placetestfn)
 
-	  -- MakePlacer("common/pighouse_placer", "pig_house", "pig_house", "idle")  
+	  -- MakePlacer("pighouse_placer", "pig_house", "pig_house", "idle")  
