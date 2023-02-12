@@ -1,3 +1,6 @@
+require("utils/deco_util")
+require("utils/deco_placer_util")
+
 function _G.GetClosestInterior(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
     local interior = TheSim:FindEntities(x, y, z, 20, nil, nil, {"interior_collision"})[1]
@@ -17,9 +20,51 @@ function _G.MakeInteriorPhysics(inst, depth, height, width)
     inst.Physics:CollidesWith(COLLISION.ITEMS)
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)    
     
-    if inst.Physics.SetRectangle then
-        inst.Physics:SetRectangle(inst, depth, height, width)
-    end
+    inst:DoTaskInTime(0, function() inst.Physics:SetRectangle(depth, height, width) end)
+end
+
+function _G.MakeInteriorTexturePackage(name, facing, texture, groundsound)
+	return Prefab(name, function(inst)
+		local inst = CreateEntity()
+
+		inst.entity:AddTransform()
+	
+		inst:AddTag("CLASSIFIED")
+	
+		--[[Non-networked entity]]
+		inst.persists = false
+
+		--Auto-remove if not spawned by builder
+		inst:DoTaskInTime(0, inst.Remove)
+	
+		if not TheWorld.ismastersim then
+			return inst
+		end
+	
+		inst.OnBuiltFn = function(inst, builder)
+			if builder then
+				local interior = builder.components.interiorplayer
+				
+				if not interior then
+					return
+				end
+
+                if facing == INTERIORFACING.FLOOR then
+					interior.floortexture = texture
+					interior.groundsound = groundsound
+				end
+
+				if facing == INTERIORFACING.WALL then
+					interior.walltexture = texture
+				end
+
+                interior:UpdateCamera()
+				inst:Remove()
+			end
+		end
+
+		return inst
+	end)
 end
 
 --Thx Hornet
@@ -120,7 +165,7 @@ function _G.CreateRoom(data)
         )
         effect:SetUVFrameSize(0, -1.5, 1)
         effect:SetKillOnEntityDeath(0, true)
-        effect:SetLayer(0, LAYER_BACKGROUND)
+        effect:SetLayer(0, LAYER_BACKDROP)
 
         effect:SetRenderResources(1, resolvefilepath(data.walltex), resolvefilepath(SHADER))
         effect:SetMaxNumParticles(1, MAX_PARTICLES2)
@@ -131,7 +176,7 @@ function _G.CreateRoom(data)
         )
         effect:SetUVFrameSize(1, 2, 1)
         effect:SetKillOnEntityDeath(1, true)
-        effect:SetLayer(1, LAYER_BACKGROUND)
+        effect:SetLayer(1, LAYER_BACKDROP)
         
         effect:SetRenderResources(2, resolvefilepath(data.walltex), resolvefilepath(SHADER))
         effect:SetMaxNumParticles(2, MAX_PARTICLES2)
@@ -142,7 +187,7 @@ function _G.CreateRoom(data)
         )
         effect:SetUVFrameSize(2, 2, 1)
         effect:SetKillOnEntityDeath(2, true)
-        effect:SetLayer(2, LAYER_BACKGROUND)
+        effect:SetLayer(2, LAYER_BACKDROP)
 
         effect:SetRenderResources(3, resolvefilepath(data.walltex), resolvefilepath(SHADER))
         effect:SetMaxNumParticles(3, MAX_PARTICLES1)
@@ -153,7 +198,7 @@ function _G.CreateRoom(data)
         )
         effect:SetUVFrameSize(3, 3, 1)
         effect:SetKillOnEntityDeath(3, true)
-        effect:SetLayer(3, LAYER_BACKGROUND)
+        effect:SetLayer(3, LAYER_BACKDROP)
     
         inst:DoTaskInTime(0, function()
             --TODO, currently assumes 512x512 is the texture width/length, this needs to change

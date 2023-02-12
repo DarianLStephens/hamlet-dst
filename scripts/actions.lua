@@ -1,3 +1,4 @@
+require("actions")
 -----------------------------------------------------------------------------------------
 local ENTERDOOR = AddAction("ENTERDOOR", "ENTERDOOR", function(act)
 	if act.target:HasTag("secret_room") or act.target:HasTag("predoor") then
@@ -419,6 +420,12 @@ AddComponentAction("USEITEM", "inventoryitem", function(inst, doer, target, acti
     end
 end)
 -----------------------------------------------------------------------------------------
+AddComponentAction("USEITEM", "inventoryitem", function(inst, doer, target, actions, right)
+	if target:HasTag("shelfer") then        
+		table.insert(actions, ACTIONS.GIVE)        
+	end  
+end)
+-----------------------------------------------------------------------------------------
 local DISLODGE = AddAction("DISLODGE", "DISLODGE", function(act)
 	if act.target.components.dislodgeable then
 		act.target.components.dislodgeable:Dislodge(act.doer)
@@ -559,3 +566,44 @@ CHARGE_UP.rmb = true
 AddStategraphActionHandler("wilson", ActionHandler(CHARGE_UP, "charge"))
 AddStategraphActionHandler("wilson_client", ActionHandler(CHARGE_UP, "charge"))
 -----------------------------------------------------------------------------------------
+
+
+local _Pickup = ACTIONS.PICKUP.fn
+ACTIONS.PICKUP.fn = function(act)
+	if act.target and act.target.components.inventoryitem and act.target.components.shelfer then
+		local item  = act.target.components.shelfer:GetGift()
+		if item then
+			item:AddTag("cost_one_oinc")
+			if act.target.components.shelfer.shelf and not act.target.components.shelfer.shelf:HasTag("playercrafted") then
+				if act.doer.components.shopper and act.doer.components.shopper:IsWatching(item) then 
+					if act.doer.components.shopper:CanPayFor(item) then 
+						act.doer.components.shopper:PayFor(item)
+					else 			
+						return false, "CANTPAY"
+					end
+				else
+					if act.target.components.shelfer.shelf and act.target.components.shelfer.shelf.curse then
+						act.target.components.shelfer.shelf.curse(act.target)
+					end						
+				end
+			end
+			item:RemoveTag("cost_one_oinc")
+			if item.components.perishable then 
+				item.components.perishable:StartPerishing() 
+			end		
+			act.target = act.target.components.shelfer:GiveGift()	
+		end
+	end
+	return _Pickup(act)
+end
+
+local _Give = ACTIONS.GIVE.fn
+ACTIONS.GIVE.fn = function(act)
+	if act.invobject.components.inventoryitem then
+		if act.target.components.shelfer then
+			act.target.components.shelfer:AcceptGift(act.doer, act.invobject)
+			return true
+		end
+	end 	
+	return _Give(act)
+end

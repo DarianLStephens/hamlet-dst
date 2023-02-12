@@ -724,13 +724,6 @@ local function MakeHouseDoor(name, build, bank)
 	return Prefab(name, house_fn, assets, prefabs )
 end
 
-local function MakeHouseDoorPlacer(name, build, bank)
-	-- return MakePlacer(name .. "_placer", bank, build, name .. "_open_north", nil, nil, nil, nil, nil, nil, nil, nil, nil, place_door_test_fn, modify_house_door, nil)
-	-- Gotta do something about the place test function.
-	-- Turns out it's done in the recipe itself, now!
-	return MakePlacer( name .. "_placer", bank, build, name .. "_open_north", nil, nil, 2, nil, nil, nil, nil, modify_house_door) --, InitHouseDoorInteriorPrefab)
-end
-
 local function InitInteriorPrefab_shadow(inst, doer, prefab_definition, interior_definition)
 	--If we are spawned inside of a building, then update our door to point at our interior
 	if prefab_definition.animdata then
@@ -786,14 +779,5 @@ return MakeHouseDoor("wood_door",    "pig_ruins_door", "doorway_ruins"),
 	   MakeHouseDoor("curtain_door", "pig_ruins_door", "doorway_ruins"),
 	   MakeHouseDoor("round_door", 	 "pig_ruins_door", "doorway_ruins"),
 	   MakeHouseDoor("plate_door", 	 "pig_ruins_door", "doorway_ruins"),
-
-	   MakeHouseDoorPlacer("wood_door",    "player_house_doors", "player_house_doors"),
-	   MakeHouseDoorPlacer("stone_door",   "player_house_doors", "player_house_doors"),
-	   MakeHouseDoorPlacer("organic_door", "player_house_doors", "player_house_doors"),
-	   MakeHouseDoorPlacer("iron_door",    "player_house_doors", "player_house_doors"),
-	   MakeHouseDoorPlacer("pillar_door",  "player_house_doors", "player_house_doors"),
-	   MakeHouseDoorPlacer("curtain_door", "player_house_doors", "player_house_doors"),
-	   MakeHouseDoorPlacer("round_door",   "player_house_doors", "player_house_doors"),
-	   MakeHouseDoorPlacer("plate_door",   "player_house_doors", "player_house_doors"),
 
 	   Prefab("house_door_shadow", shadowfn, assets, prefabs)

@@ -1,1 +1,6 @@
 _G.NUM_RELICS = 5
+
+_G.INTERIORFACING = {
+    WALL = 1,
+    FLOOR = 2,
+}

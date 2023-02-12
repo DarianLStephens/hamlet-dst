@@ -2,7 +2,9 @@ local assets =
 {
     --Asset("ANIM", "anim/store_items.zip"),
     Asset("ANIM", "anim/pedestal_crate.zip"),
-    Asset("ATLAS_BUILD", "images/inventoryimages.xml", 256),
+    Asset("ATLAS_BUILD", "images/inventoryimages1.xml", 256),
+    Asset("ATLAS_BUILD", "images/inventoryimages1.xml", 256),
+    Asset("ATLAS_BUILD", "images/porkland_inventoryimages.xml", 256),
     Asset("INV_IMAGE", "cost-1"),
     Asset("INV_IMAGE", "cost-2"),
     Asset("INV_IMAGE", "cost-3"),

@@ -13,8 +13,8 @@ for key, atlas in pairs(ToLoad.MiniMapAtlases) do
 end
 
 for _, data in ipairs(ToLoad.InventoryItemsAtlasses) do
-    for _, texure in ipairs(data.texture) do
-        RegisterInventoryItemAtlas(data.atlas, texure)
+    for _, texture in ipairs(data.texture) do
+        RegisterInventoryItemAtlas(data.atlas, texture)
     end
 end
 
@@ -45,5 +45,6 @@ table.insert(SEAMLESSSWAP_CHARACTERLIST, "waterbot")
 AddTile(
     "INTERIOR",
     "LAND",
-    {ground_name = "Interior"}
+    { ground_name = "Interior" },
+    { name="dirt", noise_texture="Ground_noise_dirt", runsound="dontstarve/movement/run_dirt", walksound="dontstarve/movement/walk_dirt", snowsound="dontstarve/movement/run_snow", mudsound="dontstarve/movement/run_mud", cannotbedug = true, flooring = true, hard = true }
 )

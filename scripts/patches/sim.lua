@@ -38,72 +38,49 @@ local function BuildMesh(vertices, height)
 end
 
 return function()
-	-- local _IsPassableAtPointWithPlatformRadiusBias = Map.IsPassableAtPointWithPlatformRadiusBias
-	-- function Map:IsPassableAtPointWithPlatformRadiusBias(...)
-		-- if TheWorld.components.interiorspawner.current_interior then
-			-- return true
-		-- else
-			-- return _IsPassableAtPointWithPlatformRadiusBias(self, ...)
-		-- end
-	-- end
-	
-	local _GetTileCoordsAtPoint = Map.GetTileCoordsAtPoint
-	function Map:GetTileCoordsAtPoint(x,y,z, ...)
-		if x > 990 then
-			x, y, z = 0, 0, 0 
+	local _GetTile = Map.GetTile
+	function Map:GetTile(tilex, tiley, ...)
+		local w, h = self:GetSize()
+		if tilex > w then
+			return WORLD_TILES.INTERIOR
 		end
-		return _GetTileCoordsAtPoint(self, x,y,z, ...)
-	end
-	
-	-- I have to override this, otherwise there are crashes with things like poop, the digamajig, or other farming-related stuff, because Klei doesn't null check it.
-	local _GetTileCenterPoint = Map.GetTileCenterPoint
-	function Map:GetTileCenterPoint(x,y,z, ...)
-		--local x,y,z = pt:Get()
-		if x > 990 then -- Gotta get as close as possible to the edge, without hitting the actual world
-			--local newpos = Vector3(0,0,0)
-			--return _GetTileCenterPoint(self, newpos, ...)
-			--return (Vector3(0,0,0))
-			-- Half suggested I make it return the original coordinates, but I'm not sure how well that will work.
-			x, y, z = 0, 0, 0 
-		end
-		return _GetTileCenterPoint(self, x,y,z, ...)
+		
+		return _GetTile(self, tilex, tiley, ...)
 	end
 	
 	local _GetTileAtPoint = Map.GetTileAtPoint
 	function Map:GetTileAtPoint(x, y, z, ...)
-		---local arg = {...}
-		---local x = arg[1]
-		---local z = arg[3]
-		--if x >= intx and z >= intz then -- Interior space, beginnings of multiplayer compat
-		--local intx, inty, intz = TheWorld.components.interiorspawner:GetSpawnOrigin():Get()
-		if x >= 990 then
-		--if TheWorld.components.interiorspawner.current_interior then
-			--print("Interior - Forcing tile type to dirt on the inside")
-			return WORLD_TILES.INTERIOR 
-		else
-			return _GetTileAtPoint(self, x, y, z, ...)
+		if x >= 1800 then
+			return WORLD_TILES.INTERIOR
 		end
+		
+		return _GetTileAtPoint(self, x, y, z, ...)
 	end
 	
 	local _IsVisualGroundAtPoint = Map.IsVisualGroundAtPoint
 	function Map:IsVisualGroundAtPoint(x, y, z, ...)
-		-- local arg = {...}
-		-- local x = arg[1]
-		-- local z = arg[3]
-		--local intx, inty, intz = TheWorld.components.interiorspawner:GetSpawnOrigin():Get()
-		--if x >= intx and z >= intz then
-		if x >= 990 then
-		--if TheWorld.components.interiorspawner.current_interior then
+		if x >= 1800 then
 			return true
+		end
+		
+		return _IsVisualGroundAtPoint(self, x, y, z, ...)
+	end
+
+	local _GetTileCenterPoint =	Map.GetTileCenterPoint
+	Map.GetTileCenterPoint= function(self, x, y, z)
+		if x and  x > 1800 then
+			return math.floor(x/4)*4+ 2,0,math.floor(z/4)*4 + 2
+		end
+		if z then
+			return _GetTileCenterPoint(self, x, y, z)
 		else
-			return _IsVisualGroundAtPoint(self, x, y, z, ...)
+			return _GetTileCenterPoint(self, x, y)
 		end
 	end
-	
+
 	-- looks for ground, when it finds a point, checks a radius around that point to make sure they're all ground as well
 	-- (pathfinding isn't granular enough, and chamfered corners can return the tiletype they belong to, but technically player will be outside it)
 	function Map:FindValidExitPoint(position, start_angle, radius, attempts, subradius)
-		--print("FindWalkableOffset:")
 		local theta = start_angle -- radians
 
 		attempts = attempts or 8
@@ -132,13 +109,7 @@ return function()
 			local run_point = position+offset
 			local ground = GetWorld()
 			local tile = ground.Map:GetTileAtPoint(run_point:Get())
-			-- local tile = GetVisualTileType(run_point.x, run_point.y, run_point.z)
-			-- if tile == GROUND.IMPASSABLE or tile == GROUND.OCEAN_SHORE or tile >= GROUND.UNDERGROUND or
-			-- tile == GROUND.OCEAN_SHALLOW or tile == GROUND.OCEAN_MEDIUM or tile == GROUND.OCEAN_DEEP or
-			-- tile == GROUND.OCEAN_CORAL or tile == GROUND.MANGROVE or tile == GROUND.OCEAN_CORAL_SHORE or
-			-- tile == GROUND.MANGROVE_SHORE or tile == GROUND.OCEAN_SHIPGRAVEYARD or tile == GROUND.LILYPOND then
 			if IsOceanTile(tile) then
-				--print("\tfailed, unwalkable ground.")
 				return false
 			end
 
@@ -147,17 +118,9 @@ return function()
 				if check_angle > 2*PI then check_angle = check_angle - 2*PI end
 
 				local offset = Vector3(subradius * math.cos( check_angle ), 0, -subradius * math.sin( check_angle ))
-
-				--print(string.format("    %2.2f", check_angle/DEGREES))
 				local subtest = run_point+offset
 
 				local tile = ground.Map:GetTileAtPoint(run_point:Get())
-				-- local tile = GetVisualTileType(subtest.x, subtest.y, subtest.z)
-				-- if tile == GROUND.IMPASSABLE or tile == GROUND.OCEAN_SHORE or tile >= GROUND.UNDERGROUND or
-					-- tile == GROUND.OCEAN_SHALLOW or tile == GROUND.OCEAN_MEDIUM or tile == GROUND.OCEAN_DEEP or
-					-- tile == GROUND.OCEAN_CORAL or tile == GROUND.MANGROVE or tile == GROUND.OCEAN_CORAL_SHORE or
-					-- tile == GROUND.MANGROVE_SHORE or tile == GROUND.OCEAN_SHIPGRAVEYARD or tile == GROUND.LILYPOND then
-					--print("\tfailed, unwalkable ground.")
 				if IsOceanTile(tile) then
 					return false
 				end
@@ -169,14 +132,13 @@ return function()
 
 		return FindValidPositionByFan(start_angle, radius, attempts, test)
 	end
-
-	function Physics:SetRectangle(inst, depth, height, width) -- Ported from "engine" :D
-        local vertexes = {
-            Vector3(width, 0, -depth),
-            Vector3(-width, 0, -depth),
-            Vector3(-width, 0, depth),
-            Vector3(width, 0, depth),
-        }
-		inst.Physics:SetTriangleMesh(BuildMesh(vertexes, height))
+	Physics.SetRectangle = function(self, depth, height, width)-- Ported from "engine" :D
+		local vertexes = {
+			Vector3(width, 0, -depth),
+			Vector3(-width, 0, -depth),
+			Vector3(-width, 0, depth),
+			Vector3(width, 0, depth),
+		}
+		self:SetTriangleMesh(BuildMesh(vertexes, height))
 	end
 end

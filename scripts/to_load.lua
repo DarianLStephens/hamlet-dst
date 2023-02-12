@@ -4,13 +4,15 @@ local ToLoad = {
 		"home_prototyper",
 		"prop_door",
 		"deco_roomglow",
-		"shelf",
+		"interior_tex_packages",
 		"shelf_slot",
+		"deco_shelf",
 		"deco_antiquities",
 		"deco_swinging_light",
 		"deco_placers",
+		"deco_rug",
 		"deco",
-		"deco_lightglow",
+		"swinglightobject",
 		"deco_academy",
 		"deco_chair",
 		"deco_florist",
@@ -19,6 +21,7 @@ local ToLoad = {
 		"deco_ruins_fountain",
 		"deco_table",
 		"deco_wall_ornament",
+		"deco_pillars",
 		"construction_permit",
 		"house_door",
 		"oincs", 
@@ -48,7 +51,6 @@ local ToLoad = {
 		"shop_spawner",
 		"shop_trinket",
 		"pigman_shopkeeper_desk",
-		"rug",
 		"littlehammer",
 		"iron",
 		"ancient_robots",
@@ -59,7 +61,6 @@ local ToLoad = {
 		"waterbot",
 		"waterbot_none",
 		"ancient_hulk",
-		"interior_wall_fx",
 		"deed",
 		"demolition_permit",
 		"securitycontract",
@@ -79,11 +80,11 @@ local ToLoad = {
 
 		Asset("IMAGE", "images/colour_cubes/pigshop_interior_cc.tex"),
 	
-		Asset("IMAGE", "images/inventoryimages.tex"),
-		Asset("ATLAS", "images/inventoryimages.xml"),
+		Asset("IMAGE", "images/porkland_inventoryimages.tex"),
+		Asset("ATLAS", "images/porkland_inventoryimages.xml"),
 		
-		Asset("IMAGE", "images/inventoryimages_2.tex"),
-		Asset("ATLAS", "images/inventoryimages_2.xml"),
+		Asset("IMAGE", "images/porkland_hud.tex"),
+		Asset("ATLAS", "images/porkland_hud.xml"),
 		
 		Asset("IMAGE", "images/minimap/ham_minimap_atlas.tex"),
 		Asset("ATLAS", "images/minimap/ham_minimap_data.xml"),
@@ -125,6 +126,21 @@ local ToLoad = {
 		Asset("IMAGE", "levels/textures/interiors/floor_cityhall.tex"),
 		Asset("IMAGE", "levels/textures/interiors/wall_mayorsoffice_whispy.tex"),
 		Asset("IMAGE", "levels/textures/interiors/shop_wall_marble.tex"),
+		Asset("IMAGE", "levels/textures/interiors/shop_floor_marble.tex"),
+		Asset("IMAGE", "levels/textures/interiors/floor_gardenstone.tex"),
+		Asset("IMAGE", "levels/textures/interiors/floor_geometrictiles.tex"),
+		Asset("IMAGE", "levels/textures/interiors/floor_shag_carpet.tex"),
+		Asset("IMAGE", "levels/textures/interiors/floor_transitional.tex"),
+		Asset("IMAGE", "levels/textures/interiors/floor_woodpanels.tex"),
+		Asset("IMAGE", "levels/textures/interiors/shop_floor_herringbone.tex"),
+		Asset("IMAGE", "levels/textures/interiors/shop_floor_octagon.tex"),
+		Asset("IMAGE", "levels/textures/interiors/shop_wall_floraltrim2.tex"),
+		Asset("IMAGE", "levels/textures/interiors/shop_wall_sunflower.tex"),
+		Asset("IMAGE", "levels/textures/interiors/wall_peagawk.tex"),
+		Asset("IMAGE", "levels/textures/interiors/wall_plain_DS.tex"),
+		Asset("IMAGE", "levels/textures/interiors/wall_plain_RoG.tex"),
+		Asset("IMAGE", "levels/textures/interiors/wall_rope.tex"),
+		Asset("IMAGE", "levels/textures/interiors/shop_wall_upholstered.tex"),
 	},
 
 	MiniMapAtlases = {
@@ -133,12 +149,8 @@ local ToLoad = {
 
 	InventoryItemsAtlasses = {
 		{
-			atlas = resolvefilepath("images/inventoryimages.xml"),
+			atlas = resolvefilepath("images/porkland_inventoryimages.xml"),
 			texture = require("inventorytextures")[1],
-		},
-		{
-			atlas = resolvefilepath("images/inventoryimages_2.xml"),
-			texture = require("inventorytextures")[2],
 		}
 	},
 }
