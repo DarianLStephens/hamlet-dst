@@ -584,7 +584,7 @@ local function placetestfn(inst)
     -- local tile = GetWorld().Map:GetTileAtPoint(pt.x,pt.y,pt.z)
 	
     -- local tile = GetWorld().Map:GetTileAtPoint(pt.x,pt.y,pt.z)
-    -- if tile == GROUND.INTERIOR then
+    -- if tile == WORLD_TILES.INTERIOR then
         -- return false
     -- end
 

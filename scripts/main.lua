@@ -41,3 +41,9 @@ modimport("strings/names") -- So things have their display names
 
 AddModCharacter("waterbot", "ROBOT")
 table.insert(SEAMLESSSWAP_CHARACTERLIST, "waterbot") 
+
+AddTile(
+    "INTERIOR",
+    "LAND",
+    {ground_name = "Interior"}
+)

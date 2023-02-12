@@ -50,9 +50,7 @@ return function()
 	local _GetTileCoordsAtPoint = Map.GetTileCoordsAtPoint
 	function Map:GetTileCoordsAtPoint(x,y,z, ...)
 		if x > 990 then
-			x = 0
-			y = 0
-			z = 0
+			x, y, z = 0, 0, 0 
 		end
 		return _GetTileCoordsAtPoint(self, x,y,z, ...)
 	end
@@ -66,9 +64,7 @@ return function()
 			--return _GetTileCenterPoint(self, newpos, ...)
 			--return (Vector3(0,0,0))
 			-- Half suggested I make it return the original coordinates, but I'm not sure how well that will work.
-			x = 0
-			y = 0
-			z = 0
+			x, y, z = 0, 0, 0 
 		end
 		return _GetTileCenterPoint(self, x,y,z, ...)
 	end
@@ -83,8 +79,7 @@ return function()
 		if x >= 990 then
 		--if TheWorld.components.interiorspawner.current_interior then
 			--print("Interior - Forcing tile type to dirt on the inside")
-			return WORLD_TILES.DIRT --GROUND.INTERIOR
-			
+			return WORLD_TILES.INTERIOR 
 		else
 			return _GetTileAtPoint(self, x, y, z, ...)
 		end

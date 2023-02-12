@@ -134,11 +134,11 @@ local ToLoad = {
 	InventoryItemsAtlasses = {
 		{
 			atlas = resolvefilepath("images/inventoryimages.xml"),
-			texture = require("assets/inventorytextures1"),
+			texture = require("inventorytextures")[1],
 		},
 		{
 			atlas = resolvefilepath("images/inventoryimages_2.xml"),
-			texture = require("assets/inventorytextures2"),
+			texture = require("inventorytextures")[2],
 		}
 	},
 }
