@@ -234,17 +234,6 @@ function _G.CreateRoom(data)
     end
 
     if Prefabs["interior_dyn"] then
-		local count = 0
-		for k,ent in pairs(Ents) do
-			-- for i,tag in ipairs(arg) do
-				if ent == "interior_dyn" then
-					ent:Remove()
-					count = count + 1
-					break
-				end
-			-- end
-		end
-		print("removed",count)
         TheSim:UnloadPrefabs({"interior_dyn"})
         TheSim:UnregisterPrefabs({"interior_dyn"})	
     end

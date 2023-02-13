@@ -12,7 +12,6 @@ end
 
 local InteriorPlayer = Class(function(self, inst)
     self.inst = inst
-	self.oldcamera = TheCamera
 
     self.camx = net_float(self.inst.GUID, "roomx")
 	self.camz = net_float(self.inst.GUID, "roomz")
@@ -109,6 +108,7 @@ function InteriorPlayer:CleanInteriorSurfaces()
 end
 
 function InteriorPlayer:SetupInteriorSurfaces()
+	self:CleanInteriorSurfaces()
 	if self.inst == ThePlayer then 
 		self.interior = CreateRoom({
 			id = self.roomid:value(), 
