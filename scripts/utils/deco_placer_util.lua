@@ -1,5 +1,5 @@
 INTERIORPLACERS = {}
-local PLACE_OFFSET = 3.25
+local PLACE_OFFSET = 6
 local function placer_onupdatetransform(inst)
     local pos = inst:GetPosition()
     for i, pillar in ipairs(inst.pillars) do
@@ -68,18 +68,18 @@ local function SpawnPillar(inst, data, flip, far)
     return placer
 end
 
-local function WallPostInitFn(inst)
+local function PillarPostInitFn(inst)
     inst.pillars = {}
     local pt = inst:GetPosition()
     inst:DoTaskInTime(0, function()
-        local interior = ThePlayer.replica.interiorplayer
+        local interior = ThePlayer and ThePlayer.replica.interiorplayer
         if interior then
             local width = interior.interiorwidth:value()
             local depth = interior.interiordepth:value()
             local originpt = {x = interior.camx:value(), z = interior.camz:value()}
 
-            local dMax = originpt.x + (depth + PLACE_OFFSET)/2
-            local dMin = originpt.x - (depth - PLACE_OFFSET)/2 
+            local dMax = originpt.x + (depth + (PLACE_OFFSET-1))/2
+            local dMin = originpt.x - (depth - (PLACE_OFFSET-1))/2 
 
             local wMax = originpt.z + width/2
             local wMin = originpt.z - width/2
@@ -109,7 +109,6 @@ local function WallPostInitFn(inst)
 end
 
 function _G.MakePillarPlacer(name, bank, build, anim, data)
-	--return MakePlacer(name, bank, build, anim, nil, nil, nil, nil, nil, nil, nil, nil, nil, TestPillarFn, ModifyPillarFn, PrePillarFn),
     return MakePlacer(name, bank, build, anim, nil, nil, nil, nil, nil, nil, function(inst) 
         inst.data = {
             bank = bank,
@@ -117,7 +116,7 @@ function _G.MakePillarPlacer(name, bank, build, anim, data)
             anim = anim,
             far = data.far,
         }
-        WallPostInitFn(inst) 
+        PillarPostInitFn(inst) 
     end)
 end
 
@@ -125,9 +124,9 @@ function _G.MakePillarBuilder(name, near, far)
     table.insert(INTERIORPLACERS, name)
 	local function OnBuilt(inst, builder)
         local pos = inst:GetPosition()
-        local interior = ThePlayer.replica.interiorplayer
+        local interior = builder and builder.components.interiorplayer
         if interior then
-            local originpt = {x = interior.camx:value(), z = interior.camz:value()}
+            local originpt = {x = interior.camx, z = interior.camz}
 
             local pillar = SpawnAt(pos.x > originpt.x and near or far, inst)
             if pos.z > originpt.z then
@@ -164,7 +163,7 @@ end
 
 local function FurnitureOnUpdate(inst)
     local pt = inst:GetPosition()
-    local interior = ThePlayer.replica.interiorplayer
+    local interior = ThePlayer and ThePlayer.replica.interiorplayer
     if interior then
         local width = interior.interiorwidth:value()
         local depth = interior.interiordepth:value()
@@ -207,7 +206,7 @@ end
 
 local function CeilingLightOnUpdate(inst)
     local pt = inst:GetPosition()
-    local interior = ThePlayer.replica.interiorplayer
+    local interior = ThePlayer and ThePlayer.replica.interiorplayer
     if interior then
         local width = interior.interiorwidth:value()
         local depth = interior.interiordepth:value()
@@ -262,7 +261,7 @@ end
 
 local function RugOnUpdate(inst)
     local pt = inst:GetPosition()
-    local interior = ThePlayer.replica.interiorplayer
+    local interior = ThePlayer and ThePlayer.replica.interiorplayer
     if interior then
         local width = interior.interiorwidth:value()
         local depth = interior.interiordepth:value()
@@ -319,7 +318,7 @@ end
 
 local function WallDecoOnUpdate(inst)
     local pt = inst:GetPosition()
-    local interior = ThePlayer.replica.interiorplayer
+    local interior = ThePlayer and ThePlayer.replica.interiorplayer
     if interior then
         local width = interior.interiorwidth:value()
         local depth = interior.interiordepth:value()
@@ -417,7 +416,7 @@ end
 
 local function WindowOnUpdate(inst)
     local pt = inst:GetPosition()
-    local interior = ThePlayer.replica.interiorplayer
+    local interior = ThePlayer and ThePlayer.replica.interiorplayer
     if interior then
         local width = interior.interiorwidth:value()
         local depth = interior.interiordepth:value()
@@ -516,17 +515,12 @@ end
 
 local function ShelfOnUpdate(inst)
     local pt = inst:GetPosition()
-    local interior = ThePlayer.replica.interiorplayer
+    local interior = ThePlayer and ThePlayer.replica.interiorplayer
     if interior then
         local width = interior.interiorwidth:value()
         local depth = interior.interiordepth:value()
         local originpt = {x = interior.camx:value(), z = interior.camz:value()}
-        local add_offset = PLACE_OFFSET+1.1
-        local dMax = originpt.x + (depth + add_offset)/2
-        local dMin = originpt.x - (depth - add_offset)/2
-
-        local wMax = originpt.z + width/2
-        local wMin = originpt.z - width/2 
+        local add_offset = PLACE_OFFSET
 
         local dist = 2
         local newpt = {}
@@ -590,10 +584,10 @@ function _G.MakeDoorBuilder(name, bank, build)
     table.insert(INTERIORPLACERS, name)
 	local function OnBuilt(inst, builder)
         local pos = inst:GetPosition()
-        local interior = ThePlayer.replica.interiorplayer
-        local originpt = {x = interior.camx:value(), z = interior.camz:value()}
-        local width = interior.interiorwidth:value()
-        local depth = interior.interiordepth:value()
+        local interior = builder and builder.components.interiorplayer
+        local originpt = {x = interior.camx, z = interior.camz}
+        local width = interior.interiorwidth
+        local depth = interior.interiordepth
         local backdiff =  pos.x < (originpt.x - depth/2 + 2)
         local frontdiff = pos.x > (originpt.x + depth/2 - 2)
         local rightdiff = pos.z > (originpt.z + width/2 - 2)
@@ -645,12 +639,12 @@ end
 
 local function DoorOnUpdate(inst)
     local pt = inst:GetPosition()
-    local interior = ThePlayer.replica.interiorplayer
+    local interior = ThePlayer and ThePlayer.replica.interiorplayer
     if interior then
         local width = interior.interiorwidth:value()
         local depth = interior.interiordepth:value()
         local originpt = {x = interior.camx:value(), z = interior.camz:value()}
-        local add_offset = PLACE_OFFSET
+        local add_offset = PLACE_OFFSET - 1
         local dMax = originpt.x + (depth + add_offset)/2
         local dMin = originpt.x - (depth - add_offset)/2
 

@@ -72,7 +72,7 @@ local InteriorPlayer = Class(function(self, inst)
 	self.camzoom = 0
 	
 	self.interiormode = false
-	self._lastMode = false -- Specifically don't save this
+	self._lastMode = false
 	
 	self.interiorwidth = 0
 	self.interiordepth = 0
@@ -100,12 +100,9 @@ nil,
 })
 
 function InteriorPlayer:UpdateCamera()
-	print("DS - Main interiorplayer component, attempting to send data via net to replica...")
-	print("X ", self.camx, "Z ", self.camz, "Zoom ", self.camzoom, "Interior mode ", self.interiormode)
 	if self.interiormode then
 		if self._lastMode == self.interiormode then
-			print("Detected same interior mode, force-update camera position")
-			self.inst.replica.interiorplayer.forceupdatecamera:set(true)
+			SetDirty(self.inst.replica.interiorplayer.forceupdatecamera, true)
 		end
 	end
 	
@@ -127,16 +124,13 @@ function InteriorPlayer:OnSave()
 		groundsound = self.groundsound,
 		roomid = self.roomid,
 	}
-	if self.interiormode == true then
+	if self.interiormode then
 		return data
 	end
 end
 
 function InteriorPlayer:OnLoad(data)
-	print("DS - InteriorPlayer load pass")
-	if data ~= nil then
-		print("Got data from load, dumping...")
-		dumptable(data, 1, 1, nil, 0)
+	if data then
 		self.camx = data.camx
 		self.camz = data.camz
 		self.camzoom = data.camzoom
@@ -149,20 +143,13 @@ function InteriorPlayer:OnLoad(data)
 		self.floortexture = data.floortexture
 		self.groundsound = data.groundsound
 		self.roomid = data.roomid
-	else
-		print("Got no data from load, nothing should happen")
 	end
 end
 
 function InteriorPlayer:LoadPostPass(data)
-	print("DS - InteriorPlayer load POST pass")
 	if data.interiormode then
-		print("Interiormode is true, update camera")
-		self:UpdateCamera() -- Moving it a bit later in init so it can hopefully wait for the client to fully load
-	else
-		print("Interior mode was false, you (probably) weren't in an interior, don't do the thing")
+		self:UpdateCamera()
 	end
-	
 end
 
 return InteriorPlayer

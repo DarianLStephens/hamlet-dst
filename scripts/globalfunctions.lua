@@ -1,6 +1,11 @@
 require("utils/deco_util")
 require("utils/deco_placer_util")
 
+function _G.SetDirty(netvar, val)
+	netvar:set_local(val)
+	netvar:set(val)
+end
+
 function _G.GetClosestInterior(inst)
 	local x, y, z = inst.Transform:GetWorldPosition()
     local interior = TheSim:FindEntities(x, y, z, 20, nil, nil, {"interior_collision"})[1]

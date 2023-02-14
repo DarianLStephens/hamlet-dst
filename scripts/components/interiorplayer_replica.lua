@@ -6,7 +6,6 @@ local function ForceUpdateCameraDirty(inst, val)
 	local rep = inst.replica.interiorplayer
 	if rep.forceupdatecamera:value() then
 		rep:ForceUpdateCamera()
-		rep.forceupdatecamera:set(false)
 	end
 end
 
@@ -27,7 +26,7 @@ local InteriorPlayer = Class(function(self, inst)
 	self.roomid = net_string(self.inst.GUID, "roomid")
 	
 	self.interiormode = net_bool(self.inst.GUID, "setintcam", "setintcamdirty")
-	
+
 	self.forceupdatecamera = net_bool(self.inst.GUID, "forceupdatecam", "forceupdatecamdirty")
 	
 	-- Default dimensions for most interiors
@@ -118,7 +117,7 @@ function InteriorPlayer:SetupInteriorSurfaces()
 			floortex = self.floortexture:value(),
 			walltex = self.walltexture:value(),
 		})
-		self.interior.Transform:SetPosition(self.camx:value()+2, 0, self.camz:value())
+		self.interior.Transform:SetPosition(self.camx:value()+2.5, 0, self.camz:value())
 	end
 end
 
