@@ -54,15 +54,7 @@ function _G.MakeInteriorTexturePackage(name, facing, texture, groundsound)
 					return
 				end
 
-                if facing == INTERIORFACING.FLOOR then
-					interior.floortexture = texture
-					interior.groundsound = groundsound
-				end
-
-				if facing == INTERIORFACING.WALL then
-					interior.walltexture = texture
-				end
-
+                interior:UpdateInterior(facing, texture, groundsound)
                 interior:UpdateCamera()
 				inst:Remove()
 			end

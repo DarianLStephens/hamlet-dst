@@ -107,6 +107,23 @@ nil,
     roomid = onroomidthresh,
 })
 
+function InteriorPlayer:UpdateInterior(facing, texture, groundsound)
+	local interior = self.roomid and TheWorld.components.interiorspawner:GetInteriorByName(self.roomid)
+	if interior then
+		if facing == INTERIORFACING.FLOOR then
+			self.floortexture = texture
+			self.groundsound = groundsound
+			interior.floortexture = texture
+			interior.groundsound = groundsound
+		end
+
+		if facing == INTERIORFACING.WALL then
+			self.walltexture = texture
+			interior.walltexture = texture
+		end
+	end
+end
+
 function InteriorPlayer:UpdateCamera()
 	if self.interiormode then
 		if self._lastMode == self.interiormode then
@@ -145,7 +162,8 @@ function InteriorPlayer:OnLoad(data)
 		self.camzoom = data.camzoom
 		self.camoffset = data.camoffset
 		self.interiormode = data.interiormode
-	
+		self._lastMode = data.interiormode
+
 		self.interiorwidth = data.interiorwidth
 		self.interiordepth = data.interiordepth
 		self.interiorheight = data.interiorheight
