@@ -1,8 +1,4 @@
 require "prefabutil"
---require "stategraphs/SGanthilldoor_north"
---require "stategraphs/SGanthilldoor_south"
---require "stategraphs/SGanthilldoor_east"
---require "stategraphs/SGanthilldoor_west"
 
 local assets =
 {
@@ -50,9 +46,6 @@ end
 local phasefunctions = 
 {
     day = function(inst)
-	
-		
-
     	if inst:HasTag("timechange_anims") then
         	inst.AnimState:PlayAnimation("to_day")
        		inst.AnimState:PushAnimation("day_loop", true)
@@ -65,7 +58,6 @@ local phasefunctions =
     end,
 
     dusk = function(inst) 
-
     	if inst:HasTag("timechange_anims") then
         	inst.AnimState:PlayAnimation("to_dusk")
         	inst.AnimState:PushAnimation("dusk_loop", true)
@@ -78,7 +70,6 @@ local phasefunctions =
     end,
 
     night = function(inst) 
-
     	if inst:HasTag("timechange_anims") then
        		inst.AnimState:PlayAnimation("to_night")
         	inst.AnimState:PushAnimation("night_loop", true)
@@ -140,9 +131,6 @@ local function settimechange(inst)
 	inst.components.lighttweener:StartTween(inst.entity:AddLight(), lights.day.rad, lights.day.intensity, lights.day.falloff, {lights.day.color[1],lights.day.color[2],lights.day.color[3]}, 0)
 	inst.Light:Enable(true)
 
-	-- inst:ListenForEvent("daytime", function() timechange(inst) end, TheWorld)
-	-- inst:ListenForEvent("dusktime", function() timechange(inst) end, TheWorld)
-	-- inst:ListenForEvent("nighttime", function() timechange(inst) end, TheWorld)   
 	inst:WatchWorldState("phase", timechange)
     -- UpdateTime(inst, TheWorld.state.phase)
 
@@ -601,12 +589,19 @@ local function shadowfn()
 	inst.AnimState:SetScale(-1, 1, 1) --They are flipped by default in hamlet
     inst:AddTag("NOCLICK")  -- Note for future self: Was commented out, but not sure why.. if it's not there, the shadow eats the click on the door.
     inst:AddTag("NOBLOCK")
-	inst.initInteriorPrefab = InitInteriorPrefab_shadow
 
     inst:AddTag("SELECT_ME")
+	inst.initInteriorPrefab = InitInteriorPrefab_shadow
 
     inst.AnimState:SetLayer( LAYER_BACKGROUND )
-    inst.AnimState:SetSortOrder( 3 )  
+    inst.AnimState:SetSortOrder( 3 ) 
+
+	inst.entity:SetPristine()
+
+	if not TheWorld.ismastersim then
+		return inst
+	end
+ 
     return inst
 end
 

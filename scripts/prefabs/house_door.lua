@@ -309,22 +309,15 @@ local function DeactivateSelf(inst)
 end
 
 local function common_on_built( inst )
-	-- local interior_spawner = GetTheWorld.components.interiorspawner()
 	local interior_spawner = TheWorld.components.interiorspawner
-	--local interior_spawner = TheWorld.components.interiorspawner
 	local current_interior = interior_spawner:GetCurrentInterior()
-
-	print("DS - House Door - Common on built running")
 
 	local baseanimname = GetBaseAnimName(inst)
 	inst.baseanimname = baseanimname
     CheckForShadow(inst)
-	print("Checked for shadow")
 
 	local wasExistingDoor = false
 	local doors = interior_spawner:GetInteriorDoors(current_interior.unique_name)
-	print("Found doors of interior ID ", current_interior.unique_name, ", dumping...")
-	dumptable(doors, 1, 1, nil, 0)
     for index, door in ipairs(doors) do
     	if door.inst and door.inst.baseanimname then
 
@@ -332,10 +325,6 @@ local function common_on_built( inst )
     		if door.inst.baseanimname == baseanimname then
     			ActivateSelf(inst, door.inst.components.door.target_interior, current_interior)
 				door.inst:Remove() -- Deletes an old door
-				print("Found the door already exists, don't initialize")
-				print("This is the data used to determine it exists already:")
-				print("Loop door baseanimname: ", door.inst.baseanimname)
-				print("My baseanimname: ", baseanimname)
 				wasExistingDoor = true
 				break
     		end
@@ -343,16 +332,12 @@ local function common_on_built( inst )
     end
 
 	if not wasExistingDoor then
-		print("Door didn't already exist, check its stuff for proper init")
 		local connecting_room = interior_spawner:GetPlayerRoomInDirection(current_interior.dungeon_name, current_interior.unique_name, baseanimname)
 		if connecting_room then
 			local found_interior = interior_spawner:GetInteriorByName(connecting_room)
-			print("DS - House door - Found interior, dumping...")
-			dumptable(found_interior, 1, 1, nil, 0)
 			ActivateSelf(inst, found_interior.unique_name, current_interior)
 
 			local opposing_exit = player_interior_exit_dir_data[baseanimname].op_dir
-			print("DS - Adding door data")
 			local door_data = 
 			{ 
 				name = inst.prefab, 
@@ -383,9 +368,10 @@ local function common_on_built( inst )
                	interior_spawner:insertprefab(found_interior, prefabdata.name, {x_offset = prefabdata.x_offset, z_offset = prefabdata.z_offset}, prefabdata)
             end
         else
-           	print ("NO CONNECTING NO ROOM FOUND")
 		end
 	end
+
+	inst.components.door.angle = player_interior_exit_dir_data[baseanimname].angle
 
     -- Replaces a door that hasn't been activated yet
 	local x, y, z = inst.Transform:GetWorldPosition()
@@ -462,8 +448,6 @@ local function common_house_door_fn()
 
    	local function CheckForRemoval()
    		inst:DoTaskInTime(0, function() 
-   			-- inst.doorcanberemoved = GetTheWorld.components.interiorspawner():GetCurrentPlayerRoomConnectedToExit(inst.baseanimname)
-            -- inst.roomcanberemoved = GetTheWorld.components.interiorspawner():GetCurrentPlayerRoomConnectedToExit(inst.baseanimname, inst.components.door.target_interior)
    			inst.doorcanberemoved = TheWorld.components.interiorspawner:GetCurrentPlayerRoomConnectedToExit(inst.baseanimname)
             inst.roomcanberemoved = TheWorld.components.interiorspawner:GetCurrentPlayerRoomConnectedToExit(inst.baseanimname, inst.components.door.target_interior)
    		end)
@@ -541,8 +525,6 @@ local function common_house_door_fn()
     inst.components.workable:SetOnWorkCallback(
         function(inst, worker, workleft)
             if workleft <= 0 and worker == GetPlayer() then
-
-            	print ("WORKER IS ", worker)
 
             	-- local interior_spawner = GetTheWorld.components.interiorspawner()
             	local interior_spawner = TheWorld.components.interiorspawner
@@ -677,45 +659,30 @@ local function MakeHouseDoor(name, build, bank)
 		inst.AnimState:SetBank("player_house_doors")
 		inst.AnimState:SetBuild("player_house_doors")
 
-	--"iron_door",    "player_house_doors", "player_house_doors"
+		--"iron_door",    "player_house_doors", "player_house_doors"
 
-	-- Temporary hardcoding to see if this can work at all
-	inst.animdata = {}
-	inst.animdata.bank = "player_house_doors"--bank
-	inst.animdata.build = "player_house_doors"--build
-	-- inst.animdata.anim = "iron_door" .. "_open_north" --"_placer"--anim
-	inst.animdata.anim = "close_north" --"_placer"--anim
-		
+		-- Temporary hardcoding to see if this can work at all
+		inst.animdata = {}
+		inst.animdata.bank = "player_house_doors"--bank
+		inst.animdata.build = "player_house_doors"--build
+		-- inst.animdata.anim = "iron_door" .. "_open_north" --"_placer"--anim
+		inst.animdata.anim = "close_north" --"_placer"--anim
+			
 		if not TheWorld.ismastersim then
 			return inst
 		end
 		
-		-- This stuff didn't exist in DST, it was prefabutil stuff
-
 		inst.OnBuilt = function()
 			common_on_built(inst)
+			modify_house_door(inst)
+			inst.animdata.anim = inst.prefab .. "_" .. inst.animdata.anim
+			inst.AnimState:PlayAnimation(inst.animdata.anim)
 
-			-- if not inst.initialized and not TheWorld.ismastersim then
-			-- if not inst.initialized and TheWorld.ismastersim then
-			if not inst.initialized then
-				print("DS - House Door - This is where the crash happens, and where it's missing data. Print everything we can, with the problem data being the last thing")
-				print("Inst: ", inst)
-				print("Printing inst.prefab: ", inst.prefab)
-				print("About to print problem stuff, inst.animdata")
-				print("Animdata: ", inst.animdata)
-				print("Animdata anim: ", inst.animdata.anim)
-				print("Manually calling the house modification function, to try and update the anim before playing it")
-				modify_house_door(inst)
-				inst.animdata.anim = inst.prefab .. "_" .. inst.animdata.anim
-				print("New anim: ", inst.animdata.anim)
-				inst.AnimState:PlayAnimation(inst.animdata.anim)
-
-				local background = player_interior_exit_dir_data[inst.baseanimname].background
-				if background then
-					inst.AnimState:SetLayer( LAYER_WORLD_BACKGROUND )
-				else
-					inst.AnimState:SetLayer( LAYER_WORLD )
-				end
+			local background = player_interior_exit_dir_data[inst.baseanimname].background
+			if background then
+				inst.AnimState:SetLayer( LAYER_WORLD_BACKGROUND )
+			else
+				inst.AnimState:SetLayer( LAYER_WORLD )
 			end
 		end
 

@@ -126,7 +126,7 @@ function _G.CreateRoom(data)
     
     local function emit(inst, emitter, pos, uv)
         uv = uv or {}
-    
+        pos.x = (pos.x or 0)-data.offset--+2.5
         inst.VFXEffect:AddParticle(
             emitter or 0,
             MAX_LIFETIME,   -- lifetime

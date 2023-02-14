@@ -593,10 +593,10 @@ function _G.MakeDoorBuilder(name, bank, build)
         local rightdiff = pos.z > (originpt.z + width/2 - 2)
         local leftdiff =  pos.z < (originpt.z - width/2 + 2)
 		
-		local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 1, {}, {}, {"interiordoor"})
+		local ents = TheSim:FindEntities(pos.x, pos.y, pos.z, 1, {}, {}, {"predoor"})
         if #ents >= 1 then
         	for _, ent in pairs(ents) do
-        		if ent:HasTag("interiordoor") then
+        		if ent:HasTag("predoor") then
 					ent.animdata.bank = bank
 					ent.animdata.build = build
 					ent.animdata.anim = name.."_open_"..(backdiff and "north" or frontdiff and "south" or rightdiff and "east" or "west")
@@ -699,7 +699,7 @@ local function DoorOnUpdate(inst)
         -- 	return 
         -- end
 
-        local ents = TheSim:FindEntities(newpt.x, newpt.y, newpt.z, 3, {}, {}, {"wallsection", "interiorteleporter", "interiordoor"})
+        local ents = TheSim:FindEntities(newpt.x, newpt.y, newpt.z, 3, {}, {}, {"wallsection", "door", "predoor"})
         if #ents >= 1 then
         	for _, ent in pairs(ents) do
 				if ent.animdata then
@@ -707,7 +707,7 @@ local function DoorOnUpdate(inst)
 						or string.find(ent.animdata.anim, "_open_south") and string.gsub(ent.animdata.anim, "_open_south", "") 
 						or string.find(ent.animdata.anim, "_open_west") and string.gsub(ent.animdata.anim, "_open_west", "")
 						or string.find(ent.animdata.anim, "_open_east") and string.gsub(ent.animdata.anim, "_open_east", "")
-					if ent:HasTag("interiordoor") and anim ~= name then
+					if ent:HasTag("predoor") and anim ~= name then
 						inst.accept_placement = true
 						return
 					end

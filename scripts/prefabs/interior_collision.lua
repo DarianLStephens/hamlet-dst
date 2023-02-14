@@ -36,7 +36,17 @@ local function BuildMesh(vertices, height)
     end
  
     return triangles
- end
+end
+
+local function CreateBounds(inst, depth, width, height)
+    local vertexes = {
+        Vector3(((depth+0.5)/2), 0, -((width+0.5)/2)),
+        Vector3(-((depth+0.5)/2), 0, -((width+0.5)/2)),
+        Vector3(-((depth+0.5)/2), 0, ((width+0.5)/2)),
+        Vector3(((depth+0.5)/2), 0, ((width+0.5)/2)),
+    }
+    inst.Physics:SetTriangleMesh(BuildMesh(vertexes, height or 3))
+end
 
 local function interior_collision()
     local inst = CreateEntity()
@@ -78,19 +88,14 @@ local function interior_collision()
 
     if not TheWorld.ismastersim then
         inst:ListenForEvent("interiorcollisiondirty", function()
-            local vertexes = {
-                Vector3((inst.depth:value()/2), 0, -(inst.width:value()/2)),
-                Vector3(-(inst.depth:value()/2), 0, -(inst.width:value()/2)),
-                Vector3(-(inst.depth:value()/2), 0, (inst.width:value()/2)),
-                Vector3((inst.depth:value()/2), 0, (inst.width:value()/2)),
-            }
-            inst.Physics:SetTriangleMesh(BuildMesh(vertexes, inst.height:value() or 3))
+            CreateBounds(inst, inst.depth:value(), inst.width:value(), inst.height:value())
         end)
         return inst
     end
 
+    inst:AddComponent("lightningblocker")
+
     inst.SetName = function(inst, name)
-        print("LOOK AT ME", name)
         inst.name:set(name)
     end
 
@@ -98,13 +103,9 @@ local function interior_collision()
         inst.depth:set(depth)
         inst.width:set(width)
         inst.height:set(height)
-        local vertexes = {
-            Vector3((depth/2), 0, -(width/2)),
-            Vector3(-(depth/2), 0, -(width/2)),
-            Vector3(-(depth/2), 0, (width/2)),
-            Vector3((depth/2), 0, (width/2)),
-        }
-        inst.Physics:SetTriangleMesh(BuildMesh(vertexes, height or 3))
+        inst.components.lightningblocker:SetBlockRange(math.sqrt(depth*depth + width*width)/2)
+        
+        CreateBounds(inst, depth, width, height)
 
         if height then
             if not inst.ceiling then

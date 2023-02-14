@@ -15,6 +15,7 @@ local InteriorPlayer = Class(function(self, inst)
     self.camx = net_float(self.inst.GUID, "roomx")
 	self.camz = net_float(self.inst.GUID, "roomz")
 	self.camzoom = net_float(self.inst.GUID, "roomzoom")
+	self.camoffset = net_float(self.inst.GUID, "roomoffset")
 	
 	self.interiorwidth = net_float(self.inst.GUID, "roomwidth")
 	self.interiordepth = net_float(self.inst.GUID, "roomdepth")
@@ -116,8 +117,9 @@ function InteriorPlayer:SetupInteriorSurfaces()
 			height = self.interiorheight:value(),
 			floortex = self.floortexture:value(),
 			walltex = self.walltexture:value(),
+			offset = self.camoffset:value(),
 		})
-		self.interior.Transform:SetPosition(self.camx:value()+2.5, 0, self.camz:value())
+		self.interior.Transform:SetPosition(self.camx:value(), 0, self.camz:value())
 	end
 end
 
@@ -140,11 +142,12 @@ local headingtarget = 0
 function InteriorPlayer:SetCamera()
 	print("Client - SetCamera event received from server")
 	if self.interiormode:value() == true then
-		headingtarget = TheCamera.headingtarget
-		TheCamera.headingtarget = 0
-		TheCamera.controllable = false
-		TheCamera.paused = true 
-
+		self.inst:DoTaskInTime(0, function()
+			headingtarget = TheCamera.headingtarget
+			TheCamera.headingtarget = 0
+			TheCamera.controllable = false
+			TheCamera.paused = true 
+		end)
 		self:UpdateCameraPositions()
 		
 		self:ApplyColorCube(INTERIOR_COLOURCUBES) -- These are the only ones ever used, anyway. If I discover others, I'll change it to be proper

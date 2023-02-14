@@ -17,6 +17,12 @@ local function oncamzoomthresh(self, val)
 	end
 end
 
+local function oncamoffsetthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.camoffset:set(val)
+	end
+end
+
 local function onintmodthresh(self, val)
 	if val ~= nil then
 		self.inst.replica.interiorplayer.interiormode:set(val)
@@ -70,6 +76,7 @@ local InteriorPlayer = Class(function(self, inst)
 	self.camx = 0
 	self.camz = 0
 	self.camzoom = 0
+	self.camoffset = 0
 	
 	self.interiormode = false
 	self._lastMode = false
@@ -89,6 +96,7 @@ nil,
     camx = oncamxthresh,
     camz = oncamzthresh,
     camzoom = oncamzoomthresh,
+    camoffset = oncamoffsetthresh,
     interiormode = onintmodthresh,
     interiorwidth = onintwidththresh,
     interiordepth = onintdepththresh,
@@ -114,6 +122,7 @@ function InteriorPlayer:OnSave()
 		camx = self.camx,
 		camz = self.camz,
 		camzoom = self.camzoom,
+		camoffset = self.camoffset,
 		interiormode = self.interiormode,
 		
 		interiorwidth = self.interiorwidth,
@@ -134,8 +143,9 @@ function InteriorPlayer:OnLoad(data)
 		self.camx = data.camx
 		self.camz = data.camz
 		self.camzoom = data.camzoom
+		self.camoffset = data.camoffset
 		self.interiormode = data.interiormode
-		
+	
 		self.interiorwidth = data.interiorwidth
 		self.interiordepth = data.interiordepth
 		self.interiorheight = data.interiorheight
@@ -143,12 +153,6 @@ function InteriorPlayer:OnLoad(data)
 		self.floortexture = data.floortexture
 		self.groundsound = data.groundsound
 		self.roomid = data.roomid
-	end
-end
-
-function InteriorPlayer:LoadPostPass(data)
-	if data.interiormode then
-		self:UpdateCamera()
 	end
 end
 

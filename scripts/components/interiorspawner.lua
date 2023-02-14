@@ -660,18 +660,6 @@ function InteriorSpawner:FadeInFinished(was_invincible, doer)
 	TheWorld:PushEvent("enterroom")
 end	
 
-function InteriorSpawner:SetCameraOffset(cameraoffset, zoom)
-	local pt = self:GetSpawnOrigin()
-
-	-- cameraoffset = -2
-	-- zoom = 35
-	
-	TheCamera.interior_currentpos_original = Vector3(pt.x+cameraoffset, 0, pt.z)
-	TheCamera.interior_currentpos = Vector3(pt.x+cameraoffset, 0, pt.z)
-
-	TheCamera.interior_distance = zoom
-end
-
 local function GetTileType(pt)
 	local ground = TheWorld
 	local tile
@@ -752,6 +740,7 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 		plint.camx = camx
 		plint.camz = camz
 		plint.camzoom = zoom
+		plint.camoffset = cameraoffset
 		
 		plint.interiorwidth = destination.width
 		plint.interiordepth = destination.depth
