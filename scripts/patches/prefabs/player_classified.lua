@@ -1,7 +1,16 @@
-----------------------------------------------------------------------------------------
---Try to initialise all functions locally outside of the post-init so they exist in RAM only once
-----------------------------------------------------------------------------------------
+local function CraftingFilterTypeDirty(inst)
+	if not inst._parent then
+		return
+	end
+
+	inst._parent.HUD.controls.craftingmenu:AddFilterSwapper(inst.craftingfiltertype:value())
+	--PUSH
+end
 
 return function(inst)
-	print("DS - Player classified being edited with new net things, I hope")
+	inst.craftingfiltertype = net_string(inst.GUID, "craftingfiltertype", "craftingfiltertypedirty")
+	
+	if not TheNet:IsDedicated() then
+		inst:ListenForEvent("craftingfiltertypedirty", CraftingFilterTypeDirty)
+	end
 end

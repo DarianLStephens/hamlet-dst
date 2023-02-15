@@ -41,21 +41,12 @@ local function CreatePrototyper(name, state, techtree)
 		Asset("ANIM", "anim/researchlab.zip"),
 	}
 
-	local function InitFn(Sim)
+	local function fn(Sim)
 		local inst = CreateEntity()
-		local trans = inst.entity:AddTransform()
-        local anim = inst.entity:AddAnimState()  
-
-        anim:SetBank("researchlab")
-        anim:SetBuild("researchlab")
-        anim:PlayAnimation("idle")
-
-        inst.OnSave = OnSave
-        inst.OnLoad = OnLoad
-	        
+		inst.entity:AddTransform()
 		inst.entity:AddSoundEmitter()
         inst.entity:AddNetwork()
-
+	        
 		inst:AddTag("prototyper")		
 
 		inst:AddComponent("prototyper")
@@ -92,11 +83,13 @@ local function CreatePrototyper(name, state, techtree)
 
 		inst.persists = false
 
-		inst:Hide()
+        inst.OnSave = OnSave
+        inst.OnLoad = OnLoad
+		
 		return inst
 	end
 
-	return Prefab(name, InitFn, assets, prefabs)
+	return Prefab(name, fn)
 
 end
 

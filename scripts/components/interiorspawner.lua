@@ -45,11 +45,6 @@ local InteriorSpawner = Class(function(self, inst)
 
 	self.dungeon_entries = {}
 
-	-- self.homeprototyper = SpawnPrefab("home_prototyper")
-	
-	--self.homeprototyper.Transform:SetPosition(interior_spawn_storage_origin:Get())
-	-- self.homeprototyper.Transform:SetPosition(2000,0,2000)
-	
 	-- for debugging the black room issue
 	self.alreadyFlagged = {}
 	self.was_invincible = false

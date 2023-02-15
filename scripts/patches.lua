@@ -7,6 +7,7 @@ local PATCHES =
 	COMPONENTS = {
 		"inventoryitem",
 		"birdspawner",
+		"playercontroller",
 	},
 	
 	PREFABS = {
@@ -17,7 +18,10 @@ local PATCHES =
 	SCREENS = {
 	},
 
-	WIDGETS = {},
+	WIDGETS = {
+		"redux/craftingmenu_widget",	
+		"redux/craftingmenu_hud",	
+	},
 
 	STATEGRAPHS = { --To patch existing states
 		--"SGwilson", 
@@ -134,3 +138,9 @@ function _G.MakeSnowCovered(inst)
 		return _MakeSnowCovered(inst)
 	end)
 end
+
+AddGlobalClassPostConstruct("recipe", "Recipe", function(self, name, ingredients, tab, level, placer_or_more_data, ...)
+	self.wallitem = placer_or_more_data.wallitem
+	self.decor = placer_or_more_data.decor
+	self.flipable = placer_or_more_data.flipable
+end)

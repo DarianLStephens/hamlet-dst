@@ -29,8 +29,8 @@ end
 _G.UpvalueHacker =  require("tools/upvaluehacker")
 
 modimport("scripts/constants.lua")
-modimport("scripts/recipes.lua")
 modimport("scripts/patches.lua")
+modimport("scripts/recipes.lua")
 modimport("scripts/strings.lua")
 modimport("scripts/ham_fx.lua")
 modimport("scripts/ham_containers.lua")

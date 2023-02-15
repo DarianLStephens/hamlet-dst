@@ -1,3 +1,4 @@
+local PLACE_OFFSET = 6
 local function BuildMesh(vertices, height)
     local triangles = {}
     local y0 = 0
@@ -67,8 +68,8 @@ return function()
 	end
 
 	local _GetTileCenterPoint =	Map.GetTileCenterPoint
-	Map.GetTileCenterPoint= function(self, x, y, z)
-		if x and  x > 1800 then
+	function Map:GetTileCenterPoint(x, y, z)
+			if x and  x > 1800 then
 			return math.floor(x/4)*4+ 2,0,math.floor(z/4)*4 + 2
 		end
 		if z then
@@ -78,6 +79,31 @@ return function()
 		end
 	end
 
+	local _CanDeployRecipeAtPoint =	Map.CanDeployRecipeAtPoint
+	function Map:CanDeployRecipeAtPoint(pt, recipe, rot, ...)
+        local interior = ThePlayer and ThePlayer.replica.interiorplayer
+        if interior and interior.interiormode:value() and not recipe.wallitem then
+            local width = interior.interiorwidth:value()
+            local depth = interior.interiordepth:value()
+            local originpt = {x = interior.camx:value(), z = interior.camz:value()}
+            local dMax = originpt.x + (depth + (PLACE_OFFSET-1))/2
+            local dMin = originpt.x - (depth - (PLACE_OFFSET-1))/2 
+
+			local wMax = originpt.z + width/2
+			local wMin = originpt.z - width/2 
+			
+			local dist = 1
+
+			if pt.x < dMin+dist or pt.x > dMax -dist or pt.z < wMin+dist or pt.z > wMax-dist then
+				return false
+			end
+		end
+		if recipe.decor then
+            return true
+		end
+		return _CanDeployRecipeAtPoint(self, pt, recipe, rot, ...)
+	end
+	
 	-- looks for ground, when it finds a point, checks a radius around that point to make sure they're all ground as well
 	-- (pathfinding isn't granular enough, and chamfered corners can return the tiletype they belong to, but technically player will be outside it)
 	function Map:FindValidExitPoint(position, start_angle, radius, attempts, subradius)
