@@ -23,6 +23,8 @@ local InteriorPlayer = Class(function(self, inst)
 	self.floortexture = net_string(self.inst.GUID, "roomtexturefloor")
 	self.walltexture = net_string(self.inst.GUID, "roomtexturewall")
 	self.groundsound = net_string(self.inst.GUID, "roomgroundsound")
+	self.reverb = net_string(self.inst.GUID, "roomreverb")
+	self.ambsnd = net_string(self.inst.GUID, "roomambsnd")
 	
 	self.roomid = net_string(self.inst.GUID, "roomid")
 	
@@ -40,48 +42,29 @@ local InteriorPlayer = Class(function(self, inst)
 	self.floortexture:set("levels/textures/interiors/ground_ruins_slab.tex")
 	self.walltexture:set("levels/textures/interiors/ground_ruins_slab.tex")
 	self.groundsound:set("WOOD")
+	self.reverb:set("default")
+	self.ambsnd:set("")
 	self.interiormode:set(false)
-
+	
 	self.inst:ListenForEvent("setintcamdirty", SetIntCamDirty)
 	self.inst:ListenForEvent("forceupdatecamdirty", ForceUpdateCameraDirty)
 end)
-
-local cc = resolvefilepath("images/colour_cubes/pigshop_interior_cc.tex")
-local INTERIOR_COLOURCUBES =
-{
-    day = cc,
-    dusk = cc,
-    night = cc,
-    full_moon = cc,
-}
-
-local function DisableCCTest()
-	return self.interiormode:value() == false --and not CanEntitySeeInDark(self.inst)
-end
-
-local function CCUpdater(inst, self)
-	if CanEntitySeeInDark(self.inst) then
-		self.inst.components.playervision:SetCustomCCTable(nil)
-	else
-		self.inst.components.playervision:SetCustomCCTable(INTERIOR_COLOURCUBES)
-	end
-end
 
 function InteriorPlayer:GetGroundSound()
 	return self.interiormode:value() and self.groundsound:value()
 end
 
 function InteriorPlayer:ApplyColorCube(cc)
-	self.inst.components.playervision:SetCustomCCTable(INTERIOR_COLOURCUBES)
+	self.inst.components.playervision:SetInteriorColourcube()
 end
 
 function InteriorPlayer:RemoveColorCube()
-	self.inst.components.playervision:SetCustomCCTable(nil)
+	self.inst.components.playervision:ClearInteriorColourcube()
 end
 
-function InteriorPlayer:ApplyInteriorLighting()
+function InteriorPlayer:ApplyInteriorEnv()
 	if self.inst == ThePlayer then 
-		TheWorld:PushEvent("overrideambientlighting", Vector3(0,0,0))
+		TheWorld.components.ambientsound:SetInteriorAmbient(self.ambsnd:value(), self.reverb:value())
 		local oceancolor = TheWorld.components.oceancolor
 		if oceancolor then
 			TheWorld:StopWallUpdatingComponent(oceancolor)
@@ -90,9 +73,9 @@ function InteriorPlayer:ApplyInteriorLighting()
 	end
 end
 
-function InteriorPlayer:RemoveInteriorLighting()
+function InteriorPlayer:RemoveInteriorEnv()
 	if self.inst == ThePlayer then 
-		TheWorld:PushEvent("overrideambientlighting", nil)
+		TheWorld.components.ambientsound:ClearInteriorAmbient()
 		local oceancolor = TheWorld.components.oceancolor
 		if oceancolor then
 			oceancolor:Initialize(TheWorld.has_ocean)
@@ -150,8 +133,8 @@ function InteriorPlayer:SetCamera()
 		end)
 		self:UpdateCameraPositions()
 		
-		self:ApplyColorCube(INTERIOR_COLOURCUBES) -- These are the only ones ever used, anyway. If I discover others, I'll change it to be proper
-		self:ApplyInteriorLighting()
+		self:ApplyColorCube() -- These are the only ones ever used, anyway. If I discover others, I'll change it to be proper
+		self:ApplyInteriorEnv()
 		self:SetupInteriorSurfaces()
 	else
 		print("Restoring original camera")
@@ -163,7 +146,7 @@ function InteriorPlayer:SetCamera()
 		TheCamera:Apply()
 
 		self:RemoveColorCube()
-		self:RemoveInteriorLighting()
+		self:RemoveInteriorEnv()
 		self:CleanInteriorSurfaces()
 	end
 end

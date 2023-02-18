@@ -27,6 +27,9 @@ local function onintmodthresh(self, val)
 	if val ~= nil then
 		self.inst.replica.interiorplayer.interiormode:set(val)
 	end
+	if self.inst.UpdateInteriorDarkness then
+		self.inst:UpdateInteriorDarkness()
+	end
 end
 
 local function onintwidththresh(self, val)
@@ -65,10 +68,27 @@ local function ongroundsoundthresh(self, val)
 	end
 end
 
+local function onreverbthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.reverb:set(val)
+	end
+end
+
+local function onambsndthresh(self, val)
+	if val ~= "" and val ~= nil then
+		self.inst.replica.interiorplayer.ambsnd:set(val)
+	end
+end
+
 local function onroomidthresh(self, val)
 	if val then
 		self.inst.replica.interiorplayer.roomid:set(val)
 	end
+end
+
+local function onplayerroomthresh(self, val)
+	print("SODOs",val)
+	self.inst.player_classified.craftingfiltertype:set(val and "reno" or "")
 end
 
 local InteriorPlayer = Class(function(self, inst)
@@ -87,7 +107,10 @@ local InteriorPlayer = Class(function(self, inst)
 	self.walltexture = nil
 	self.floortexture = nil
 	self.groundsound = "WOOD"
+	self.reverb = "default"
+	self.ambsnd = ""
 	self.roomid = "unknown"
+	self.playerroom = false
 	
 	self.soundupdatertask = nil
 end,
@@ -104,7 +127,10 @@ nil,
     walltexture = onwalltexthresh,
     floortexture = onfloortexthresh,
     groundsound = ongroundsoundthresh,
+    reverb = onreverbthresh,
+    ambsnd = onambsndthresh,
     roomid = onroomidthresh,
+    playerroom = onplayerroomthresh,
 })
 
 function InteriorPlayer:UpdateInterior(facing, texture, groundsound)
@@ -148,7 +174,10 @@ function InteriorPlayer:OnSave()
 		walltexture = self.walltexture,
 		floortexture = self.floortexture,
 		groundsound = self.groundsound,
+		reverb = self.reverb,
+		ambsnd = self.ambsnd,
 		roomid = self.roomid,
+		playerroom = self.playerroom,
 	}
 	if self.interiormode then
 		return data
@@ -170,7 +199,10 @@ function InteriorPlayer:OnLoad(data)
 		self.walltexture = data.walltexture
 		self.floortexture = data.floortexture
 		self.groundsound = data.groundsound
+		self.reverb = data.reverb
+		self.ambsnd = data.ambsnd
 		self.roomid = data.roomid
+		self.playerroom = data.playerroom
 	end
 end
 

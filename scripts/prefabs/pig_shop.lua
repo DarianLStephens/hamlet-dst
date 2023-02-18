@@ -575,9 +575,8 @@ local function creatInterior(inst, name)
 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_giftshop", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
-                    { name = "musac",                       x_offset =  0,   z_offset = 0 }, 
                     { name = "deco_roomglow",               x_offset =  0,   z_offset = 0 }, 
                     { name = "shop_spawner",                x_offset = -3,   z_offset = 0,  shop_type = name },
                     { name = "pigman_professor_shopkeep",   x_offset = -2.3, z_offset = 4,  startstate = "desk_pre" },
@@ -618,9 +617,8 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_antiquities", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
                     { name = "pigman_collector_shopkeep", x_offset = -3, z_offset = 4, startstate = "desk_pre" },
                     { name = "deco_roomglow",             x_offset = 0, z_offset = 0 }, 
                     { name = "shop_spawner",              x_offset = -3, z_offset = 0, shop_type = name, },
@@ -663,11 +661,10 @@ local function creatInterior(inst, name)
 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_giftshop", background=true},
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
                     { name = "shelves_floating",               x_offset = -5,   z_offset = 0, 
                             shelfitems={{1,"petals"},{2,"petals"},{3,"petals"}, {4,"cutgrass"}, {5,"cutgrass"},{6,"petals"}} },
 
-                    { name = "musac",                          x_offset =  0,   z_offset = 0 }, 
                     { name = "deco_roomglow",                  x_offset =  0,   z_offset = 0 }, 
                     { name = "shop_spawner",                   x_offset = -3,   z_offset = 0, shop_type = name },
                     { name = "pigman_hatmaker_shopkeep",       x_offset = -3.5, z_offset = 5, startstate = "desk_pre" },
@@ -715,11 +712,10 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_basic", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
                     
                     { name = "shelves_midcentury", x_offset = -4.5, z_offset = 4, --rotation = -90,
                             shelfitems={{5,"twigs"}, {6,"twigs"}, {3,"twigs"}, {4,"twigs"}} },
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
                     { name = "deco_roomglow",          x_offset =  0,    z_offset =  0 }, 
                     { name = "shop_spawner",           x_offset = -3,    z_offset =  0, shop_type = name },
                     { name = "pigman_hunter_shopkeep", x_offset = -3,    z_offset =  0, startstate = "desk_pre" },
@@ -764,9 +760,8 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_florist", background=true}, 
-                             my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                             my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
-                    { name = "musac",                   x_offset =  0,   z_offset = 0 }, 
                     { name = "pigman_erudite_shopkeep", x_offset = -3,   z_offset = 4, startstate = "desk_pre" },
                     { name = "deco_roomglow",           x_offset = 0,    z_offset = 0 }, 
                     { name = "shop_spawner",            x_offset = -3,   z_offset = 0, shop_type = name, saveID = true },
@@ -808,9 +803,8 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_florist", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
                     { name = "pigman_florist_shopkeep", x_offset = -1,   z_offset =  4,    startstate = "desk_pre" },
                     { name = "deco_roomglow",           x_offset =  0,   z_offset =  0 }, 
                     { name = "shop_spawner",            x_offset =  0,   z_offset =  0,    shop_type = name },
@@ -852,8 +846,7 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_hoofspa", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT}},
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT}},
                     { name = "pigman_beautician_shopkeep", x_offset = -3, z_offset = 3, startstate = "desk_pre" },
                     { name = "deco_roomglow",              x_offset = 0,  z_offset = 0 }, 
                     { name = "shop_spawner",               x_offset = -3, z_offset = 0, shop_type = name },
@@ -887,10 +880,9 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_general", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
                     { name = "pigman_banker_shopkeep", x_offset = -1, z_offset = 4, startstate = "desk_pre" },
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
                     { name = "shop_spawner", x_offset = -3,   z_offset =  0, shop_type = name },
                     { name = "shelves_wood", x_offset = -4.5, z_offset = -4, shelfitems={{3,"rocks"},{4,"rocks"},{5,"rocks"},{6,"rocks"}} },
                     { name = "shelves_wood", x_offset = -4.5, z_offset =  4, shelfitems={{3,"cutgrass"},{4,"cutgrass"},{5,"cutgrass"},{6,"cutgrass"}} },
@@ -933,8 +925,7 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_produce", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
                     { name = "pigman_storeowner_shopkeep", x_offset = -2.5,         z_offset = 4, startstate = "desk_pre" }, 
                     { name = "shop_spawner",               x_offset = -3,           z_offset = 0, shop_type = name },
                     { name = "rug_rectangle",              x_offset = depth/6+1,    z_offset = width/6+1, rotation =  95},
@@ -980,8 +971,7 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_deli", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
                     { name = "pigman_storeowner_shopkeep", x_offset = -1, z_offset = 4, startstate = "desk_pre" },
                     { name = "shop_spawner",               x_offset = -3, z_offset = 0, shop_type = name },
                     { name = "shelves_fridge", x_offset = -4.5, z_offset = -4, rotation=-90,  shelfitems={{1,"fish_raw_small"},{2,"fish_raw_small"},{3,"bird_egg"},{4,"bird_egg"},{5,"froglegs"},{6,"froglegs"}} },
@@ -1020,7 +1010,7 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_flag", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
                     { name = "pigman_mayor_shopkeep",    x_offset = -3, z_offset = 4 },
                     { name = "deco_roomglow",            x_offset = 0,  z_offset = 0 }, 
@@ -1064,7 +1054,7 @@ local function creatInterior(inst, name)
                 
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_flag", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
                     --{ name = "pigman_mayor_shopkeep",    x_offset = -3, z_offset = 4 },
                     { name = "deco_roomglow",            x_offset = 0,  z_offset = 0 }, 
@@ -1103,9 +1093,8 @@ local function creatInterior(inst, name)
                 height = 6
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_bank", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
                     { name = "pigman_banker_shopkeep",     x_offset = -2.5,         z_offset = 0, startstate = "desk_pre" }, 
                     { name = "shop_spawner",               x_offset = -3,           z_offset = 0, shop_type = name },
 
@@ -1158,9 +1147,8 @@ local function creatInterior(inst, name)
                 height = 6
                 addprops = {
                     { name = "prop_door", x_offset = 5, z_offset = 0, animdata = {bank ="pig_shop_doormats", build ="pig_shop_doormats", anim="idle_tinker", background=true}, 
-                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags={"guard_entrance"}, usesounds={SHOPSOUND_EXIT} },
+                        my_door_id = exterior_door_def.target_door_id, target_door_id = exterior_door_def.my_door_id, addtags = {"guard_entrance", "shop_entrance"}, usesounds={SHOPSOUND_EXIT} },
 
-                    { name = "musac",               x_offset =  0,   z_offset = 0 }, 
                     { name = "pigman_mechanic_shopkeep",     x_offset = -2,         z_offset = -3, startstate = "desk_pre" }, 
                     { name = "shop_spawner",               x_offset = -3,           z_offset = 0, shop_type = name },
 

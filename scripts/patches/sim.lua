@@ -1,44 +1,42 @@
 local PLACE_OFFSET = 6
-local function BuildMesh(vertices, height)
-    local triangles = {}
-    local y0 = 0
-    local y1 = height
- 
-    local idx0 = #vertices
-    for idx1 = 1, #vertices do
-        local x0, z0 = vertices[idx0].x, vertices[idx0].z
-        local x1, z1 = vertices[idx1].x, vertices[idx1].z
- 
-        table.insert(triangles, x0)
-        table.insert(triangles, y0)
-        table.insert(triangles, z0)
- 
-        table.insert(triangles, x0)
-        table.insert(triangles, y1)
-        table.insert(triangles, z0)
- 
-        table.insert(triangles, x1)
-        table.insert(triangles, y0)
-        table.insert(triangles, z1)
- 
-        table.insert(triangles, x1)
-        table.insert(triangles, y0)
-        table.insert(triangles, z1)
- 
-        table.insert(triangles, x0)
-        table.insert(triangles, y1)
-        table.insert(triangles, z0)
- 
-        table.insert(triangles, x1)
-        table.insert(triangles, y1)
-        table.insert(triangles, z1)
- 
-        idx0 = idx1
-    end
-    return triangles
-end
 
 return function()
+	local INTERIOR_TILES = {}
+	function Map:GetInteriorAtPoint(x, y, z)
+		x, y, z = self:GetTileCenterPoint(x,y,z)
+		return INTERIOR_TILES[x.."_"..z]
+	end
+
+	function Map:SetInteriorTileData(x, y, z, name)
+		x, y, z = self:GetTileCenterPoint(x,y,z)
+		INTERIOR_TILES[x.."_"..z] = name
+	end
+
+	local _IsAboveGroundAtPoint = Map.IsAboveGroundAtPoint
+	function Map:IsAboveGroundAtPoint(x, y, z, ...)
+		local val = _IsAboveGroundAtPoint(self, x, y, z, ...)
+		if val then
+			local interior = ThePlayer and ThePlayer.replica.interiorplayer
+			if interior and interior.interiormode:value() then
+				local width = interior.interiorwidth:value()
+				local depth = interior.interiordepth:value()
+				local originpt = {x = interior.camx:value(), z = interior.camz:value()}
+				local dMax = originpt.x + (depth + (PLACE_OFFSET-1))/2
+				local dMin = originpt.x - (depth - (PLACE_OFFSET-1))/2 
+
+				local wMax = originpt.z + width/2
+				local wMin = originpt.z - width/2 
+				
+				local dist = 1
+
+				if x < dMin+dist or x > dMax -dist or z < wMin+dist or z > wMax-dist then
+					return false
+				end
+			end
+		end
+		return val
+	end
+
 	local _GetTile = Map.GetTile
 	function Map:GetTile(tilex, tiley, ...)
 		local w, h = self:GetSize()
@@ -157,14 +155,5 @@ return function()
 		end
 
 		return FindValidPositionByFan(start_angle, radius, attempts, test)
-	end
-	Physics.SetRectangle = function(self, depth, height, width)-- Ported from "engine" :D
-		local vertexes = {
-			Vector3(width, 0, -depth),
-			Vector3(-width, 0, -depth),
-			Vector3(-width, 0, depth),
-			Vector3(width, 0, depth),
-		}
-		self:SetTriangleMesh(BuildMesh(vertexes, height))
 	end
 end

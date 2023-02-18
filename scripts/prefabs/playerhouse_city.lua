@@ -31,7 +31,6 @@ local assets =
 
 local prefabs =
 {
-    "home_prototyper",
     "renovation_poof_fx",
 }
 

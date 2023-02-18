@@ -8,6 +8,13 @@ local PATCHES =
 		"inventoryitem",
 		"birdspawner",
 		"playercontroller",
+		"ambientsound",
+		"dynamicmusic",
+		"playervision",
+		"frograin",
+		"hounded",
+		"kramped",
+		"sheltered",
 	},
 	
 	PREFABS = {
@@ -111,10 +118,18 @@ function _G.PlayFootstep(inst, volume, ispredicted, ...)
                 size_inst = rider:GetMount() or inst
             end
         end
+		local x,y,z = inst.Transform:GetWorldPosition()
 		local groundsound = inst.replica.interiorplayer and inst.replica.interiorplayer:GetGroundSound()--GetClosestInterior(inst)
+		
+		if TheWorld.components.interiorspawner then
+			local data = TheWorld.components.interiorspawner:GetInteriorsByDungeonName(TheWorld.Map:GetInteriorAtPoint(x,y,z))
+			groundsound = data and data[1].groundsound
+		end
+
 		if not groundsound  then
 			return _PlayFootstep(inst, volume, ispredicted, ...)
 		end
+		groundsound = groundsound == "STONE" and "dirt" or groundsound
 		sound:PlaySound(
 			(inst.sg and inst.sg:HasStateTag("running") and "dontstarve/movement/run_"..groundsound or "dontstarve/movement/walk_"..groundsound
 			)..
@@ -144,3 +159,53 @@ AddGlobalClassPostConstruct("recipe", "Recipe", function(self, name, ingredients
 	self.decor = placer_or_more_data.decor
 	self.flipable = placer_or_more_data.flipable
 end)
+
+local function BuildMesh(vertices, height)
+    local triangles = {}
+    local y0 = 0
+    local y1 = height
+ 
+    local idx0 = #vertices
+    for idx1 = 1, #vertices do
+        local x0, z0 = vertices[idx0].x, vertices[idx0].z
+        local x1, z1 = vertices[idx1].x, vertices[idx1].z
+ 
+        table.insert(triangles, x0)
+        table.insert(triangles, y0)
+        table.insert(triangles, z0)
+ 
+        table.insert(triangles, x0)
+        table.insert(triangles, y1)
+        table.insert(triangles, z0)
+ 
+        table.insert(triangles, x1)
+        table.insert(triangles, y0)
+        table.insert(triangles, z1)
+ 
+        table.insert(triangles, x1)
+        table.insert(triangles, y0)
+        table.insert(triangles, z1)
+ 
+        table.insert(triangles, x0)
+        table.insert(triangles, y1)
+        table.insert(triangles, z0)
+ 
+        table.insert(triangles, x1)
+        table.insert(triangles, y1)
+        table.insert(triangles, z1)
+ 
+        idx0 = idx1
+    end
+    return triangles
+end
+
+--Physics
+Physics.SetRectangle = function(self, depth, height, width)-- Ported from "engine" :D
+	local vertexes = {
+		Vector3(width, 0, -depth),
+		Vector3(-width, 0, -depth),
+		Vector3(-width, 0, depth),
+		Vector3(width, 0, depth),
+	}
+	self:SetTriangleMesh(BuildMesh(vertexes, height))
+end

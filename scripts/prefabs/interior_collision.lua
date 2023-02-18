@@ -38,13 +38,21 @@ local function BuildMesh(vertices, height)
     return triangles
 end
 
-local function CreateBounds(inst, depth, width, height)
+local function CreateBounds(inst, depth, width, height, name)
     local vertexes = {
         Vector3(((depth+0.5)/2), 0, -((width+0.5)/2)),
         Vector3(-((depth+0.5)/2), 0, -((width+0.5)/2)),
         Vector3(-((depth+0.5)/2), 0, ((width+0.5)/2)),
         Vector3(((depth+0.5)/2), 0, ((width+0.5)/2)),
     }
+    inst:DoTaskInTime(0, function()
+        local _x,_,_z = inst.Transform:GetWorldPosition()
+        for x = -depth/2, depth/2 do
+            for z = -width/2, width/2 do
+                TheWorld.Map:SetInteriorTileData(_x+x,0,_z+z,name)
+            end
+        end
+    end)
     inst.Physics:SetTriangleMesh(BuildMesh(vertexes, height or 3))
 end
 
@@ -88,7 +96,7 @@ local function interior_collision()
 
     if not TheWorld.ismastersim then
         inst:ListenForEvent("interiorcollisiondirty", function()
-            CreateBounds(inst, inst.depth:value(), inst.width:value(), inst.height:value())
+            CreateBounds(inst, inst.depth:value(), inst.width:value(), inst.height:value(), inst.name:value())
         end)
         return inst
     end
@@ -105,7 +113,7 @@ local function interior_collision()
         inst.height:set(height)
         inst.components.lightningblocker:SetBlockRange(math.sqrt(depth*depth + width*width)/2)
         
-        CreateBounds(inst, depth, width, height)
+        CreateBounds(inst, depth, width, height, inst.name:value())
 
         if height then
             if not inst.ceiling then

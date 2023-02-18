@@ -85,50 +85,12 @@ local phasefunctions =
     end,
 }
 
--- local function timechange(inst)    
-    -- if TheWorld.state.isday then
-
-    	-- if inst:HasTag("timechange_anims") then
-        	-- inst.AnimState:PlayAnimation("to_day")
-       		-- inst.AnimState:PushAnimation("day_loop", true)
-    	-- end
-
-        -- if inst.Light then
-            -- phasefunctions["day"](inst)
-        -- end
-    -- elseif TheWorld.state.isnight then
-
-    	-- if inst:HasTag("timechange_anims") then
-       		-- inst.AnimState:PlayAnimation("to_night")
-        	-- inst.AnimState:PushAnimation("night_loop", true)
-    	-- end
-
-        -- if inst.Light then
-            -- phasefunctions["night"](inst)
-        -- end
-    -- elseif TheWorld.state.isdusk then
-
-    	-- if inst:HasTag("timechange_anims") then
-        	-- inst.AnimState:PlayAnimation("to_dusk")
-        	-- inst.AnimState:PushAnimation("dusk_loop", true)
-    	-- end
-
-        -- if inst.Light then
-            -- phasefunctions["dusk"](inst)
-        -- end
-    -- end
--- end
-
 local function timechange(inst)    
-	local phase = TheWorld.state.phase
-    -- if inst.Light then
-        phasefunctions[phase](inst)
-    -- end
+	phasefunctions[TheWorld.state.phase](inst)
 end
 
 local function settimechange(inst)
-	inst:AddComponent("lighttweener")
-	inst.components.lighttweener:StartTween(inst.entity:AddLight(), lights.day.rad, lights.day.intensity, lights.day.falloff, {lights.day.color[1],lights.day.color[2],lights.day.color[3]}, 0)
+	inst.components.lighttweener:StartTween(inst.Light, lights.day.rad, lights.day.intensity, lights.day.falloff, {lights.day.color[1],lights.day.color[2],lights.day.color[3]}, 0)
 	inst.Light:Enable(true)
 
 	inst:WatchWorldState("phase", timechange)
@@ -512,6 +474,7 @@ local function fn()
 	inst.entity:AddTransform()
 	inst.entity:AddAnimState()
 	inst.entity:AddSoundEmitter()
+	inst.entity:AddLight()
 	inst.entity:AddNetwork()
 
     inst.AnimState:SetBank("acorn")
@@ -527,6 +490,7 @@ local function fn()
    	inst:AddTag("interior_door")
    	inst:AddTag("NOBLOCK")
 	
+	inst:AddComponent("lighttweener")
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then

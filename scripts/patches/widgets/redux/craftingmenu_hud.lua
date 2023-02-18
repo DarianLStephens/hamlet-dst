@@ -8,6 +8,14 @@ local images = {
 
 return function(self)
     function self:AddFilterSwapper(filter)
+        if filter == "" then
+            self.craftingmenu:MakeSpecialFilter("")
+            if self.swap then
+                self.swap:Kill()
+                self.swap = nil
+            end
+            return
+        end
         local pos = self.pinbar.open_menu_button:GetPosition()
 
         self.swap = self.pinbar.root:AddChild(ImageButton(atlas, "pinslot_bg.tex", "pinslot_bg.tex", nil, nil, nil, {1,1}, {0,0}))

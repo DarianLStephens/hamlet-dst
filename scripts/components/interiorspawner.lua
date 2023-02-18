@@ -73,8 +73,8 @@ function InteriorSpawner:ConfigureWalls(interior)
 	-- Collision
 	print("Doing configuration for collision, should match with interior's actual size now")
 	self:Teleport(self.walls, Vector3(x,y,z)) -- Center, maybe?
+	self.walls:SetName(interior.dungeon_name)
 	self.walls:SetVerticles(depth, width, height)
-	self.walls:SetName(interior.unique_name)
 	
 	self.walls:ReturnToScene()
 	self.walls:RemoveTag("INTERIOR_LIMBO")
@@ -645,11 +645,10 @@ end
 
 function InteriorSpawner:FadeInFinished(was_invincible, doer)
 	-- Last step in transition
-	local player = doer--GetPlayer()
 	if TheWorld.ismastersim then
-		player.components.health:SetInvincible(was_invincible)
+		doer.components.health:SetInvincible(was_invincible)
 	
-		player.components.playercontroller:Enable(true)
+		doer.components.playercontroller:Enable(true)
 		--doer.sg:GoToState(doer.sg.statemem.teleportarrivestate) -- Trying to fix some weirdness that happens after teleporting
 	end
 	TheWorld:PushEvent("enterroom")
@@ -744,7 +743,11 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 		plint.floortexture = floortexture
 		plint.groundsound = destination.groundsound
 
+		plint.reverb = destination.reverb
+		plint.ambsnd = destination.ambsnd
+
 		plint.roomid = destination.unique_name
+		plint.playerroom = destination.playerroom
 
 		plint.interiormode = true
 		plint:UpdateCamera()
@@ -799,6 +802,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 			print("DS - NETWORK - Detected classified, set netvars")
 			-- player.player_classified.net_intcamera:set(false)
 			player.components.interiorplayer.interiormode = false
+			player.components.interiorplayer.playerroom = false
 		else
 			print ("DS - WARNING: Player didn't have classified?!?!")
 		end
@@ -879,11 +883,6 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	--TheWorld.components.ambientsoundmixer:SetReverbPreset("default")
 	
 	if destination then -- It seems that, if it's nil, then you're going outside
-
-		if destination.reverb then
-			--TheWorld.components.ambientsoundmixer:SetReverbPreset(destination.reverb)			
-		end
-
 		-- set the interior color cube
 		--TheWorld.components.colourcubemanager:SetInteriorColourCube( destination.cc )
 		-- player.interiorplayer:ApplyColorCube(destination.cc)
@@ -993,19 +992,23 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	end
 
 	if self.from_inst and self.from_inst:HasTag("ruins_entrance") and not self.to_interior then
-		player:PushEvent("exitedruins")
+		player.player_classified.interiorenter:set("")
+	end
+
+	if self.from_inst and self.from_inst:HasTag("shop_entrance") and not self.to_interior then
+		player.player_classified.interiorenter:set("")
 	end
 
 	if to_target.prefab then
 
 		if to_target:HasTag("ruins_entrance") then
-			player:PushEvent("enteredruins")
+			player.player_classified.interiorenter:set("ruins")
 			-- unlock all doors
 			self:UnlockAllDoors(to_target)
 		end
 
 		if to_target:HasTag("shop_entrance") then
-			player:PushEvent("enteredshop")
+			player.player_classified.interiorenter:set("shop")
 		end	
 
 		if to_target:HasTag("anthill_inside") then
@@ -2868,9 +2871,6 @@ function InteriorSpawner:CleanUpMessAroundOrigin()
 				removeStray(v)
 			end
 			if v.prefab == "window_round_light_backwall" and pos == Vector3(0,0,0) then
-				removeStray(v)
-			end
-			if v.prefab == "home_prototyper" and v ~= self.homeprototyper then
 				removeStray(v)
 			end
 		end

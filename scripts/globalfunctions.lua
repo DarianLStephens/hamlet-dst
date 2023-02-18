@@ -24,8 +24,7 @@ function _G.MakeInteriorPhysics(inst, depth, height, width)
     inst.Physics:ClearCollisionMask()
     inst.Physics:CollidesWith(COLLISION.ITEMS)
     inst.Physics:CollidesWith(COLLISION.CHARACTERS)    
-    
-    inst:DoTaskInTime(0, function() inst.Physics:SetRectangle(depth, height, width) end)
+    inst.Physics:SetRectangle(depth, height, width)
 end
 
 function _G.MakeInteriorTexturePackage(name, facing, texture, groundsound)

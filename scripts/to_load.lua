@@ -1,7 +1,6 @@
 local ToLoad = {
 	Prefabs = {
 		"playerhouse_city",
-		"home_prototyper",
 		"prop_door",
 		"deco_roomglow",
 		"interior_tex_packages",
@@ -46,7 +45,6 @@ local ToLoad = {
 		"cave_entrance_roc",
 		"pigman_city",
 		"pig_shop",
-		"musac",
 		"shop_pedestals",
 		"shop_spawner",
 		"shop_trinket",
@@ -86,10 +84,16 @@ local ToLoad = {
 		Asset("IMAGE", "images/porkland_hud.tex"),
 		Asset("ATLAS", "images/porkland_hud.xml"),
 		
-		Asset("IMAGE", "images/minimap/ham_minimap_atlas.tex"),
-		Asset("ATLAS", "images/minimap/ham_minimap_data.xml"),
+		Asset("IMAGE", "images/minimap/hamlet_minimap.tex"),
+		Asset("ATLAS", "images/minimap/hamlet_minimap.xml"),
 		
 		Asset("SOUNDPACKAGE", "sound/dontstarve_DLC003.fev"),
+		Asset("SOUND", "sound/DLC003_sfx.fsb"),
+		Asset("SOUND", "sound/DLC003_AMB_stream.fsb"),
+		Asset("SOUND", "sound/DLC003_music_stream.fsb"),
+		Asset("SOUND", "sound/DLC003_sfx.fsb"),
+		Asset("SOUND", "sound/DLC003_sfx.fsb"),
+		Asset("SOUND", "sound/DLC003_sfx.fsb"),
 		Asset("SOUND", "sound/DLC003_sfx.fsb"),
 		
 		Asset("ANIM", "anim/player_actions_tap.zip"),
@@ -144,7 +148,7 @@ local ToLoad = {
 	},
 
 	MiniMapAtlases = {
-		"images/minimap/ham_minimap_data.xml",
+		"images/minimap/hamlet_minimap.xml",
 	},
 
 	InventoryItemsAtlasses = {
