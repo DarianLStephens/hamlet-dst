@@ -992,23 +992,23 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	end
 
 	if self.from_inst and self.from_inst:HasTag("ruins_entrance") and not self.to_interior then
-		player.player_classified.interiorenter:set("")
+		player.components.interiorplayer.dynamicmusictone = ""
 	end
 
 	if self.from_inst and self.from_inst:HasTag("shop_entrance") and not self.to_interior then
-		player.player_classified.interiorenter:set("")
+		player.components.interiorplayer.dynamicmusictone = ""
 	end
 
 	if to_target.prefab then
 
 		if to_target:HasTag("ruins_entrance") then
-			player.player_classified.interiorenter:set("ruins")
+			player.components.interiorplayer.dynamicmusictone = "ruins"
 			-- unlock all doors
 			self:UnlockAllDoors(to_target)
 		end
 
 		if to_target:HasTag("shop_entrance") then
-			player.player_classified.interiorenter:set("shop")
+			player.components.interiorplayer.dynamicmusictone = "shop"
 		end	
 
 		if to_target:HasTag("anthill_inside") then

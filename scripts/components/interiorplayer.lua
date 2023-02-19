@@ -87,8 +87,13 @@ local function onroomidthresh(self, val)
 end
 
 local function onplayerroomthresh(self, val)
-	print("SODOs",val)
 	self.inst.player_classified.craftingfiltertype:set(val and "reno" or "")
+end
+
+local function ondynamicmusicthresh(self, val)
+	if val then
+		self.inst.replica.interiorplayer.dynamicmusictone:set(val)
+	end
 end
 
 local InteriorPlayer = Class(function(self, inst)
@@ -111,6 +116,7 @@ local InteriorPlayer = Class(function(self, inst)
 	self.ambsnd = ""
 	self.roomid = "unknown"
 	self.playerroom = false
+	self.dynamicmusictone = ""
 	
 	self.soundupdatertask = nil
 end,
@@ -131,6 +137,7 @@ nil,
     ambsnd = onambsndthresh,
     roomid = onroomidthresh,
     playerroom = onplayerroomthresh,
+    dynamicmusictone = ondynamicmusicthresh,
 })
 
 function InteriorPlayer:UpdateInterior(facing, texture, groundsound)
@@ -178,6 +185,7 @@ function InteriorPlayer:OnSave()
 		ambsnd = self.ambsnd,
 		roomid = self.roomid,
 		playerroom = self.playerroom,
+		dynamicmusictone = self.dynamicmusictone,
 	}
 	if self.interiormode then
 		return data
@@ -203,6 +211,7 @@ function InteriorPlayer:OnLoad(data)
 		self.ambsnd = data.ambsnd
 		self.roomid = data.roomid
 		self.playerroom = data.playerroom
+		self.dynamicmusictone = data.dynamicmusictone
 	end
 end
 

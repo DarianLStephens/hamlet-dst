@@ -9,6 +9,17 @@ local function ForceUpdateCameraDirty(inst, val)
 	end
 end
 
+local function DynamicMusicToneDirty(inst, val)
+	inst:DoTaskInTime(0, function()
+		local rep = inst.replica.interiorplayer
+		if rep.dynamicmusictone:value() == "" then
+			inst:PushEvent("exitedinterior")
+		else
+			inst:PushEvent("enteredinterior", rep.dynamicmusictone:value())
+		end
+	end)
+end
+
 local InteriorPlayer = Class(function(self, inst)
     self.inst = inst
 
@@ -27,7 +38,8 @@ local InteriorPlayer = Class(function(self, inst)
 	self.ambsnd = net_string(self.inst.GUID, "roomambsnd")
 	
 	self.roomid = net_string(self.inst.GUID, "roomid")
-	
+	self.dynamicmusictone = net_string(self.inst.GUID, "dynamicmusictone", "dynamicmusictonedirty")
+
 	self.interiormode = net_bool(self.inst.GUID, "setintcam", "setintcamdirty")
 
 	self.forceupdatecamera = net_bool(self.inst.GUID, "forceupdatecam", "forceupdatecamdirty")
@@ -48,6 +60,7 @@ local InteriorPlayer = Class(function(self, inst)
 	
 	self.inst:ListenForEvent("setintcamdirty", SetIntCamDirty)
 	self.inst:ListenForEvent("forceupdatecamdirty", ForceUpdateCameraDirty)
+	self.inst:ListenForEvent("dynamicmusictonedirty", DynamicMusicToneDirty)
 end)
 
 function InteriorPlayer:GetGroundSound()
