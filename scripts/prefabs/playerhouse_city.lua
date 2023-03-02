@@ -192,7 +192,8 @@ end
 local function reconstructed(inst)
     print("RECONSTRUCTED")
         inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/crafted/pighouse/wood_1")
-    if GetPlayer().homeowner or not inst:HasTag("citypossession") then
+    -- if GetPlayer().homeowner or not inst:HasTag("citypossession") then
+    if not inst:HasTag("citypossession") then
         inst.unboarded = true
         inst.AnimState:Hide("boards")
         inst.components.door.disabled = false 

@@ -73,7 +73,8 @@ function InteriorSpawner:ConfigureWalls(interior)
 	-- Collision
 	print("Doing configuration for collision, should match with interior's actual size now")
 	self:Teleport(self.walls, Vector3(x,y,z)) -- Center, maybe?
-	self.walls:SetName(interior.dungeon_name)
+	-- self.walls:SetName(interior.dungeon_name)
+	self.walls:SetName(interior.unique_name)
 	self.walls:SetVerticles(depth, width, height)
 	
 	self.walls:ReturnToScene()
@@ -778,7 +779,12 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	
 	local destinationID = nil
 	if target then
-		destinationID = target.components.door.target_interior
+		-- destinationID = target.components.door.target_interior
+		if target.components.door then
+			destinationID = target.components.door.target_interior
+		else
+			destinationID = target.interior
+		end
 		print("Print new destination ID gotten inside FadeOutFinished: ", destinationID)
 	end
 
@@ -829,8 +835,18 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	end
 
 	local from_interior = self.current_interior
-
-	local targetInteriorName = target.components.door.target_interior
+	
+	-- local targetInteriorName = target.components.door.target_interior or target.interior
+	-- if targetInteriorName then
+	-- local targetInteriorName = target.components.door.target_interior
+	local targetInteriorName = nil
+	-- targetInteriorName = destinationID or target.components.door.target_interior
+	-- Need some more explicit checking here
+	if target.components.door then
+		targetInteriorName = target.components.door.target_interior
+	else
+		targetInteriorName = destinationID
+	end
 	-- local destination = self:GetInteriorByName(self.to_interior) 
 	local destination = self:GetInteriorByName(targetInteriorName)  --targetInteriorID
 	print("DESTINATION TEST - 'destination' value is:", destination, ". It's okay if this is nil")
@@ -1580,9 +1596,10 @@ function InteriorSpawner:PlayTransition(doer, inst, interiorID, to_target, dont_
 	if interiorID then
 		self.to_interior = interiorID
 	else
-		if inst then
-			self.to_interior = inst.components.door.target_interior
-		end
+		-- This shouldn't be used, anyway, and was crashing with telelocating from inside to outside
+		-- if inst then
+			-- self.to_interior = inst.components.door.target_interior
+		-- end
 	end
 	
 	-- if self:IsInteriorLoaded(interiorID)
@@ -1600,9 +1617,9 @@ function InteriorSpawner:PlayTransition(doer, inst, interiorID, to_target, dont_
 	end
 	
 	if doer:HasTag("player") then
-		if self.to_interior then
-			self:ConsiderPlayerInside(self.to_interior)
-		end
+		-- if self.to_interior then
+			-- self:ConsiderPlayerInside(self.to_interior)
+		-- end
 
 		TheWorld.doorfreeze = true		
 

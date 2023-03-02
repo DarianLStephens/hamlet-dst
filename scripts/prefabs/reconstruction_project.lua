@@ -210,9 +210,9 @@ local function getstatus(inst)
 end
 
 function GetSpawnPoint(inst, pt)
-    if GetPlayer():HasTag("aquatic") then 
-        return 
-    end 
+    -- if GetPlayer():HasTag("aquatic") then 
+        -- return 
+    -- end 
 
     local theta = math.random() * 2 * PI
     local radius = OFF_SCREENDIST
@@ -227,7 +227,8 @@ function GetSpawnPoint(inst, pt)
             tile = inst:GetCurrentTileType(pos:Get())
         end
 
-        local onWater = ground.Map:IsWater(tile)
+        -- local onWater = ground.Map:IsWater(tile)
+        local onWater = IsOceanTile(tile)
         if not onWater then 
             return pos
         end 
@@ -245,11 +246,13 @@ local function spawnFixer(inst)
     -- look for fixer pig
     -- spawn if none
     -- set pig's fixer target to this inst.
+	local nearestPlayerInst = nil
 	local nearestPlayerDist = 9999
 	for i, v in ipairs(AllPlayers) do
 		local distSq = v:GetDistanceSqToInst(inst)
 		if nearestPlayerDist > distSq then
 			nearestPlayerDist = distSq
+			nearestPlayerInst = v
 		end
 	end
     -- if inst:GetDistanceSqToInst(GetPlayer()) > AUTO_REPAIRDIST * AUTO_REPAIRDIST then
@@ -272,7 +275,8 @@ local function spawnFixer(inst)
                         end
                     end
                 else
-                    local pt = Vector3(GetPlayer().Transform:GetWorldPosition()) 
+                    -- local pt = Vector3(GetPlayer().Transform:GetWorldPosition()) 
+                    local pt = Vector3(nearestPlayerInst.Transform:GetWorldPosition()) 
                     local spawn_pt = GetSpawnPoint(inst, pt)
                     if spawn_pt then
                         local fixer = SpawnPrefab("pigman_mechanic")

@@ -6,8 +6,10 @@ function _G.SetDirty(netvar, val)
 	netvar:set(val)
 end
 
-function _G.GetClosestInterior(inst)
-	local x, y, z = inst.Transform:GetWorldPosition()
+function _G.GetClosestInterior(pos)
+	-- if instorvector 
+	-- local x, y, z = instorvector.Transform:GetWorldPosition() or instorvector.x instorvector.y instorvector.z
+	local x, y, z = pos.x, pos.y, pos.z
     local interior = TheSim:FindEntities(x, y, z, 20, nil, nil, {"interior_collision"})[1]
     --You should add here checking for current interior
     return interior

@@ -139,7 +139,8 @@ end
 
 function Interior_Quaker:GetMammalSpawnPoint()
 	local basept = self.quakeentity:GetPosition()
-	local interior = GetClosestInterior(self.quakeentity) 
+	-- local interior = GetClosestInterior(self.quakeentity) 
+	local interior = GetClosestInterior(basept)
 	local interiordata
 	
 	if interior then
@@ -172,7 +173,8 @@ end
 
 function Interior_Quaker:GetSpawnPoint(pt, rad)
 	local basept = self.quakeentity:GetPosition()
-	local interior = GetClosestInterior(self.quakeentity) 
+	-- local interior = GetClosestInterior(self.quakeentity) 
+	local interior = GetClosestInterior(basept) 
 	local interiordata
 	
 	if interior then
