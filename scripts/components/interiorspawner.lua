@@ -2280,6 +2280,7 @@ function InteriorSpawner:LoadInterior(doer, interior)
 end
 
 function InteriorSpawner:insertprefab(interior, prefab, offset, prefabdata)
+	print("InsertPrefab stuff")
 	if interior == self.current_interior then
 		print("CURRENT")
 		local pt = self:GetSpawnOrigin()
@@ -2306,6 +2307,7 @@ function InteriorSpawner:insertprefab(interior, prefab, offset, prefabdata)
 		end
 		self:PutPropIntoInteriorLimbo(object,interior)
 	else
+		print("Interior was neither current nor previously visited")
 		local data = {name = prefab, x_offset = offset.x_offset, z_offset = offset.z_offset }
 		if prefabdata then
 			for arg, param in pairs(prefabdata) do

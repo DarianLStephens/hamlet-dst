@@ -16,4 +16,23 @@ return function(self)
 			self.onMarkPosition(self.inst, recall_x, recall_y, recall_z, recall_worldid)
 		end
 	end
+	
+	
+
+	function self:OnSave()
+		return {
+			recall_x = self.recall_x,
+			recall_y = self.recall_y,
+			recall_z = self.recall_z,
+			recall_worldid = self.recall_worldid,
+			recall_interior = self.interior,
+		}
+	end
+
+	function self:OnLoad(data)
+		if data ~= nil and data.recall_worldid ~= nil then
+			self:MarkPosition(data.recall_x, data.recall_y, data.recall_z, data.recall_worldid, data.recall_interior)
+		end
+	end
+	
 end

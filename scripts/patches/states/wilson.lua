@@ -95,7 +95,12 @@ local STATES = {
 				print("Dumping warpback data table:")
 				dumptable(data.warpback_data, 1, 1, nil, 0)
 				
-				inst:Teleport(Vector3(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z), ((data.warpback_data.warptype == "recall") or nil), interior_override)
+				if data.warpback_data.warptype == "recall" then
+					inst:Teleport(Vector3(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z), ((data.warpback_data.warptype == "recall") or nil), interior_override)
+				else
+					print("Do normal teleport for the Backstep watch")
+					inst.Physics:Teleport(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z)
+				end
                 -- inst:Teleport(data.warpback_data.target)
                 if TheWorld and TheWorld.components.walkableplatformmanager then -- NOTES(JBK): Workaround for teleporting too far causing the client to lose sync.
                     TheWorld.components.walkableplatformmanager:PostUpdate(0)
