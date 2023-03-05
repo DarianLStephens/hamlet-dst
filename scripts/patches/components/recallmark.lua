@@ -1,4 +1,14 @@
 return function(self)
+
+	
+
+	function self:Copy(rhs)
+		rhs = rhs ~= nil and rhs.components.recallmark
+		if rhs then
+			self:MarkPosition(rhs.recall_x, rhs.recall_y, rhs.recall_z, rhs.recall_worldid, rhs.interior)
+		end
+	end
+
 	function self:MarkPosition(recall_x, recall_y, recall_z, recall_worldid, recall_interior)
 		if recall_x ~= nil then
 			self.recall_x = recall_x or 0

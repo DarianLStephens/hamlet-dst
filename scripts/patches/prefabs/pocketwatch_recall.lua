@@ -47,13 +47,15 @@ local function Recall_DoCastSpell(inst, doer, target, pos)
 	if recallmark:IsMarked() then
 		if Shard_IsWorldAvailable(recallmark.recall_worldid) then
 		
-			if (recallmark.recall_x >= 1800) and (recallmark.interior) then
+			if ((recallmark.recall_x >= 1800) and (recallmark.interior)) or (not(recallmark.recall_x >= 1800)) then
 			
 				inst.components.rechargeable:Discharge(TUNING.POCKETWATCH_RECALL_COOLDOWN)
 
 				doer.sg.statemem.warpback = {dest_worldid = recallmark.recall_worldid, dest_x = recallmark.recall_x, dest_y = 0, dest_z = recallmark.recall_z, target = recallmark, warptype = "recall", interior = recallmark.interior, reset_warp = true}
 				return true
 			else
+				print("DS - RecallWatch - Recall mark was in interior space, but didn't have an interior marked. Avoid teleport")
+				print("X: ", recallmark.recall_x, "Recall Interior: ", recallmark.interior)
 				-- The mark was placed in interior space, but the interior wasn't saved for some reason. Avoid teleporting
 				return false
 			end

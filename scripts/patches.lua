@@ -17,6 +17,7 @@ local PATCHES =
 		"kramped",
 		"sheltered",
 		"recallmark",
+		"teleporter",
 	},
 	
 	PREFABS = {
@@ -25,6 +26,8 @@ local PATCHES =
 		telestaff = "telestaff",
 		pocketwatch_warp = "pocketwatch_warp",
 		pocketwatch_recall = "pocketwatch_recall",
+		pocketwatch_portal = "pocketwatch_portal",
+		pocketwatch_portal_entrance = "pocketwatch_portal_entrance",
 	},
 	
 	SCREENS = {
