@@ -762,6 +762,7 @@ function InteriorSpawner:ApplyInteriorCameraWithPosition(player, destination, pt
 	-- TheCamera.interior_distance = zoom
 end
 
+-- interiorID is used to manually override, for when you don't have a target
 function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, interiorID)
 	-- THIS ASSUMES IT IS THE PLAYER WHO MOVED
 	local player = doer --GetPlayer()
@@ -786,6 +787,11 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 			destinationID = target.interior
 		end
 		print("Print new destination ID gotten inside FadeOutFinished: ", destinationID)
+	else
+		if interiorID then
+			print("DS - interiorspawner PlayTransition working off directly-provided interior ID")
+			destinationID = interiorID
+		end
 	end
 
 	--if the door has an interior name, then we are going to a room, otherwise we are going out
@@ -807,6 +813,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 		if player.components.interiorplayer then
 			print("DS - NETWORK - Detected classified, set netvars")
 			-- player.player_classified.net_intcamera:set(false)
+			player.components.interiorplayer.roomid = "unknown" -- Set this back to the default
 			player.components.interiorplayer.interiormode = false
 			player.components.interiorplayer.playerroom = false
 		else
@@ -842,7 +849,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 	local targetInteriorName = nil
 	-- targetInteriorName = destinationID or target.components.door.target_interior
 	-- Need some more explicit checking here
-	if target.components.door then
+	if target ~= nil and target.components.door then
 		targetInteriorName = target.components.door.target_interior
 	else
 		targetInteriorName = destinationID
@@ -937,9 +944,11 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 
 
 	local to_target_position
-	if not to_target and self.from_inst.components.door then
+	-- if not to_target and self.from_inst.components.door then
+	if not to_target and (target ~= nil and target.components.door) then
 		-- by now the door we want to spawn at should be created and/or placed.	
-		to_target = self.doors[self.from_inst.components.door.target_door_id].inst
+		-- to_target = self.doors[self.from_inst.components.door.target_door_id].inst
+		to_target = self.doors[target.components.door.target_door_id].inst
 		if direction == "out" then
 			local radius = 1.75
 			if to_target and to_target:IsValid() then
@@ -1003,15 +1012,18 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 			end
 		end
 	end
-	if self.from_inst and self.from_inst.components.door then
+	-- if self.from_inst and self.from_inst.components.door then
+	if target and target.components.door then
 		TheWorld:PushEvent("doorused", {door = self.to_target, from_door = self.from_inst})
 	end
 
-	if self.from_inst and self.from_inst:HasTag("ruins_entrance") and not self.to_interior then
+	-- if self.from_inst and self.from_inst:HasTag("ruins_entrance") and not self.to_interior then
+	if target and target:HasTag("ruins_entrance") and not self.to_interior then
 		player.components.interiorplayer.dynamicmusictone = ""
 	end
 
-	if self.from_inst and self.from_inst:HasTag("shop_entrance") and not self.to_interior then
+	-- if self.from_inst and self.from_inst:HasTag("shop_entrance") and not self.to_interior then
+	if target and target:HasTag("shop_entrance") and not self.to_interior then
 		player.components.interiorplayer.dynamicmusictone = ""
 	end
 
@@ -1180,6 +1192,11 @@ end
 
 function InteriorSpawner:ExecuteTeleport(doer, destination, direction)	
 	self:Teleport(doer, destination)
+	
+	-- Copied from some other vanilla DST sources. Maybe this will help with the boat problem?
+	if TheWorld and TheWorld.components.walkableplatformmanager then -- NOTES(JBK): Workaround for teleporting too far causing the client to lose sync.
+		TheWorld.components.walkableplatformmanager:PostUpdate(0)
+    end
 
 	if direction then
 		self:PushDirectionEvent(doer, direction)

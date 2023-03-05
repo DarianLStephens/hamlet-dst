@@ -24,6 +24,22 @@ local plant_symbols =
     "blink"
 }
 
+local function ToggleOffPhysics(inst)
+    inst.sg.statemem.isphysicstoggle = true
+    inst.Physics:ClearCollisionMask()
+    inst.Physics:CollidesWith(COLLISION.GROUND)
+end
+
+local function ToggleOnPhysics(inst)
+    inst.sg.statemem.isphysicstoggle = nil
+    inst.Physics:ClearCollisionMask()
+    inst.Physics:CollidesWith(COLLISION.WORLD)
+    inst.Physics:CollidesWith(COLLISION.OBSTACLES)
+    inst.Physics:CollidesWith(COLLISION.SMALLOBSTACLES)
+    inst.Physics:CollidesWith(COLLISION.CHARACTERS)
+    inst.Physics:CollidesWith(COLLISION.GIANTS)
+end
+
 local STATES = {
     -- State{
         -- name = "enterdoor",
@@ -50,6 +66,76 @@ local STATES = {
         -- end,
     -- }
 -- }
+
+
+
+    State{
+        name = "pocketwatch_warpback_pst",
+        tags = { "busy", "nopredict", "nomorph", "noattack", "nointerrupt", "jumping" },
+
+        onenter = function(inst, data)
+            ToggleOffPhysics(inst)
+            inst.components.locomotor:Stop()
+            inst.DynamicShadow:Enable(false)
+            inst.components.health:SetInvincible(true)
+
+            inst.AnimState:PlayAnimation("pocketwatch_warp_pst")
+            inst.sg:SetTimeout(8 * FRAMES)
+
+			if data.queued_snap_camera then
+				inst:SnapCamera()
+				inst:ScreenFade(true, 0.5)
+			end
+
+            if data.warpback_data ~= nil then
+				print("DS - SG - TP - Just about to teleport with Wanda's thing")
+				print("Warp target: ", data.warpback_data.target)
+				local interior_override = data.warpback_data.interior
+				print("Interior override: ", interior_override)
+				print("Dumping warpback data table:")
+				dumptable(data.warpback_data, 1, 1, nil, 0)
+				
+				inst:Teleport(Vector3(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z), ((data.warpback_data.warptype == "recall") or nil), interior_override)
+                -- inst:Teleport(data.warpback_data.target)
+                if TheWorld and TheWorld.components.walkableplatformmanager then -- NOTES(JBK): Workaround for teleporting too far causing the client to lose sync.
+                    TheWorld.components.walkableplatformmanager:PostUpdate(0)
+                end
+            end
+            inst:PushEvent("onwarpback", data.warpback_data)
+
+			local fx = SpawnPrefab("pocketwatch_warpbackout_fx")
+			fx.Transform:SetPosition(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z)
+			fx:SetUp(data.castfxcolour or { 1, 1, 1 })
+        end,
+
+        timeline =
+        {
+            TimeEvent(1*FRAMES, function(inst) inst.SoundEmitter:PlaySound("wanda2/characters/wanda/watch/recall")
+            end),
+
+            TimeEvent(3 * FRAMES, function(inst)
+                inst.DynamicShadow:Enable(true)
+                ToggleOnPhysics(inst)
+            end),
+            TimeEvent(4 * FRAMES, function(inst)
+                inst.components.health:SetInvincible(false)
+                inst.sg:RemoveStateTag("noattack")
+                inst.SoundEmitter:PlaySound("dontstarve/movement/bodyfall_dirt")
+            end),
+        },
+
+        ontimeout = function(inst)
+            inst.sg:GoToState("idle", true)
+        end,
+
+        onexit = function(inst)
+            inst.components.health:SetInvincible(false)
+            inst.DynamicShadow:Enable(true)
+            if inst.sg.statemem.isphysicstoggle then
+                ToggleOnPhysics(inst)
+            end
+        end,
+    },
 
     State{
         name = "rebirth2",

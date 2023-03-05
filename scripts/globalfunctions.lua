@@ -6,13 +6,18 @@ function _G.SetDirty(netvar, val)
 	netvar:set(val)
 end
 
-function _G.GetClosestInterior(pos)
+function _G.GetClosestInterior(pos, returnuniquename)
 	-- if instorvector 
 	-- local x, y, z = instorvector.Transform:GetWorldPosition() or instorvector.x instorvector.y instorvector.z
 	local x, y, z = pos.x, pos.y, pos.z
     local interior = TheSim:FindEntities(x, y, z, 20, nil, nil, {"interior_collision"})[1]
     --You should add here checking for current interior
-    return interior
+	
+	if returnuniquename and interior then
+		print("Closest interior name: ", interior.name:value())
+		return interior.name
+	end
+	return interior
 end
 
 function _G.MakeInteriorPhysics(inst, depth, height, width)
