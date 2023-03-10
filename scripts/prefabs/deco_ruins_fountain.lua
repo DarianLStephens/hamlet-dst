@@ -105,11 +105,18 @@ local function OnGetItemFromPlayer(inst, giver, item)
         inst:DoTaskInTime(1, function()
                 local gems = 0
                 if value < 100 then
+					local enemy = nil
                     if math.random() <= 0.6 then
-                        SpawnAt("crawlingnightmare",inst)
+                        enemy = SpawnAt("crawlingnightmare",inst)
                     else
-                        SpawnAt("nightmarebeak",inst)
+                        enemy = SpawnAt("nightmarebeak",inst)
                     end
+					-- DS - Gotta make it actually attack. They seem to function a little different in DST
+					if enemy then
+						if enemy.components.combat ~= nil then
+							enemy.components.combat:SetTarget(giver)
+						end
+					end
                 elseif value < 150 then
                         gems = 1
                 elseif value < 200 then
@@ -130,7 +137,7 @@ local function OnGetItemFromPlayer(inst, giver, item)
                         --local angle = (-TUNING.CAM_ROT-90 + math.random()*60-30)/180*PI
                         local sp = math.random()*4+2
                         nug.Physics:SetVel(sp*math.cos(angle), math.random()*2+8, sp*math.sin(angle))
-                        nug.components.inventoryitem:OnStartFalling()
+                        -- nug.components.inventoryitem:OnStartFalling() -- DS - Is this needed? It doesn't exist in DST, and things seem to still be falling fine?
                     end
                 end
         end)
@@ -178,7 +185,8 @@ local function decofn(build, bank, animframe, data )
         end
 
         inst:AddComponent("trader")
-        inst.components.trader:SetAcceptTest(ShouldAcceptItem)
+        -- inst.components.trader:SetAcceptTest(ShouldAcceptItem)
+        inst.components.trader:SetAbleToAcceptTest(ShouldAcceptItem)
         inst.components.trader.onaccept = OnGetItemFromPlayer
         inst.components.trader.onrefuse = OnRefuseItem
 

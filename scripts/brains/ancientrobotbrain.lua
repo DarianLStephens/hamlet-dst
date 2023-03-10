@@ -22,6 +22,7 @@ local MAX_JUMP_ATTACK_RANGE = 9
 local function GetFaceTargetFn(inst)
     local target = GetClosestInstWithTag("player", inst, START_FACE_DIST)
     if target and not target:HasTag("notarget") then
+    -- if target and not (target:HasTag("notarget") or target:HasTag("playerghost")) then
         return target
     end
 end

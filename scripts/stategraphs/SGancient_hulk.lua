@@ -361,7 +361,7 @@ local states=
                     SpawnPrefab("laserscorch").Transform:SetPosition(x, 0, z-1)
                     SpawnPrefab("laserscorch").Transform:SetPosition(x-1, 0, z)
                     
-                    GetWorld():DoTaskInTime(2,function()
+                    TheWorld:DoTaskInTime(2,function()
                             local head = SpawnPrefab("ancient_robot_head")
                             head.spawntask:Cancel()
                             head.spawntask = nil

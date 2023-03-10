@@ -9,6 +9,8 @@ PrefabFiles = ToLoad.Prefabs
 Assets = ToLoad.Assets
 
 for key, atlas in pairs(ToLoad.MiniMapAtlases) do
+	print("DS - Atlas - Loading atlas ", atlas)
+	-- This isn't working, it seems. All objects have lost their minimap icons again.
     AddMinimapAtlas(atlas)
 end
 

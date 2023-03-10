@@ -211,11 +211,26 @@ AddRecipe2("curtain_door",                              {Ingredient("oinc", 15)}
 AddRecipe2("plate_door",                                {Ingredient("oinc", 15)}, TECH.NONE,            {placer="plate_door_placer", image = "plate_door.tex", wallitem = true, decor = true}, {"DOORS"})
 AddRecipe2("round_door",                                {Ingredient("oinc", 20)}, TECH.NONE,            {placer="round_door_placer", image = "round_door.tex", wallitem = true, decor = true}, {"DOORS"})
 AddRecipe2("pillar_door",                               {Ingredient("oinc", 20)}, TECH.NONE,            {placer="pillar_door_placer", image = "pillar_door.tex", wallitem = true, decor = true}, {"DOORS"})
+AddRecipe2("living_artifact",							{Ingredient("infused_iron", 6), Ingredient("waterdrop", 1)}, TECH.LOST, {nounlock=false}, {"ARMOUR"})
+-- AddRecipe2("living_artifact",							{Ingredient("infused_iron", 6), Ingredient("waterdrop", 1)}, TECH.LOST)
+
+-- Why is this one not needed, while the ballpein hammer one is?
+-- table.insert(CRAFTING_FILTERS.ARMOUR.recipes, "living_artifact")
 
 -- Recipe("disarming_kit", {Ingredient("iron", 2), Ingredient("cutreeds", 2)}, RECIPETABS.ARCHAEOLOGY, TECH.NONE, RECIPE_GAME_TYPE.PORKLAND)
 -- Recipe("ballpein_hammer", {Ingredient("iron", 2), Ingredient("twigs", 1)}, RECIPETABS.ARCHAEOLOGY, TECH.SCIENCE_ONE, RECIPE_GAME_TYPE.PORKLAND)
+
+AddRecipe2("city_lamp",									{Ingredient("alloy", 1), Ingredient("transistor", 1), Ingredient("lantern", 1)}, TECH.SCIENCE_TWO, {placer="city_lamp_placer"}, {"LIGHT"})
+ 
+AddRecipe2("smelter",									{Ingredient("cutstone", 6), Ingredient("boards", 4), Ingredient("redgem", 1)}, TECH.SCIENCE_TWO, {placer="smelter_placer"}, {"PROTOTYPERS","STRUCTURES"})
+ 
+ 
+AddRecipe2("ballpein_hammer",							{Ingredient("iron", 2), Ingredient("twigs", 1)}, TECH.SCIENCE_ONE, {nounlock=false}, {"TOOLS"})
 -- Recipe("goldpan", {Ingredient("iron", 2), Ingredient("hammer", 1)}, RECIPETABS.ARCHAEOLOGY, TECH.SCIENCE_ONE, RECIPE_GAME_TYPE.PORKLAND)
 -- Recipe("magnifying_glass", {Ingredient("iron", 1), Ingredient("twigs", 1), Ingredient("bluegem", 1)}, RECIPETABS.ARCHAEOLOGY, TECH.SCIENCE_TWO, RECIPE_GAME_TYPE.PORKLAND)
+
+-- SortAfter("ballpein_hammer", "axe", "TOOLS")
+-- table.insert(CRAFTING_FILTERS.TOOLS.recipes, "ballpein_hammer")
 
 -- --- CITY ---
 -- Recipe("turf_foundation", {Ingredient("cutstone", 1)}, RECIPETABS.CITY, TECH.CITY, cityRecipeGameTypes, nil, nil, true)

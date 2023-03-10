@@ -71,6 +71,7 @@ local ToLoad = {
 		"reconstruction_project",
 		"waterdrop",
 		"floweroflife",
+		"infused_iron",
 	},
 	
 	Assets = {

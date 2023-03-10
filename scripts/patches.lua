@@ -28,6 +28,7 @@ local PATCHES =
 		pocketwatch_recall = "pocketwatch_recall",
 		pocketwatch_portal = "pocketwatch_portal",
 		pocketwatch_portal_entrance = "pocketwatch_portal_entrance",
+		-- firepit = "firepit",
 	},
 	
 	SCREENS = {
@@ -93,6 +94,65 @@ for _, file in ipairs(PATCHES.WIDGETS) do
 	AddClassPostConstruct("widgets/"..file, fn)
 end
 
+
+
+function EntityScript:RemoveFromScene(frominterior)
+    self.entity:AddTag("INLIMBO")
+    self.entity:SetInLimbo(not self.forcedoutoflimbo)
+    self.inlimbo = true
+    self.entity:Hide()
+
+    self:StopBrain()
+
+    if self.sg then
+        self.sg:Stop()
+    end
+    if self.Physics then
+        self.Physics:SetActive(false)
+    end
+    if self.Light and self.Light:GetDisableOnSceneRemoval() then
+        self.Light:Enable(false)
+    end
+    if self.AnimState then
+        self.AnimState:Pause()
+    end
+    if self.DynamicShadow then
+        self.DynamicShadow:Enable(false)
+    end
+
+    if self.MiniMapEntity and not frominterior then
+        self.MiniMapEntity:SetEnabled(false)
+    end
+
+    self:PushEvent("enterlimbo")
+end
+
+function EntityScript:CheckIsInInterior()
+    --assert(self.ininterior)
+    return self.ininterior
+end
+
+function EntityScript:UpdateIsInInterior()
+    if self.Transform then     
+        local pt = self:GetPosition()
+        local tile = TheWorld.Map:GetTileAtPoint(pt.x,pt.y,pt.z)
+        if (tile == WORLD_TILES.INTERIOR) then
+            self.ininterior = true
+        else
+            self.ininterior = false
+        end
+    else 
+        print("THIS ENTITY DID NOT HAVE A TRANSFORM..YET",self.prefab)
+    end
+end
+
+local _ReturnToScene = EntityScript.ReturnToScene
+
+function EntityScript.ReturnToScene(self, ...)
+	_ReturnToScene(self, ...)
+	self:DoTaskInTime(0, function() self:UpdateIsInInterior() end)
+end
+
 function EntityScript:Teleport(EntityOrPosition, instant, interior_override)
 	print("DS - TP - Starting entityscript interior-accounting teleportation...")
 	local px,py,pz = self.Transform:GetWorldPosition()
@@ -115,7 +175,7 @@ function EntityScript:Teleport(EntityOrPosition, instant, interior_override)
 	
 	print("Tested for location: ", t_loc)
 
-	local sourceInterior = self.interior
+	local sourceInterior = self.interior or self.components.interiorplayer.roomid
 	if not sourceInterior then
 		print("DS - TP - No source interior specified, do special stuff")
 	    -- local tile = TheWorld.Map:GetTileAtPoint(px,py,pz)
@@ -131,13 +191,13 @@ function EntityScript:Teleport(EntityOrPosition, instant, interior_override)
 			sourceInterior = GetClosestInterior(Vector3(px,py,pz))
 		-- end
 	else
-		print("DS - TP - Source was in interior, we know where it's from")
+		print("DS - TP - Source was in interior, we know where it's from:", sourceInterior)
 	end
 
 	local destInterior = (loctarget and loctarget.interior) or interior_override
 	if not destInterior then
 		print("Couldn't find destination interior, do... other stuff, I guess?")
-	    local tile = GetWorld().Map:GetTileAtPoint(t_loc.x,t_loc.y,t_loc.z)
+	    local tile = TheWorld.Map:GetTileAtPoint(t_loc.x,t_loc.y,t_loc.z)
 		local destInInterior = (tile == WORLD_TILES.INTERIOR)
 		-- if the object is in an interior but doesn't have an interior set then it must be in the current interior
 		-- technically for a point (rather than an entity) this logic would not work, but then we'd have no way to discern the interior either
@@ -160,11 +220,14 @@ function EntityScript:Teleport(EntityOrPosition, instant, interior_override)
 			print("DS - TP - The player is going to a specific target?")
         	-- if TheCamera.interior or loctarget.interior then
         	if self.components.interiorplayer.interiormode or loctarget.interior then
-            	-- local interiorSpawner = GetWorld().components.interiorspawner
-	            -- interiorSpawner:PlayTransition(GetPlayer(), nil, destInterior, loctarget, true)   
-            	local interiorSpawner = TheWorld.components.interiorspawner
-	            interiorSpawner:PlayTransition(self, loctarget, destInterior, loctarget, true)   
-    	        snapcam = false
+				if sourceInterior ~= destInterior then -- Different interior, otherwise don't pointlessly reload the interior
+					print("Source interior and destination interior are different, play the transition so things load and unload properly")
+					-- local interiorSpawner = GetWorld().components.interiorspawner
+					-- interiorSpawner:PlayTransition(GetPlayer(), nil, destInterior, loctarget, true)   
+					local interiorSpawner = TheWorld.components.interiorspawner
+					interiorSpawner:PlayTransition(self, loctarget, destInterior, loctarget, instant)   
+					snapcam = false
+				end
 	        end
 			-- re-grab the position, the target may have come out of interior storage
 			t_loc = loctarget:GetPosition()
@@ -172,11 +235,18 @@ function EntityScript:Teleport(EntityOrPosition, instant, interior_override)
 			local intFailure
 			if t_loc then
 				if destInterior ~= "unknown" then
-					print("Got a teleport location and destination interior, do the interior transition")
-					print("Location: ", t_loc, "Dest interior: ", destInterior)
-					local interiorSpawner = TheWorld.components.interiorspawner
-					interiorSpawner:PlayTransition(self, loctarget, destInterior, t_loc, true)   
-					snapcam = false
+					print("Dest interior is", destInterior)
+					if sourceInterior ~= destInterior then
+						print("Source interior of", sourceInterior, "and dest interior of", destInterior, "are different, transition")
+						print("Got a teleport location and destination interior, do the interior transition")
+						print("Location: ", t_loc, "Dest interior: ", destInterior)
+						local interiorSpawner = TheWorld.components.interiorspawner
+						interiorSpawner:PlayTransition(self, loctarget, destInterior, t_loc, instant)   
+						snapcam = false
+					else
+						print("Target and source interior are the same, going to another position in the same room, don't transition")
+						print("For reference, source:",sourceInterior, "Destination:", destInterior)
+					end
 				else
 					print("destInterior's check failed")
 					intFailure = true
@@ -196,7 +266,7 @@ function EntityScript:Teleport(EntityOrPosition, instant, interior_override)
 					-- local interiorSpawner = GetWorld().components.interiorspawner
 					-- interiorSpawner:PlayTransition(GetPlayer(), nil, nil, t_loc, true)   
 					local interiorSpawner = TheWorld.components.interiorspawner
-					interiorSpawner:PlayTransition(self, nil, nil, t_loc, true)  
+					interiorSpawner:PlayTransition(self, nil, nil, t_loc, instant)  
 					snapcam = false
 				end
 			end

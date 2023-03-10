@@ -114,9 +114,10 @@ local function fn()
             inst.door:RemoveTag("secret")
 
             inst.SoundEmitter:PlaySound("dontstarve/common/destroy_stone")
-
+			
             -- GetPlayer().SoundEmitter:PlaySound( "dontstarve_DLC003/music/secret_found")
-            inst.SoundEmitter:PlaySound( "dontstarve_DLC003/music/secret_found")
+            -- inst.SoundEmitter:PlaySound( "dontstarve_DLC003/music/secret_found")
+            sound:PlaySound( "dontstarve_DLC003/music/secret_found")
 
             -- The rest of the function unlocks the equivalent door within the secret room
             local interior_spawner = TheWorld.components.interiorspawner

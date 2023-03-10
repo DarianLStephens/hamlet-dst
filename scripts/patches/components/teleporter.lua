@@ -67,7 +67,7 @@ function self:Teleport(obj)
 
         if obj.Physics ~= nil then
 			if obj:HasTag("player") then
-				obj:Teleport(Vector3(target_x, target_y, target_z), nil, target_interior) -- Forgot the nil, HAH
+				obj:Teleport(Vector3(target_x, target_y, target_z), true, target_interior) -- Forgot the nil, HAH
 			else
 				obj.Physics:Teleport(target_x, target_y, target_z)
 			end

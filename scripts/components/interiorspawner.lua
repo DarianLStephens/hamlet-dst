@@ -99,9 +99,10 @@ function InteriorSpawner:SetUpPathFindingBarriers(x,y,z,width, depth)
 	end
 	for i,pt in pairs(self.pathfindingBarriers) do
 		ground.Pathfinder:AddWall(pt.x, pt.y, pt.z)
-		--local r = SpawnPrefab("acorn")
-		--RemovePhysicsColliders(r)
-		--r.Transform:SetPosition(pt.x, pt.y, pt.z)
+		-- Some nice Hamlet debuggery
+		-- local r = SpawnPrefab("acorn")
+		-- RemovePhysicsColliders(r)
+		-- r.Transform:SetPosition(pt.x, pt.y, pt.z)
 	end
 end
 
@@ -386,9 +387,14 @@ end
 
 function InteriorSpawner:SetPropToInteriorLimbo(prop,interior,ignoredisplacement)
 	print("Removing prop from scene and adding to interior list...")
+	print("Prop: ",prop)
 	if not prop.persists then
-		prop:Remove()
-	else
+		-- print("Prop doesn't persist, remove")
+		-- prop:Remove()
+		-- DS - Disabling this part of the script, because it seems to help a lot with things like campfire flames and other lights.
+		-- Before, they would just disappear forever and the fires would light things on fire in interior space, burning everything in every interior at the same time.
+		-- Need to keep a very close eye on stuff, though, to make sure nothing breaks because of this, since it was likely a thing in Hamlet for good reason
+	else 
 		if interior then
 			table.insert(interior.object_list, prop)
 		end
@@ -415,6 +421,7 @@ end
 
 function InteriorSpawner:MovePropToInteriorStorage(prop,interior,ignoredisplacement,interiorOffset)
 	if prop:IsValid() then
+		print("DS - MovePropToInteriorStorage - Prop is:", prop)
 		local pt1 = self:GetSpawnOrigin()		
 		print("DS - MovePropToInteriorStorage - Attempting to add the index offset")
 		-- local index = self:GetLoadedInteriorIndex(interior.unique_name)
@@ -438,8 +445,10 @@ function InteriorSpawner:MovePropToInteriorStorage(prop,interior,ignoredisplacem
 		local pt3 = self:GetSpawnStorage(0, nil)
 		print("PT3 = ",pt3)
 		
+		local parent = prop.parent or prop.entity:GetParent()
 
-		if pt2 and not prop.parent and not ignoredisplacement then			
+		-- if pt2 and not prop.parent and not ignoredisplacement then			
+		if pt2 and not parent and not ignoredisplacement then			
 			local diffx = pt2.x - pt1.x 
 			local diffz = pt2.z - pt1.z
 			-- local offsetCancelX = pt3.x - pt2.x
@@ -456,6 +465,8 @@ function InteriorSpawner:MovePropToInteriorStorage(prop,interior,ignoredisplacem
 			local proppt = Vector3(prop.Transform:GetWorldPosition())
 			print("Prop original position: ", proppt)
 			prop.Transform:SetPosition(proppt.x + diffx, proppt.y, proppt.z +diffz)
+		else
+			print("Prop had a parent, don't move because it'll move itself")
 		end
 	end
 end
@@ -647,12 +658,15 @@ end
 function InteriorSpawner:FadeInFinished(was_invincible, doer)
 	-- Last step in transition
 	if TheWorld.ismastersim then
-		doer.components.health:SetInvincible(was_invincible)
+		-- doer.components.health:SetInvincible(was_invincible)
+		doer.components.health:SetInvincible(false)
+		-- DS - Doing it directly seems way easier. May need some other checks, though.
 	
 		doer.components.playercontroller:Enable(true)
 		--doer.sg:GoToState(doer.sg.statemem.teleportarrivestate) -- Trying to fix some weirdness that happens after teleporting
 	end
 	TheWorld:PushEvent("enterroom")
+	doer:PushEvent("ms_changeroom_post")
 end	
 
 local function GetTileType(pt)
@@ -1012,6 +1026,7 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 			end
 		end
 	end
+	-- DS - Replacing these with 'target' might be wrong, since it is 'from_inst', not 'to_target', which is also referenced here
 	-- if self.from_inst and self.from_inst.components.door then
 	if target and target.components.door then
 		TheWorld:PushEvent("doorused", {door = self.to_target, from_door = self.from_inst})
@@ -1084,6 +1099,9 @@ function InteriorSpawner:FadeOutFinished(dont_fadein, doer, target, to_target, i
 		end
 		self.inst:DoTaskInTime(0.5, function() self:FadeInFinished(self.was_invincible, doer) end)
 	end
+	
+	doer:PushEvent("ms_changeroom")
+	
 	TheWorld.doorfreeze = nil
 end
 

@@ -79,6 +79,14 @@ end
 function CreatureProx:SetOnPlayerNear(fn)
     self.onnear = fn
 end
+-- Ported from Jerry's Hamlet, to make it more compatible
+function CreatureProx:SetOnNear(fn)
+    self.onnear = fn
+end
+
+function CreatureProx:SetOnFar(fn)
+    self.onfar = fn
+end
 
 
 function CreatureProx:OnSave()

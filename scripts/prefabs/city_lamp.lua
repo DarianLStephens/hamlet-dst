@@ -206,7 +206,8 @@ local function OnEntityWake(inst)
 
 	local aporkalypse = TheWorld.components.aporkalypse
 
-    if aporkalypse and aporkalypse:GetFiestaActive() then
+    -- if aporkalypse and aporkalypse:GetFiestaActive() then
+    if aporkalypse and TheWorld.state.isaporkalypse then -- Updated for Jerry's Hamlet, with rewritten Aporkalypse
         if inst.build == "lamp_post2_city_build" then
             inst.build = "lamp_post2_yotp_build"
             inst.AnimState:SetBuild(inst.build)

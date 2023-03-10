@@ -23,7 +23,7 @@ local function SpawnPart(inst, prefab, x,y,z,rotation)
         part:PushEvent("shock")
         part.lifetime = 20 + (math.random()*20)  --120 
         if not part.updatetask then
-            part.updatetask = part:DoPeriodicTask(part.UPDATETIME, part.periodicupdate)
+            part.updatetask = part:DoPeriodicTask(part.UPDATETIME, part.PeriodicUpdate)
         end  
     end)
     

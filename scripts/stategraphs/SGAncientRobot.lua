@@ -278,12 +278,14 @@ local events=
 
                     if inst:HasTag("dormant") then
                         if  math.random() < 0.6 then
+							-- print("DS - Robot - Waking up in Stategraph")
                             inst.wantstodeactivate = nil
                             inst:RemoveTag("dormant")                                
                             inst:PushEvent("shock")
                             inst.lifetime = 20 --120
                             if not inst.updatetask then
-                                inst.updatetask = inst:DoPeriodicTask(inst.UPDATETIME, inst.periodicupdate)
+                                inst.updatetask = inst:DoPeriodicTask(inst.UPDATETIME, inst.PeriodicUpdate)
+								-- I think you forgot to update this, Asura. It broke the sleep of the robots
                             end                                                                                                            
                         end
                     elseif not inst.sg:HasStateTag("attack") and not inst.sg:HasStateTag("activating") then                        

@@ -302,6 +302,7 @@ local function onremove(inst)
     end
 end
 
+-- DS - Need an instant version of this, to update immediately upon loading the interior with the 'inst.returntointeriorscene' function that gets called when the object's interior is loaded
 local function UpdateTime(inst)    
 	local phase = TheWorld.state.phase
     if phase == "day" then

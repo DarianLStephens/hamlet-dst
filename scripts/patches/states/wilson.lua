@@ -77,12 +77,27 @@ local STATES = {
             ToggleOffPhysics(inst)
             inst.components.locomotor:Stop()
             inst.DynamicShadow:Enable(false)
-            inst.components.health:SetInvincible(true)
+			
+			
+			-- DS - Need to selectively disable this so you don't get perma-invincibility thanks to the normal PlayTransition effect
+			-- Otherwise, you gotta let it happen, or the Backstep Watch would be useless!
+			if data.warpback_data.warptype ~= "recall" then
+				print("Warp type wasn't recall, do invincibility")
+				inst.components.health:SetInvincible(true)
+			else
+				-- Force the camera thing, it's needed for teleporting between interiors, because the game doesn't automatically do it since it's TECHNICALLY close enough to be on the same screen.
+				-- print("Trying to force the camera snap and fade for recall warp")
+				-- data.queued_snap_camera = true
+				-- This didn't work. Need to look in to that more. Maybe something can be done with PlayTransition? It's too slow, though, way different from Backtrek teleporting. Maybe it's okay, though?
+				-- The problem is that they BOTH do it, because you're now REALLY teleporting a large distance if going in/out, so the PlayTransition effect happens both times.
+				-- Maybe I can check if you're moving to a different interior, AND are currently in an interior already?
+			end
 
             inst.AnimState:PlayAnimation("pocketwatch_warp_pst")
             inst.sg:SetTimeout(8 * FRAMES)
 
 			if data.queued_snap_camera then
+				print("Do the snap, it should be here")
 				inst:SnapCamera()
 				inst:ScreenFade(true, 0.5)
 			end
@@ -95,8 +110,71 @@ local STATES = {
 				print("Dumping warpback data table:")
 				dumptable(data.warpback_data, 1, 1, nil, 0)
 				
+				if interior_override == "unknown" then
+					interior_override = nil
+				end
+				
+
+				local currentinterior = inst.components.interiorplayer.roomid
+				-- ((inst.components.interiorplayer.roomid) and (inst.components.interiorplayer.roomid ~= "unknown")) or nil
+				local ininterior = currentinterior ~= "unknown"
+				-- if currentinterior ~= "unknown" then
+					-- ininterior = true
+				-- end
+				
+				local PTFade = not (data.warpback_data.warptype == "recall")
+				-- ((data.warpback_data.warptype == "recall") or (ininterior and (inst.components.interiorplayer.roomid ~= interior_override))) or false
+				print("Fade Logic. Starting value:",PTFade)
+				-- if (ininterior and (inst.components.interiorplayer.roomid ~= interior_override))) then
+					if ininterior then
+						if currentinterior ~= interior_override then -- Moving to an interior while you're already in an interior
+							if interior_override then
+								print("Player going to a new interior from an interior")
+								PTFade = true
+							else -- Going outside, because there's no interior target set
+								print("Player moving from interior to exterior")
+								PTFade = false
+							end
+						else -- Moving to the same interior. Do a fade anyway, because it jitters currently because... I guess it's playing the transition again. I could probably fix that, actually...
+							print("Moving to a recall spot in the same interior. Useless in normal play generally, but still possible")
+							PTFade = false
+						end
+					elseif not interior_override then -- Not in an interior or going to an interior
+						print("Not in an interior and not going to an interior, don't enable our extra-special fade")
+						PTFade = false
+					else
+						if interior_override then
+							print("Not in an interior, but going to one. The game will handle this naturally, but just in case...")
+							print("This is getting activated wrongly. Value:",interior_override)
+							PTFade = true
+						end
+						-- No more cases really needed, because all that's left is moving outside>outside
+					end
+				-- end
+				
+				print("Fade value:",PTFade)
+				
+				-- How this should work:
+				-- Disable the PlayTransition fade if you're going from exterior>interior, or interior>exterior, since the Backtrek Watch has a built-in fade for long distances
+				-- Force the PlayTransition fade if you're going interior>interior, because it's usually technically a short distance otherwise
+				-- I might need to add even more logic to see if you're going to an already-loaded interior, because they could be placed a distance away and still trigger the Backtrek's in-built fade because of that
+				
 				if data.warpback_data.warptype == "recall" then
-					inst:Teleport(Vector3(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z), ((data.warpback_data.warptype == "recall") or nil), interior_override)
+					
+					-- Instead of screwing around with nonsense and the PlayTransition fade... just do it manually
+					-- if PTFade and (not data.queued_snap_camera) then -- Don't do it if it's already done, though
+					if PTFade then -- Ah, screw it
+						print("Fade asked for and the snap camera wasn't already queued, do it manually")
+						inst:SnapCamera()
+						inst:ScreenFade(true, 0.5)
+					end
+					
+					inst:Teleport(Vector3(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z), true, interior_override)
+					
+					-- (true or ((data.warpback_data.warptype == "recall") and nil))
+					-- ((data.warpback_data.warptype == "recall") or nil)
+					-- (not data.queued_snap_camera)
+					-- (data.warpback_data.warptype == "recall")
 				else
 					print("Do normal teleport for the Backstep watch")
 					inst.Physics:Teleport(data.warpback_data.dest_x, data.warpback_data.dest_y, data.warpback_data.dest_z)
@@ -123,7 +201,7 @@ local STATES = {
                 ToggleOnPhysics(inst)
             end),
             TimeEvent(4 * FRAMES, function(inst)
-                inst.components.health:SetInvincible(false)
+				inst.components.health:SetInvincible(false)
                 inst.sg:RemoveStateTag("noattack")
                 inst.SoundEmitter:PlaySound("dontstarve/movement/bodyfall_dirt")
             end),

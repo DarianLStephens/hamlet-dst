@@ -58,13 +58,20 @@ local function KeepTarget(inst, target)
 end
 
 local function PeriodicUpdate(inst)
-    if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:IsActive() then
+    -- if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:IsActive() then
+	-- Adapted to Jerry's rewritten Aporkalypse system
+	
+	-- Does this work at all right now?
+    if TheWorld.components.aporkalypse and TheWorld.state.isaporkalypse then
         return
     end
 
     if inst.lifetime and inst.lifetime > 0 then
+		-- print("DS - Robot - Timer counting down, from", inst.lifetime)
         inst.lifetime = inst.lifetime - UPDATETIME
+		-- print("DS - Robot - Subtracted", UPDATETIME, "now", inst.lifetime)
     else       
+		-- print("DS - Robot - ", inst, "wants to deactivate")
         inst.wantstodeactivate = true
         inst.updatetask:Cancel()
         inst.updatetask = nil
@@ -72,14 +79,20 @@ local function PeriodicUpdate(inst)
 end
 
 local function OnLightning(inst, data)
+	-- print("DS - Robot - Lightining event triggered, seems like a general wake-up one")
     inst.lifetime = 90
+	-- print("DS - Robot - Lifetime set to", inst.lifetime)
     if inst:HasTag("dormant") then
+		-- print("DS - Robot - Is dormant, wake it up")
         inst.wantstodeactivate = nil
         inst:RemoveTag("dormant")
         inst:PushEvent("shock")
         if not inst.updatetask then
+			-- print("DS - Robot - Start update task at speed", UPDATETIME)
             inst.updatetask = inst:DoPeriodicTask(UPDATETIME, PeriodicUpdate)
         end
+	else
+		-- print("DS - Robot - Robot was not dormant, just reset its life, but don't wake it up")
     end
 end
 
@@ -254,7 +267,8 @@ local function commonfn()
         end            
     end)
 
-    inst:ListenForEvent("beginaporkalypse", function(world) OnLightning(inst) end, TheWorld)
+    -- inst:ListenForEvent("beginaporkalypse", function(world) OnLightning(inst) end, TheWorld)
+    inst:ListenForEvent("ms_startaporkalypse", function(world) OnLightning(inst) end, TheWorld)
 
     return inst
 end

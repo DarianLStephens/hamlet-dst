@@ -212,45 +212,60 @@ end
 
 ---------------------------------------------------------------------------------------
 
-local function CheckValidity(x,y,w,h,tiles,stack)
+-- Something went very wrong with your updating of these functions. The game got in to an infinite loop, using tens of GBs of RAM in seconds.
+-- I replaced them with the originals, and all is fine. Need to look in to it deeper.
+
+local function color(x,y,tiles,islands,value)
+    tiles[y][x] = false
+    islands[y][x] = value
+end
+
+local function check_validity(x,y,w,h,tiles,stack)
     if x >= 1 and y >= 1 and x <= w and y <= h and tiles[y][x] then
         stack[#stack+1] = {x=x,y=y}
     end
 end
 
-local function Fill(x,y,w,h,tiles,islands,value)
+local function floodfill(x,y,w,h,tiles,islands,value)
+--    Queue q
     local q = {}
+--    q.push((x,y))
     q[#q+1] = {x=x,y=y}
+--    while (q is not empty)
     while #q > 0 do
+--       (x1,y1) = q.pop()
         local el = q[#q] 
         table.remove(q)
         local x1,y1 = el.x, el.y
-        
-        tiles[y][x] = false
-        islands[y][x] = value
+--       color(x1,y1)         -- islandmap[x,y] = color
+--print("Color",x1,y1)
+        color(x1,y1,tiles,islands,value)
+                            
+        check_validity(x1+1,y1,w,h,tiles,q)
+        check_validity(x1-1,y1,w,h,tiles,q)
+        check_validity(x1,y1+1,w,h,tiles,q)
+           check_validity(x1,y1-1,w,h,tiles,q)
+        -- diagonals
+        check_validity(x1-1,y1-1,w,h,tiles,q)
+        check_validity(x1-1,y1+1,w,h,tiles,q)
+        check_validity(x1+1,y1-1,w,h,tiles,q)
+            check_validity(x1+1,y1+1,w,h,tiles,q)
 
-        CheckValidity(x1+1,y1,w,h,tiles,q)
-        CheckValidity(x1-1,y1,w,h,tiles,q)
-        CheckValidity(x1,y1+1,w,h,tiles,q)
-        CheckValidity(x1,y1-1,w,h,tiles,q)
-        CheckValidity(x1-1,y1-1,w,h,tiles,q)
-        CheckValidity(x1-1,y1+1,w,h,tiles,q)
-        CheckValidity(x1+1,y1-1,w,h,tiles,q)
-        CheckValidity(x1+1,y1+1,w,h,tiles,q)
+--            q.push(x1,y1-1)    
     end
 end
 
-local function FillFromCoord(x,y,w, h, tiles, islands)
+local function dofloodfillfromcoord(x,y,w, h, tiles, islands)
     local index = 3
     local rescan = true
     local val = tiles[y][x]
     if val then
-        Fill(x,y,w,h,tiles,islands,index)
+        floodfill(x,y,w,h,tiles,islands,index)
         index = index + 1
     end
 end
 
-function GetDropLocations(inst)
+function getDropLocations(inst)
    local islands = {}
    local tiles = {}
    local w,h = TheWorld.Map:GetSize()
@@ -261,14 +276,14 @@ function GetDropLocations(inst)
        for x = 1, w do
            local tile = TheWorld.Map:GetTile(x-1,y-1)
 
-           tiles[y][x] = not IsOceanTile(tile)
+           tiles[y][x] = (not IsOceanTile(tile)) and (not (tile == WORLD_TILES.IMPASSABLE))
        end
    end
    local x,y,z = inst.Transform:GetWorldPosition()
 
    x = math.floor(x/4+ (w/2))
    z = math.floor(z/4 + (h/2))
-   FillFromCoord(x,z,w, h, tiles, islands)
+   dofloodfillfromcoord(x,z,w, h, tiles, islands)
 
    local locations = {}
    for z=1,h do
@@ -285,7 +300,8 @@ end
 ---------------------------------------------------------------------------------------
 
 local function DropParts(inst)
-    local locations = GetDropLocations(inst)
+	print("DS - Hulk - Dropping parts after defeat...")
+    local locations = getDropLocations(inst)
     local map = TheWorld.Map
     local w,h = map:GetSize()
 
@@ -300,7 +316,9 @@ local function DropParts(inst)
     }
 
     for i, part in ipairs(parts) do        
+		print("DS - Hulk - Dropping part", part)
         local partprop = SpawnPrefab(part)
+		print("DS - Hulk - Part spawned")
         partprop.spawntask:Cancel()
         partprop.spawntask = nil
         partprop.spawned = true
@@ -310,7 +328,9 @@ local function DropParts(inst)
         local idx = math.random(1,#locations)
         local sample = locations[idx]          
         local loc = sample            
-        table.remove(locations,idx)
+		table.remove(locations,idx)
+		print("DS - Hulk - IDX:", idx, "Sample:", sample, "loc:", loc)
+		
 
         partprop.Transform:SetPosition( (loc.x-(w/2)) *4 -4,0, (loc.z-(h/2)) *4-4 )
         
