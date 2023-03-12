@@ -72,6 +72,7 @@ local ToLoad = {
 		"waterdrop",
 		"floweroflife",
 		"infused_iron",
+		"roc_nest",
 	},
 	
 	Assets = {
