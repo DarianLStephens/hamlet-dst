@@ -77,15 +77,15 @@ local states=
        events=
         {
             EventHandler("animover", function(inst) 
-                if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() and  math.random()< 0.5 then   
-                    if math.random()< 0.3 then
-                        inst.sg:GoToState("throwcracker") 
-                    else                
-                        inst.sg:GoToState("dance")                    
-                    end
-                else
+                -- if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() and  math.random()< 0.5 then   
+                    -- if math.random()< 0.3 then
+                        -- inst.sg:GoToState("throwcracker") 
+                    -- else                
+                        -- inst.sg:GoToState("dance")                    
+                    -- end
+                -- else
                     inst.sg:GoToState("idle")                 
-                end
+                -- end
             end),
         }, 
 
@@ -523,9 +523,10 @@ local states=
 
         onenter = function(inst)
             local speech = STRINGS.CITY_PIG_TALK_DAILYGIFT
-            if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() then 
-                speech = STRINGS.CITY_PIG_TALK_APORKALYPSE_REWARD
-            end
+			-- Fiesta still not implemented
+            -- if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() then 
+                -- speech = STRINGS.CITY_PIG_TALK_APORKALYPSE_REWARD
+            -- end
             local speechset = getSpeechType(inst, speech)
             inst.components.talker:Say(speechset[math.random(#speechset)])
             inst.AnimState:PlayAnimation("interact")

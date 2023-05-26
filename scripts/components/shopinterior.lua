@@ -207,9 +207,10 @@ function ShopInterior:OnRemoveEntity()
 end
 
 function ShopInterior:GetNewProduct(shoptype)
-    if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() and SHOPTYPES[shoptype.."_fiesta"] then
-        shoptype = shoptype.."_fiesta"
-    end
+	-- Fiesta still not implemented yet. Lines left as comments for reference
+    -- if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() and SHOPTYPES[shoptype.."_fiesta"] then
+        -- shoptype = shoptype.."_fiesta"
+    -- end
     local items = SHOPTYPES[shoptype]
     if items then
         local itemset = GetRandomItem(items)

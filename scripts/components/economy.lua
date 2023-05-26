@@ -35,7 +35,7 @@ local Economy = Class(function(self, inst)
     self.inst = inst
 	self.cities = {} 
 
-    self.inst:ListenForEvent("daytime", function() self:processdelays() end, GetWorld())
+    self.inst:ListenForEvent("daytime", function() self:processdelays() end, TheWorld)
 
     for i=1,NUM_TRINKETS do
 		table.insert(TRADER.pigman_collector.items, "trinket_" .. i)

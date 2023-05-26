@@ -563,11 +563,12 @@ local function makefn(animset, setbuild, spawnList)
 
 
         inst.OnEntityWake = function (_inst)
-        if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() then
-            inst.AnimState:Show("YOTP")
-        else
+		-- DS - Fiesta not yet implemented on Jerry's side
+        -- if TheWorld.components.aporkalypse then and TheWorld.components.aporkalypse:GetFiestaActive() then
+            -- inst.AnimState:Show("YOTP")
+        -- else
             inst.AnimState:Hide("YOTP")
-        end
+        -- end
     end
 
         return inst

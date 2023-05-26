@@ -431,9 +431,9 @@ function getfacespeech(inst)
                                                             -- deepcopy(getSpeechType(inst, STRINGS.CITY_PIG_TALK_LOOKATWILSON_TRADER))
         local speech = deepcopy(getSpeechType(inst, STRINGS.CITY_PIG_TALK_LOOKATWILSON_TRADER))
 
-        if aporkalypse and aporkalypse:IsNear() then
-            speech = deepcopy(getSpeechType(inst, STRINGS.CITY_PIG_TALK_APORKALYPSE_SOON))
-        end
+        -- if aporkalypse and aporkalypse:IsNear() then
+            -- speech = deepcopy(getSpeechType(inst, STRINGS.CITY_PIG_TALK_APORKALYPSE_SOON))
+        -- end
 
         for i,line in ipairs(speech)do
             speech[i] = string.format( line, desc )
@@ -446,9 +446,9 @@ function getfacespeech(inst)
             speech =  STRINGS.CITY_PIG_TALK_LOOKATWILSON.ROYALTY
         end
         
-        if aporkalypse and aporkalypse:IsNear() then
-            speech = deepcopy(getSpeechType(inst, STRINGS.CITY_PIG_TALK_APORKALYPSE_SOON))
-        end
+        -- if aporkalypse and aporkalypse:IsNear() then
+            -- speech = deepcopy(getSpeechType(inst, STRINGS.CITY_PIG_TALK_APORKALYPSE_SOON))
+        -- end
 
         return speech
     end

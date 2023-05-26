@@ -351,11 +351,11 @@ local function fn(Sim)
     inst:ListenForEvent("onremove", function(inst) clearobstacle(inst) end)
 
     inst.OnEntityWake = function (_inst)
-        if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() then
-            inst.AnimState:Show("YOTP")
-        else
+        -- if TheWorld.components.aporkalypse and TheWorld.components.aporkalypse:GetFiestaActive() then
+            -- inst.AnimState:Show("YOTP")
+        -- else
             inst.AnimState:Hide("YOTP")
-        end
+        -- end
     end
 
     return inst
