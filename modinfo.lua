@@ -20,6 +20,6 @@ clients_only_mod = false
 
 mod_dependencies = {
     {
-        ["Interior Core Darian Branch"] = true,
+        ["Interior Core"] = true,
     },
 }
