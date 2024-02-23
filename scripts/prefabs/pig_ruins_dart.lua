@@ -173,7 +173,7 @@ local function makefn(build, bank, animframe, facing)
         inst.AnimState:SetLayer( LAYER_WORLD_BACKGROUND )
         inst.AnimState:SetSortOrder( 1 )   
         inst.setbackground = 1        
-        -- inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+        inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
         -- inst.AnimState:SetOrientation(ANIM_ORIENTATION.Billboard)
         
         inst.Transform:SetRotation(-90)

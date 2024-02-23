@@ -21,7 +21,7 @@ for _, data in ipairs(ToLoad.InventoryItemsAtlasses) do
 end
 
 ---- HAM Replicable Components ----
-AddReplicableComponent("interiorplayer")
+-- AddReplicableComponent("interiorplayer")
 
 modimport("scripts/actions")
 for k, v in pairs(require("ham_tunings")) do
@@ -31,8 +31,8 @@ end
 _G.UpvalueHacker =  require("tools/upvaluehacker")
 
 modimport("scripts/constants.lua")
-modimport("scripts/patches.lua")
-modimport("scripts/recipes.lua")
+-- modimport("scripts/patches.lua")
+-- modimport("scripts/recipes.lua")
 modimport("scripts/strings.lua")
 modimport("scripts/ham_fx.lua")
 modimport("scripts/ham_containers.lua")
@@ -44,9 +44,9 @@ modimport("strings/names") -- So things have their display names
 AddModCharacter("waterbot", "ROBOT")
 table.insert(SEAMLESSSWAP_CHARACTERLIST, "waterbot") 
 
-AddTile(
-    "INTERIOR",
-    "LAND",
-    { ground_name = "Interior" },
-    { name="dirt", noise_texture="Ground_noise_dirt", runsound="dontstarve/movement/run_dirt", walksound="dontstarve/movement/walk_dirt", snowsound="dontstarve/movement/run_snow", mudsound="dontstarve/movement/run_mud", cannotbedug = true, flooring = true, hard = true }
-)
+-- AddTile(
+    -- "INTERIOR",
+    -- "LAND",
+    -- { ground_name = "Interior" },
+    -- { name="dirt", noise_texture="Ground_noise_dirt", runsound="dontstarve/movement/run_dirt", walksound="dontstarve/movement/walk_dirt", snowsound="dontstarve/movement/run_snow", mudsound="dontstarve/movement/run_mud", cannotbedug = true, flooring = true, hard = true }
+-- )

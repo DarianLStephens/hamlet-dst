@@ -157,7 +157,7 @@ local function decofn(build, bank, animframe, data )
         anim:SetBuild(build)
         anim:SetBank(bank)
         anim:PlayAnimation(animframe, true)
-        -- anim:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
+        anim:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
 
         local minimap = inst.entity:AddMiniMapEntity()        
         minimap:SetIcon("pig_ruins_well.png")

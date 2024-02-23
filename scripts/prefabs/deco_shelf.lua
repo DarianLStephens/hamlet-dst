@@ -266,7 +266,7 @@ local function common(setsize,swp_img_list, locked, physics_round)
         MakeInteriorPhysics(inst, 1.6, 1, 0.2)
     end 
 
---    inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+   inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
 	inst.Transform:SetTwoFaced()
 
     inst:AddTag("NOCLICK")
@@ -574,7 +574,7 @@ local function ruins()
 
     MakeObstaclePhysics(inst, .5)
 
---    inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+   inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
 	inst.Transform:SetTwoFaced()
 
     inst:AddTag("NOCLICK")

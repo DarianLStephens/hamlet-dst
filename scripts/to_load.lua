@@ -3,7 +3,7 @@ local ToLoad = {
 		"playerhouse_city",
 		"prop_door",
 		"deco_roomglow",
-		"interior_tex_packages",
+		-- "interior_tex_packages",
 		"shelf_slot",
 		"deco_shelf",
 		"deco_antiquities",

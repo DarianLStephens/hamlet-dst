@@ -134,7 +134,7 @@ local function makefn()
 			return inst
 		end
 
-        -- inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+        inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
         -- inst.AnimState:SetOrientation(ANIM_ORIENTATION.Billboard)
 
         inst.facing = "north"
@@ -178,7 +178,7 @@ local function makewallfn(facing)
 		end
 		
         inst.Transform:SetRotation(-90)
-        -- inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+        inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
         inst.AnimState:SetLayer( LAYER_WORLD_BACKGROUND )
         inst.AnimState:SetSortOrder( 3 )        
 

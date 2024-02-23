@@ -1,4 +1,4 @@
-name = "Interior System"
+name = "Pig Ruins for Core"
 description = "Trying to make Hamlet-style interiors."
 author = "Darian Stephens \nAssistant: asura"
 version = "0.1"
@@ -18,3 +18,8 @@ dst_compatible = true
 all_clients_require_mod = true
 clients_only_mod = false
 
+mod_dependencies = {
+    {
+        ["Interior Core Darian Branch"] = true,
+    },
+}

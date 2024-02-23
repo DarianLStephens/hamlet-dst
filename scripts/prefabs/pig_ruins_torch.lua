@@ -216,7 +216,7 @@ local function sidewallfn(Sim)
 
     inst.AnimState:SetLayer( LAYER_BACKGROUND )
     inst.AnimState:SetSortOrder( 3 )  
-    -- inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)       
+    inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)       
     -- inst.AnimState:SetOrientation(ANIM_ORIENTATION.Billboard)
     -- anim:SetOrientation(ANIM_ORIENTATION.Billboard)
 

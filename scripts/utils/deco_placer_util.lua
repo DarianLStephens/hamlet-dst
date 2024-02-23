@@ -244,7 +244,7 @@ local function CeilingLightPostInitFn(inst)
         inst.Transform:SetPosition(px,py,pz)
     end
 
-    --inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
+    inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
     inst.Transform:SetRotation(-90)   
 
     inst.components.placer.onupdatetransform = CeilingLightOnUpdate
@@ -391,7 +391,7 @@ local function WallDecoPostInitFn(inst, data)
         inst.Transform:SetPosition(px,py,pz)
     end
 
-    --inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
+    inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
     inst.Transform:SetRotation(-90)   
 
     inst.components.placer.onupdatetransform = WallDecoOnUpdate
@@ -491,7 +491,7 @@ local function WindowPostInitFn(inst, data)
         inst.parent:RemoveChild(inst)
     end
 
-    --inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
+    inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)  
     inst.Transform:SetRotation(-90)   
 
     inst.components.placer.onupdatetransform = WindowOnUpdate

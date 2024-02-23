@@ -17,6 +17,12 @@ local prefabs =
 local depth = 10
 local width = 15
 
+
+local EAST  = { x =  1, y =  0, label = "east" }
+local WEST  = { x = -1, y =  0, label = "west" }
+local NORTH = { x =  0, y =  1, label = "north" }
+local SOUTH = { x =  0, y = -1, label = "south" }
+
 -- not local, this is used in other places
 player_interior_exit_dir_data =
 {
@@ -27,7 +33,7 @@ player_interior_exit_dir_data =
 		target_door_id_dir = "_SOUTH",
 		x_offset = -depth/2,
 		z_offset = 0,
-		opposing_exit_dir = interiorspawner and interiorspawner.GetSouth(),
+		opposing_exit_dir = SOUTH,
 		op_dir = "south",
 		angle = 0,
 		background = true,
@@ -40,7 +46,7 @@ player_interior_exit_dir_data =
 		target_door_id_dir = "_NORTH",
 		x_offset = depth/2,
 		z_offset = 0,
-		opposing_exit_dir = interiorspawner and interiorspawner.GetNorth(),
+		opposing_exit_dir = NORTH,
 		op_dir = "north",
 		angle = 180,
 		background = false,
@@ -55,7 +61,7 @@ player_interior_exit_dir_data =
 		target_door_id_dir = "_WEST",
 		x_offset = 0,
 		z_offset = width/2,
-		opposing_exit_dir = interiorspawner and interiorspawner.GetWest(),
+		opposing_exit_dir = WEST,
 		op_dir = "west",
 		angle = 90,
 		background = true,
@@ -68,7 +74,7 @@ player_interior_exit_dir_data =
 		target_door_id_dir = "_EAST",
 		x_offset = 0,
 		z_offset = -width/2,
-		opposing_exit_dir = interiorspawner and interiorspawner.GetEast(),
+		opposing_exit_dir = EAST,
 		op_dir = "east",
 		angle = 270,
 		background = true,
@@ -126,7 +132,7 @@ local function InitHouseDoorInteriorPrefab(inst, doer, prefab_definition, interi
 		if prefab_definition.animdata.background then
 			inst.AnimState:SetLayer( LAYER_WORLD_BACKGROUND )
 		
-			--inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+			inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
 			--inst.AnimState:SetOrientation(ANIM_ORIENTATION.Billboard)
 			inst.AnimState:SetSortOrder( 3 )
 
@@ -431,7 +437,7 @@ local function common_house_door_fn()
 	inst.AnimState:SetBuild("pig_ruins_door")
 
     inst.AnimState:SetLayer( LAYER_WORLD_BACKGROUND )
-	--inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+	inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
 	-- inst.AnimState:SetOrientation(ANIM_ORIENTATION.Billboard)
 	inst.AnimState:SetSortOrder( 3 )
 

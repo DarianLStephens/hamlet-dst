@@ -147,7 +147,7 @@ local function InitInteriorPrefab(inst, doer, prefab_definition, interior_defini
 		if prefab_definition.animdata.background then
 			inst.AnimState:SetLayer( LAYER_BACKGROUND )
 		
-			--inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+			inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
 			inst.AnimState:SetSortOrder( 3 )			
 			inst.Transform:SetRotation(90)
 
@@ -174,8 +174,8 @@ local function InitInteriorPrefab(inst, doer, prefab_definition, interior_defini
 		MakeObstaclePhysics(inst, prefab_definition.obstacle_scale)
 	end
 
-	if inst.components.door then		
-		inst.components.door:updateDoorVis()		
+	if inst.components.interiordoor then		
+		inst.components.interiordoor:updateDoorVis()		
 	end
 end
 
@@ -357,7 +357,7 @@ end
 local function disableDoor(inst, setting, cause)
 	assert(cause,"needs a cause")
 
-	local door = inst.components.door
+	local door = inst.components.interiordoor
 	door:checkDisableDoor(setting, cause)
 
 	-- deal with connecting doors.
@@ -382,7 +382,7 @@ local function disableDoor(inst, setting, cause)
 				--	targetdoor.components.vineable:enabledoorvis()
 				end
 			end
-			targetdoor.components.door:checkDisableDoor(setting, cause)
+			targetdoor.components.interiordoor:checkDisableDoor(setting, cause)
 		end
 		
 	else
@@ -422,7 +422,7 @@ local function usedoor(inst,data)
 end
 
 local function opendoor(inst, instant)	
-	if inst.baseanimname and inst.components.door.disabledcauses and inst.components.door.disabledcauses["door"] then
+	if inst.baseanimname and inst.components.interiordoor.disabledcauses and inst.components.interiordoor.disabledcauses["door"] then
 		--print("OPENING")
 		if not instant then
 			inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/objects/stone_door/slide")
@@ -441,7 +441,7 @@ end
 local function closedoor(inst, instant)
 	-- once the player has used a door, the doors should freeze open
 	if not TheWorld.doorfreeze  then -- lol I accidentally put 'TheDoor'
-		if inst.baseanimname and (not inst.components.door.disabledcauses or not inst.components.door.disabledcauses["door"])  then
+		if inst.baseanimname and (not inst.components.interiordoor.disabledcauses or not inst.components.interiordoor.disabledcauses["door"])  then
 			--print("CLOSING")
 			if not instant then
 				inst.SoundEmitter:PlaySound("dontstarve_DLC003/common/objects/stone_door/close")
@@ -457,17 +457,17 @@ local function closedoor(inst, instant)
 	end
 end
 
-local function testPlayerHouseDoor(inst)
-	local door = inst.components.door
-	if door then
-		local interior = TheWorld.components.interiorspawner:GetInteriorByName(door.interior_name)
-		if interior and interior.playerroom then
-		    local minimap = inst.entity:AddMiniMapEntity()
-		    minimap:SetIcon( "player_frontdoor.png" )
-			--minimap:SetIconOffset(4,0)
-		end
-	end
-end
+-- local function testPlayerHouseDoor(inst)
+	-- local door = inst.components.interiordoor
+	-- if door then
+		-- local interior = TheWorld.components.interiorspawner:GetInteriorByName(door.interior_name)
+		-- if interior and interior.playerroom then
+		    -- local minimap = inst.entity:AddMiniMapEntity()
+		    -- minimap:SetIcon( "player_frontdoor.png" )
+			-- --minimap:SetIconOffset(4,0)
+		-- end
+	-- end
+-- end
 
 local function fn()
 	local inst = CreateEntity()
@@ -483,9 +483,9 @@ local function fn()
 	inst.AnimState:SetSortOrder( 0 )
 	inst.AnimState:SetScale(-1, 1, 1) --They are flipped by default in hamlet
 
-    --inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
+    inst.AnimState:SetOrientation(ANIM_ORIENTATION.RotatingBillboard)
 
-	inst:DoTaskInTime(0, testPlayerHouseDoor)
+	-- inst:DoTaskInTime(0, testPlayerHouseDoor)
 
    	inst:AddTag("interior_door")
    	inst:AddTag("NOBLOCK")
@@ -497,7 +497,7 @@ local function fn()
 		return inst
 	end
 
-    inst:AddComponent("door")
+    inst:AddComponent("interiordoor")
 
     inst:AddComponent("vineable")    
 	inst.initInteriorPrefab = InitInteriorPrefab

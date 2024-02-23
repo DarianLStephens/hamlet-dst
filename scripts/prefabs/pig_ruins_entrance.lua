@@ -173,19 +173,72 @@ local function getRoomByIndex(rooms,idx)
 end
 local function mazemaker(inst, dungeondef)
 
+	
+
+	local EAST  = { x =  1, y =  0, label = "east" }
+	local WEST  = { x = -1, y =  0, label = "west" }
+	local NORTH = { x =  0, y =  1, label = "north" }
+	local SOUTH = { x =  0, y = -1, label = "south" }
+
+	local dir_str =
+	{
+		"north",
+		"east",
+		"south",
+		"west",
+	}
+
+	local op_dir_str =
+	{
+		["north"] = "south",
+		["east"]  = "west",
+		["south"] = "north",
+		["west"]  = "east",
+	}
+
+	local dir_main =
+	{
+		EAST,
+		WEST,
+		NORTH,
+		SOUTH,
+	}
+
+	local dir_opposite_main =
+	{
+		WEST,
+		EAST,
+		SOUTH,
+		NORTH,
+	}
+	
+	local function GetOppositeFromDirection(direction)
+		-- DS - There's gotta be a way to get the index of the direction and just return that straight from the opposite table, right?
+		if direction == NORTH then
+			return SOUTH
+		elseif direction == EAST then
+			return WEST
+		elseif direction == SOUTH then
+			return NORTH
+		else
+			return EAST
+		end
+	end
+
     local interior_spawner = TheWorld.components.interiorspawner
- 
+	
     local rooms_to_make = dungeondef.rooms --24
     local entranceRoom = nil
     local exitRoom = nil
     local rooms = {} 
-
+	
     local room = {
         x=0,
         y=0,
-        idx = dungeondef.name.."_"..interior_spawner:GetNewID(),
+        -- idx = dungeondef.name.."_"..interior_spawner:GetNewID(),
+        idx = interior_spawner:GetNewID(),
         exits = {},
-        blocked_exits = {interior_spawner:GetNorth()}, -- 3 == NORTH
+        blocked_exits = {NORTH}, -- 3 == NORTH
         entrance1 = true,
     }   
 
@@ -196,15 +249,15 @@ local function mazemaker(inst, dungeondef)
     local clock_placed = false
 
     while #rooms < rooms_to_make do
-        local dir = interior_spawner:GetDir()
-        local dir_opposite = interior_spawner:GetDirOpposite()
+        local dir = dir_main
+        local dir_opposite = dir_opposite_main
         local dir_choice = math.random(#dir)
         local fromroom = rooms[math.random(#rooms)]
 
         local fail = false
         -- fail if this direction from the chosen room is blocked
         for i,exit in ipairs(fromroom.blocked_exits) do
-            if interior_spawner:GetDir()[dir_choice] == exit then
+            if dir_main[dir_choice] == exit then
                 fail = true 
             end
         end
@@ -222,7 +275,8 @@ local function mazemaker(inst, dungeondef)
             local newroom = {
                 x= fromroom.x + dir[dir_choice].x,
                 y= fromroom.y + dir[dir_choice].y,
-                idx = dungeondef.name.."_"..interior_spawner:GetNewID(),
+                idx = interior_spawner:GetNewID(),
+                -- idx = dungeondef.name.."_"..interior_spawner:GetNewID(),
                 exits = {},
                 blocked_exits = {},
             }
@@ -292,9 +346,9 @@ local function mazemaker(inst, dungeondef)
         local function FindCandidates()
             for i,room in ipairs(rooms) do
 
-                local north = interior_spawner:GetNorth()
-                local west = interior_spawner:GetWest()
-                local east = interior_spawner:GetEast()
+                local north = NORTH
+                local west = WEST
+                local east = EAST
                 
                 local dir = nil
 
@@ -342,7 +396,8 @@ local function mazemaker(inst, dungeondef)
             local secret_room = {
                 x = x,
                 y = y,
-                idx = dungeondef.name.."_"..interior_spawner:GetNewID(),
+                -- idx = dungeondef.name.."_"..interior_spawner:GetNewID(),
+                idx = interior_spawner:GetNewID(),
                 exits = {},
                 blocked_exits ={},
                 secretroom = true
@@ -369,7 +424,7 @@ local function mazemaker(inst, dungeondef)
             end
 
             for i, grid_room in ipairs(grid_rooms) do
-                local op_dir = interior_spawner:GetOppositeFromDirection(grid_dirs[i])
+                local op_dir = GetOppositeFromDirection(grid_dirs[i])
                 local secret = true
                 if secret_room.aporkalypseclock == true then
                     secret = false
@@ -419,7 +474,7 @@ local function mazemaker(inst, dungeondef)
     local dist = 0
     for i,room in ipairs(rooms) do
        -- local dir = interior_spawner:GetDir()
-        local north_exit_open = not room.exits[interior_spawner:GetNorth()]
+        local north_exit_open = not room.exits[NORTH]
 
         if not north_exit_open then
             print("THIS ROOM'S NORTH EXIT IS USED")
@@ -501,7 +556,7 @@ local function mazemaker(inst, dungeondef)
             width = 24
             depth = 16
             local prefab = { name = "prop_door", x_offset = -depth/2, z_offset = 0,  animdata = {minimapicon = "pig_ruins_exit_int.png", bank = "doorway_ruins", build = "pig_ruins_door", anim = "day_loop", light = true}, 
-                            my_door_id = dungeondef.name.."_EXIT1", target_door_id = dungeondef.name.."_ENTRANCE1", rotation = -90, angle=0, addtags = {"timechange_anims","ruins_entrance"} }
+                            my_door_id = dungeondef.name.."_EXIT1", target_door_id = dungeondef.name.."_ENTRANCE1", rotation = -90, angle=0, targetDoor = inst, addtags = {"timechange_anims","ruins_entrance"} }
             table.insert(addprops, prefab)
             entranceRoom = room
         end
@@ -510,7 +565,7 @@ local function mazemaker(inst, dungeondef)
             width = 24
             depth = 16
             local prefab = { name = "prop_door", x_offset = -depth/2, z_offset = 0,  animdata = {minimapicon = "pig_ruins_exit_int.png", bank = "doorway_ruins", build = "pig_ruins_door", anim = "day_loop", light = true}, 
-                            my_door_id = dungeondef.name.."_EXIT2", target_door_id = dungeondef.name.."_ENTRANCE2", rotation = -90, angle=0, addtags = {"timechange_anims","ruins_entrance"} }
+                            my_door_id = dungeondef.name.."_EXIT2", target_door_id = dungeondef.name.."_ENTRANCE2", rotation = -90, angle=0, targetDoor = inst, addtags = {"timechange_anims","ruins_entrance"} }
             table.insert(addprops, prefab)
             exitRoom = room
         end 
@@ -584,10 +639,10 @@ local function mazemaker(inst, dungeondef)
             rooms_by_id[roomset.idx] = roomset
         end
 
-        local northexitopen = not room.exits[interior_spawner:GetNorth()] and not room.entrance2 and not room.entrance1
-        local westexitopen = not room.exits[interior_spawner:GetWest()] 
-        local southexitopen = not room.exits[interior_spawner:GetSouth()] 
-        local eastexitopen = not room.exits[interior_spawner:GetEast()]
+        local northexitopen = not room.exits[NORTH] and not room.entrance2 and not room.entrance1
+        local westexitopen = not room.exits[WEST] 
+        local southexitopen = not room.exits[SOUTH] 
+        local eastexitopen = not room.exits[EAST]
 
         local numexits = 0
         for i,exit in pairs(room.exits)do
@@ -996,7 +1051,7 @@ local function mazemaker(inst, dungeondef)
         table.insert(addprops, { name = prop, x_offset = -depth/2, z_offset =  -width/6, rotation = -90 } )
         table.insert(addprops, { name = prop, x_offset = -depth/2, z_offset =  width/6, rotation = -90, } )
 
-        if room.exits[interior_spawner:GetNorth()] and room.exits[interior_spawner:GetNorth()].vined then
+        if room.exits[NORTH] and room.exits[NORTH].vined then
 
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_north", x_offset = -depth/2, z_offset = -width/2 + 0.75} ) end
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_north", x_offset = -depth/2, z_offset = -width/3 + 0.75} ) end
@@ -1010,7 +1065,7 @@ local function mazemaker(inst, dungeondef)
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_north", x_offset = -depth/2, z_offset = width/2 - 0.75} ) end            
         end
 
-        if room.exits[interior_spawner:GetWest()] and room.exits[interior_spawner:GetWest()].vined then            
+        if room.exits[WEST] and room.exits[WEST].vined then            
 
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_east", x_offset = -depth/2 + 0.75, z_offset = -width/2} ) end
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_east", x_offset = -depth/3 - 0.75, z_offset = -width/2} ) end
@@ -1020,7 +1075,7 @@ local function mazemaker(inst, dungeondef)
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_east", x_offset = depth/2 - 0.75, z_offset = -width/2} ) end            
         end
 
-        if room.exits[interior_spawner:GetEast()] and room.exits[interior_spawner:GetEast()].vined then            
+        if room.exits[EAST] and room.exits[EAST].vined then            
 
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_west", x_offset = -depth/2 + 0.75, z_offset = width/2} ) end
             if math.random()<1 then table.insert(addprops, { name = "pig_ruins_wall_vines_west", x_offset = -depth/3 - 0.75, z_offset = width/2} ) end
@@ -1494,8 +1549,109 @@ local function mazemaker(inst, dungeondef)
                     exit.build = "pig_ruins_door_blue"
                 end
             end
-        end        
-        interior_spawner:CreateRoom("generic_interior", width, nil, depth, dungeondef.name, room.idx, props_by_room[room].addprops, room.exits, walltexture, floortexture, minimaptexture, nil, "images/colour_cubes/pigshop_interior_cc.tex", nil, nil, "ruins","RUINS","STONE")
+        end     
+		
+		local prefab = {}
+		
+		local roomindex = room.idx
+		print("About to loop through exits")
+		for t, exit in pairs(room.exits) do
+			print("Loop ",t)
+
+			if not exit.house_door then
+				if     t == NORTH then
+					prefab = { name = "prop_door", x_offset = -depth/2, z_offset = 0, sg_name = exit.sg_name, startstate = exit.startstate, animdata = { minimapicon = exit.minimapicon, bank = exit.bank, build = exit.build, anim = "north", background = true },
+								my_door_id = roomindex.."_NORTH", target_door_id = exit.target_room.."_SOUTH", target_interior = exit.target_room, rotation = -90, hidden = false, angle=0, addtags = { "lockable_door", "door_north" } }
+				
+				elseif t == SOUTH then
+					prefab = { name = "prop_door", x_offset = (depth/2), z_offset = 0, sg_name = exit.sg_name, startstate = exit.startstate, animdata = { minimapicon = exit.minimapicon, bank = exit.bank, build = exit.build, anim = "south", background = false },
+								my_door_id = roomindex.."_SOUTH", target_door_id = exit.target_room.."_NORTH", target_interior = exit.target_room, rotation = -90, hidden = false, angle=180, addtags = { "lockable_door", "door_south" } }
+					
+					if not exit.secret then
+						table.insert(props_by_room[room].addprops, { name = "prop_door_shadow", x_offset = (depth/2), z_offset = 0, animdata = { bank = exit.bank, build = exit.build, anim = "south_floor" } })
+					end
+
+				elseif t == EAST then
+					prefab = { name = "prop_door", x_offset = 0, z_offset = width/2, sg_name = exit.sg_name, startstate = exit.startstate, animdata = { minimapicon = exit.minimapicon, bank = exit.bank, build = exit.build, anim = "east", background = true },
+								my_door_id = roomindex.."_EAST", target_door_id = exit.target_room.."_WEST", target_interior = exit.target_room, rotation = -90, hidden = false, angle=90, addtags = { "lockable_door", "door_east" } }
+				
+				elseif t == WEST then
+					prefab = { name = "prop_door", x_offset = 0, z_offset = -width/2, sg_name = exit.sg_name, startstate = exit.startstate, animdata = { minimapicon = exit.minimapicon, bank = exit.bank, build = exit.build, anim = "west", background = true },
+								my_door_id = roomindex.."_WEST", target_door_id = exit.target_room.."_EAST", target_interior = exit.target_room, rotation = -90, hidden = false, angle=270, addtags = { "lockable_door", "door_west" } }
+				end
+			else
+				local doordata = player_interior_exit_dir_data[t.label]
+					prefab = { name = exit.prefab_name, x_offset = doordata.x_offset, z_offset = doordata.z_offset, sg_name = exit.sg_name, startstate = exit.startstate, animdata = { minimapicon = exit.minimapicon, bank = exit.bank, build = exit.build, anim = exit.prefab_name .. "_open_"..doordata.anim, background = doordata.background },
+								my_door_id = roomindex..doordata.my_door_id_dir, target_door_id = exit.target_room..doordata.target_door_id_dir, target_interior = exit.target_room, rotation = -90, hidden = false, angle=doordata.angle, addtags = { "lockable_door", doordata.door_tag } }
+
+			end
+
+			if exit.vined then
+				prefab.vined = true
+			end
+
+			if exit.secret then
+				prefab.secret = true
+				prefab.hidden = true
+			end
+
+			table.insert(props_by_room[room].addprops, prefab)
+			-- table.insert(interior_def.prefabs, prefab)
+		end
+		print("Exit loop finished")
+		
+		local mappos = {}
+		mappos.x = room.x
+		mappos.y = room.y
+
+		-- DS - Aaaaah I did it wrong
+		-- interior_data = {
+			-- dimensions = {
+				-- depth,
+				-- width,
+				-- nil
+			-- },
+			-- textures = {
+				-- floor = floortexture,
+				-- wall = walltexture,
+				-- minimap = minimaptexture
+			-- },
+			-- interior_group = dungeondef.name,
+            -- interior_id = room.idx,
+            -- pending_props = props_by_room[room].addprops,
+
+            -- camera_offset = -2,
+            -- camera_zoom = 23,
+            
+            -- cc = "images/colour_cubes/pigshop_interior_cc.tex",
+            -- reverb = "ruins",
+            -- pos = mappos,
+            -- tile = "STONE",
+		-- }
+		
+        -- interior_spawner:CreateRoom(interior_data)
+
+		local interior_data = {}
+		interior_data.length = width
+		interior_data.width = depth
+		interior_data.height = nil
+		interior_data.floortexture = floortexture
+		interior_data.walltexture = walltexture
+		interior_data.minimaptexture = minimaptexture
+		interior_data.interior_group = dungeondef.name
+		interior_data.interior_id = room.idx
+		interior_data.pending_props = props_by_room[room].addprops
+		interior_data.cameraoffset = -2
+		interior_data.zoom = 23
+		interior_data.cc = "images/colour_cubes/pigshop_interior_cc.tex"
+		interior_data.reverb = "ruins"
+		interior_data.pos = mappos
+		interior_data.tile = "INTERIOR"
+		-- interior_data.tile = "STONE"
+		
+        interior_spawner:CreateRoom(interior_data)
+        -- interior_spawner:CreateRoom("generic_interior", nil, nil, nil, "ruins","RUINS")
+        -- interior_spawner:CreateRoom("generic_interior", width, nil, depth, dungeondef.name, room.idx, props_by_room[room].addprops, room.exits, walltexture, floortexture, minimaptexture, nil, "images/colour_cubes/pigshop_interior_cc.tex", nil, nil, "ruins","RUINS","STONE")
     end
 
     return entranceRoom, exitRoom
@@ -1573,6 +1729,7 @@ end
 local function onsave(inst, data)
     data.stage = inst.stage
     data.hackeable = inst.components.hackable.canbehacked
+	data.exitdoor = inst.exitdoor
     if inst:HasTag("maze_generated") then
         data.maze_generated = true
     end
@@ -1608,6 +1765,9 @@ local function onload(inst, data)
         if data.top_ornament3 then
             inst:AddTag("top_ornament3")
         end
+		if data.exitdoor then
+			inst.exitdoor = exitdoor
+		end
     end
     
     refreshImage(inst)
@@ -1621,7 +1781,7 @@ local function onhackedfn(inst, hacker, hacksleft)
 
             if inst.stage == 0 then
                 inst.components.hackable.canbehacked = false
-                inst.components.door:checkDisableDoor(false, "vines")                
+                inst.components.interiordoor:checkDisableDoor(false, "vines")                
             else
                 inst.components.hackable.hacksleft = inst.components.hackable.maxhacks
             end
@@ -1662,7 +1822,7 @@ local function initmaze(inst, dungeonname)
             dungeondef.doorvines = 0.6
             dungeondef.nosecondexit = true            
         elseif dungeonname == "RUINS_SMALL" then
-            local interior_spawner = GetWorld().components.interiorspawner
+            local interior_spawner = TheWorld.components.interiorspawner
             dungeondef.name = "RUINS_SMALL"..interior_spawner:GetNewID()
             dungeondef.rooms = math.random(6,8)
             dungeondef.nosecondexit = true
@@ -1675,16 +1835,44 @@ local function initmaze(inst, dungeonname)
 
         local entranceRoom, exitRoom = mazemaker(inst, dungeondef)
 
-        local interior_spawner = GetWorld().components.interiorspawner
+		local function AddDoor(inst, door_definition)
+			print("ADDING DOOR", door_definition.my_door_id)
+			-- this sets some properties on the door component of the door object instance
+			-- this also adds the door id to a list here in interiorspawner so it's easier to find what room needs to load when a door is used
+			-- self.doors[door_definition.my_door_id] = { my_interior_name = door_definition.my_interior_name, inst = inst, target_interior = door_definition.target_interior }
+
+			if inst ~= nil then
+				print("Door is valid, setting data...")
+				if inst.components.interiordoor == nil then
+					print("Door was missing door component, add it")
+					inst:AddComponent("interiordoor")
+				end
+				inst.components.interiordoor.door_id = door_definition.my_door_id
+				inst.components.interiordoor.interior_name = door_definition.my_interior_name
+				inst.components.interiordoor.target_door_id = door_definition.target_door_id
+				inst.components.interiordoor.targetInteriorID = door_definition.target_interior
+				inst.components.interiordoor.targetDoor = inst.exitdoor
+				
+				print("Double-checking door data: ")
+				print("Door ID: ", inst.components.interiordoor.door_id )
+				print("Interior Name: ", inst.components.interiordoor.interior_name )
+				print("Target Door ID: ", inst.components.interiordoor.target_door_id )
+				print("Target Interior: ", inst.components.interiordoor.targetInteriorID )
+				print("Target Door: ", inst.components.interiordoor.targetDoor )
+				
+			end
+		end
+
+        local interior_spawner = TheWorld.components.interiorspawner
         local exterior_door_def = {
             my_door_id = dungeondef.name.."_ENTRANCE1",
             target_door_id = dungeondef.name.."_EXIT1",
             target_interior = entranceRoom.idx,
         }
-        interior_spawner:AddDoor(inst, exterior_door_def)
+        AddDoor(inst, exterior_door_def)
 
-        if inst.components.door and dungeondef.lock then
-            inst.components.door:checkDisableDoor(true, "vines")
+        if inst.components.interiordoor and dungeondef.lock then
+            inst.components.interiordoor:checkDisableDoor(true, "vines")
         end      
 
         local exit_door = nil
@@ -1701,7 +1889,7 @@ local function initmaze(inst, dungeonname)
                 target_door_id = dungeondef.name.."_EXIT2",
                 target_interior = exitRoom.idx,
             }
-            interior_spawner:AddDoor(exit_door, exterior_door_def2)
+            AddDoor(exit_door, exterior_door_def2)
         end     
 
         inst:AddTag("maze_generated")
@@ -1711,7 +1899,7 @@ local function initmaze(inst, dungeonname)
 end
 
 local function inspect(inst)
-    if inst.components.door.disabled then
+    if inst.components.interiordoor.disabled then
         return "LOCKED"
     end
 end
@@ -1759,8 +1947,9 @@ local function makefn(name,build_interiors, dungeonname)
         inst.components.inspectable.getstatus = inspect
 
 
-        inst:AddComponent("door")
-        inst.components.door.outside = true
+        inst:AddComponent("interiordoor")
+        -- inst:AddComponent("door")
+        -- inst.components.interiordoor.outside = true
 
         if dungeonname == "RUINS_1" then
             inst:AddTag("top_ornament") 
@@ -1801,14 +1990,14 @@ local function makefn(name,build_interiors, dungeonname)
             inst:AddTag(dungeonname.."_EXIT_TARGET")
             inst.stage = 0 
             inst.components.hackable.canbehacked = false
-            inst.components.door.disabled = nil
+            inst.components.interiordoor.disabled = false
             refreshImage(inst)
         end 
 
         if dungeonname == "RUINS_SMALL" then
             inst.stage = 0 
             inst.components.hackable.canbehacked = false
-            inst.components.door.disabled = nil
+            inst.components.interiordoor.disabled = false
             refreshImage(inst)
         end
 
